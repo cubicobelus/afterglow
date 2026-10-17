@@ -1,0 +1,10 @@
+.env*
+*.key
+*.pem
+.vscode/
+.idea/
+__pycache__/
+*.pyc
+test-output/
+.DS_Store
+Thumbs.db
