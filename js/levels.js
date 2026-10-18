@@ -298,7 +298,130 @@ def(1, "LANTERN LIFT", {
 });
 
 // ================================================================ tier 3: the tideworks
-// (levels are added tier by tier)
+// ---------------------------------------------------------------- tide
+def(2, "FERRY", {
+  unlock: "tide", echoes: ["tide"], recMax: 10,
+  hint: "TIDE REPLAYS YOUR PATH BACK AND FORTH, WAITING WHERE YOU WAITED. WAIT AT THE EDGE, JUMP OUT, STOP IN MID AIR, THEN RIDE IT.",
+}, (g) => {
+  g.base();
+  g.set(2, 14, "@");
+  g.pit(9, 15);
+  g.fill(28, 13, 28, 14, "X");
+  g.set(5, 8, "L").set(12, 5, "L").set(25, 8, "L");
+});
+
+def(2, "LIFT", {
+  echoes: ["shade", "tide"], recMax: 14, dark: true,
+  hint: "THE STAIRS LIGHT UP ONLY WHILE PLATE ONE IS HELD. RIDE YOUR TIDE UP, AND LET THE SHADE GO TO THE OTHER PLATE.",
+}, (g) => {
+  g.base();
+  g.set(2, 14, "@");
+  g.set(5, 14, "a");
+  g.set(8, 14, "b");
+  g.fill(12, 12, 13, 12, "~");
+  g.fill(15, 9, 16, 9, "~");
+  g.fill(18, 6, 19, 6, "~");
+  g.fill(21, 6, 24, 6, "#");
+  g.fill(25, 1, 25, 14, "#");
+  g.fill(25, 4, 25, 5, "B");
+  g.fill(26, 6, 30, 14, "#");
+  g.fill(29, 4, 29, 5, "X");
+  g.set(14, 11, "P").set(18, 8, "P");
+  g.set(27, 3, "L");
+});
+
+def(2, "SLUICE", {
+  echoes: ["tide"], recMax: 10,
+  hint: "A TIDE ECHO CANNOT HOLD A PLATE FOR GOOD. IT LEAVES AND COMES BACK, SO BE READY AT THE DOOR.",
+}, (g) => {
+  g.base();
+  g.set(2, 14, "@");
+  g.set(7, 14, "a");
+  g.fill(15, 1, 17, 8, "#");
+  g.fill(15, 9, 17, 14, "A");
+  g.fill(22, 14, 23, 14, "^");
+  g.fill(27, 13, 27, 14, "X");
+  g.set(5, 9, "L").set(12, 6, "L").set(25, 9, "L");
+});
+
+// ---------------------------------------------------------------- spring
+def(2, "TRAMPOLINE", {
+  unlock: "spring", echoes: ["spring"], recMax: 8,
+  hint: "LAND ON A SPRING TO BOUNCE. HOLD JUMP AS YOU LAND FOR A MUCH BIGGER BOUNCE.",
+}, (g) => {
+  g.base();
+  g.set(2, 14, "@");
+  g.fill(20, 7, 30, 14, "#");
+  g.fill(28, 5, 28, 6, "X");
+  g.set(6, 9, "L").set(14, 6, "L");
+});
+
+def(2, "BOUNCE COURSE", {
+  echoes: ["spring"], recMax: 8,
+  hint: "LEAVE A SPRING ON THE PILLAR, THEN BOUNCE ACROSS. HOLD JUMP TO GO FAR ENOUGH.",
+}, (g) => {
+  g.base();
+  g.set(2, 14, "@");
+  g.pit(9, 16);
+  g.fill(10, 12, 12, 17, "#");
+  g.fill(17, 6, 30, 14, "#");
+  g.fill(28, 4, 28, 5, "X");
+  g.set(5, 9, "L").set(14, 4, "L");
+});
+
+def(2, "SKYHOOK", {
+  echoes: ["spring"], recMax: 8,
+  hint: "FREEZE A SPRING IN MID AIR OVER THE GAP, LAND ON IT, AND HOLD JUMP.",
+}, (g) => {
+  g.base();
+  g.set(2, 14, "@");
+  g.pit(9, 15);
+  g.fill(16, 5, 30, 14, "#");
+  g.fill(28, 3, 28, 4, "X");
+  g.set(5, 8, "L").set(12, 4, "L");
+});
+
+// ---------------------------------------------------------------- mix
+def(2, "TWO STAGES", {
+  echoes: ["spring", "tide"], recMax: 14,
+  hint: "THE SPRING MUST BE ON THE LEDGE. USE YOUR TIDE TO GET IT THERE.",
+}, (g) => {
+  g.base();
+  g.set(2, 14, "@");
+  g.fill(10, 9, 14, 14, "#");
+  g.fill(18, 5, 30, 14, "#");
+  g.fill(28, 3, 28, 4, "X");
+  g.set(5, 9, "L").set(16, 3, "L");
+});
+
+def(2, "FERRY LIGHT", {
+  echoes: ["glow", "tide"], recMax: 14, dark: true,
+  hint: "LIGHT THE BRIDGE, SEND A TIDE ACROSS, THEN MOVE THE GLOW TO THE GATE. THE TIDE CARRIES YOU OVER THE DARK.",
+}, (g) => {
+  g.base();
+  g.set(2, 14, "@");
+  g.pit(8, 21);
+  g.fill(8, 14, 13, 14, "~");
+  g.fill(14, 14, 17, 17, "#");
+  g.fill(18, 14, 21, 14, "~");
+  g.set(10, 12, "L");
+  g.fill(26, 1, 26, 12, "#");
+  g.fill(26, 13, 26, 14, "G");
+  g.fill(29, 13, 29, 14, "X");
+  g.set(30, 8, "L");
+});
+
+def(2, "HIGH WATER", {
+  echoes: ["tide", "spring"], recMax: 14,
+  hint: "A FERRY ACROSS, THEN A SPRING TO CLEAR THE WALL.",
+}, (g) => {
+  g.base();
+  g.set(2, 14, "@");
+  g.pit(9, 15);
+  g.fill(24, 8, 30, 14, "#");
+  g.fill(28, 6, 28, 7, "X");
+  g.set(5, 8, "L").set(12, 5, "L").set(20, 8, "L");
+});
 
 // ================================================================ tier 4: the beacon
 def(3, "LEAPFROG", {

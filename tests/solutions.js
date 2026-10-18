@@ -489,3 +489,227 @@ SOLUTIONS["LANTERN LIFT"] = () => {
   Bot.jumpTo(486, 24);
   Bot.walkTo(570);
 };
+
+// ---------------------------------------------------------------- tier 3: the tideworks
+const tideOf = () => G.echoes.tide;
+// Hop onto the tide echo while it waits at its start (the pedestal).
+const boardAtSpawn = () => {
+  Bot.jumpTo(Bot.px(), 12);
+  Bot.expect(G.p.stand === tideOf(), "standing on the tide echo");
+};
+
+SOLUTIONS["FERRY"] = () => {
+  Bot.record(0);
+  Bot.walkTo(172); // the left floor ends at x 180
+  Bot.run(120); // wait at the edge: the echo waits too
+  Bot.jumpKey(true);
+  Bot.dir(1);
+  for (let i = 0; i < 36; i++) Bot.tick();
+  Bot.jumpKey(false);
+  Bot.dir(0);
+  Bot.stop();
+  Bot.walkTo(172);
+  Bot.waitUntil(() => Math.abs(tideOf().x + PW / 2 - 172) < 2 && G.t < 160, 600, "the tide to wait at the edge");
+  Bot.jumpTo(tideOf().x + PW / 2, 12);
+  Bot.expect(G.p.stand === tideOf(), "standing on the tide echo");
+  const n = tideOf().trace.length;
+  Bot.waitUntil(() => G.t >= 120 + 50 + 33, 900, "the ride out over the gap");
+  Bot.jumpTo(345, 24);
+  Bot.walkTo(570);
+};
+
+// Jump (key held) toward a resting spring, bounce on it, then steer in dirAfter until landing.
+const jumpToSpring = (sx, dirAfter) => {
+  Bot.jumpKey(true);
+  let bounced = false;
+  for (let i = 0; i < 260 && !G.won; i++) {
+    const dx = sx - Bot.px();
+    Bot.dir(bounced ? dirAfter : Math.abs(dx) < 3 ? 0 : Math.sign(dx));
+    Bot.tick();
+    if (G.dead) Bot.fail("died on the way to the spring");
+    if (G.p.vy < -520) bounced = true;
+    if (bounced && G.p.onGround) break;
+  }
+  Bot.jumpKey(false);
+  Bot.dir(0);
+  Bot.expect(bounced, "the spring bounced the player");
+};
+const restOf = (k) => () => G.echoes[k] && G.echoes[k].restT > 20;
+
+SOLUTIONS["LIFT"] = () => {
+  // slots: 0 shade, 1 tide
+  Bot.record(0);
+  Bot.walkTo(110);
+  Bot.run(6);
+  Bot.stop();
+  Bot.record(1);
+  Bot.run(110);
+  Bot.walkTo(222);
+  Bot.jumpTo(262, 24);
+  Bot.jumpTo(322, 24);
+  Bot.jumpTo(382, 24);
+  Bot.jumpTo(442, 24);
+  Bot.walkTo(462);
+  Bot.run(110);
+  Bot.stop();
+  Bot.record(0);
+  Bot.walkTo(170);
+  Bot.run(6);
+  Bot.stop();
+  boardAtSpawn();
+  Bot.waitUntil(() => G.p.y < 112 && Bot.px() > 430, 1500, "the ride to the top");
+  Bot.walkTo(590);
+};
+
+SOLUTIONS["SLUICE"] = () => {
+  Bot.record(0);
+  Bot.walkTo(150);
+  Bot.run(150);
+  Bot.walkTo(214);
+  Bot.run(4);
+  Bot.stop();
+  Bot.walkTo(285);
+  Bot.waitUntil(() => G.L.doorOpen.a, 900, "the door to open");
+  Bot.walkTo(420);
+  Bot.jumpTo(505, 24);
+  Bot.walkTo(570);
+};
+
+SOLUTIONS["TRAMPOLINE"] = () => {
+  Bot.record(0);
+  Bot.walkTo(372);
+  Bot.run(6);
+  Bot.stop();
+  Bot.walkTo(372);
+  Bot.waitUntil(restOf("spring"), 600, "the spring to settle");
+  jumpToSpring(372, 1);
+  Bot.expect(G.p.y < 130, "up on the ledge");
+  Bot.walkTo(570);
+};
+
+SOLUTIONS["BOUNCE COURSE"] = () => {
+  const toPillar = () => {
+    Bot.walkTo(172);
+    Bot.jumpTo(215, 24);
+    Bot.walkTo(250);
+  };
+  Bot.record(0);
+  toPillar();
+  Bot.run(6);
+  Bot.stop();
+  toPillar();
+  Bot.waitUntil(restOf("spring"), 600, "the spring to settle");
+  jumpToSpring(250, 1);
+  Bot.expect(G.p.y < 130, "up on the far ledge");
+  Bot.walkTo(570);
+};
+
+SOLUTIONS["SKYHOOK"] = () => {
+  Bot.record(0);
+  Bot.walkTo(172);
+  Bot.jumpKey(true);
+  Bot.dir(1);
+  for (let i = 0; i < 36; i++) Bot.tick();
+  Bot.jumpKey(false);
+  Bot.dir(0);
+  Bot.stop();
+  Bot.walkTo(172);
+  Bot.waitUntil(restOf("spring"), 600, "the spring to settle");
+  const sx = G.echoes.spring.x + PW / 2;
+  jumpToSpring(sx, 1);
+  Bot.expect(G.p.y < 110, "up on the high ledge");
+  Bot.walkTo(570);
+};
+
+SOLUTIONS["TWO STAGES"] = () => {
+  // slots: 0 spring, 1 tide
+  Bot.record(0);
+  Bot.walkTo(190);
+  Bot.run(6);
+  Bot.stop();
+  Bot.record(1);
+  Bot.run(110);
+  Bot.walkTo(190);
+  Bot.waitUntil(restOf("spring"), 600, "the spring to settle");
+  jumpToSpring(190, 1);
+  Bot.expect(G.p.y < 190, "up on the middle ledge");
+  Bot.walkTo(260);
+  Bot.run(110);
+  Bot.stop();
+  Bot.record(0);
+  boardAtSpawn();
+  Bot.waitUntil(() => G.p.y < 190 && Bot.px() > 205, 1500, "the ride up to the middle ledge");
+  Bot.walkTo(292);
+  Bot.run(6);
+  Bot.stop();
+  boardAtSpawn();
+  Bot.waitUntil(() => G.p.y < 190 && Bot.px() > 205, 1500, "the ride up to the middle ledge");
+  Bot.walkTo(292);
+  Bot.waitUntil(restOf("spring"), 900, "the spring to settle on the ledge");
+  jumpToSpring(292, 1);
+  Bot.expect(G.p.y < 110, "up on the top ledge");
+  Bot.walkTo(570);
+};
+
+SOLUTIONS["FERRY LIGHT"] = () => {
+  // slots: 0 glow, 1 tide
+  const toIsland = () => {
+    Bot.walkTo(150);
+    Bot.jumpTo(175, 24);
+    Bot.walkTo(352);
+  };
+  Bot.record(0);
+  toIsland();
+  Bot.run(6);
+  Bot.stop();
+  Bot.record(1);
+  Bot.run(110);
+  toIsland();
+  Bot.waitUntil(restOf("glow"), 600, "the glow to light the far planks");
+  Bot.walkTo(470);
+  Bot.run(110);
+  Bot.stop();
+  Bot.record(0);
+  boardAtSpawn();
+  Bot.waitUntil(() => Bot.px() > 450 && G.p.y > 255, 1800, "the ride across the dark bridge");
+  Bot.walkTo(490);
+  Bot.run(6);
+  Bot.stop();
+  boardAtSpawn();
+  Bot.waitUntil(() => Bot.px() > 450 && G.p.y > 255, 1800, "the ride across the dark bridge");
+  Bot.walkTo(490);
+  Bot.waitUntil(() => G.L.gates.every((x) => x.open), 900, "the gate to open");
+  Bot.walkTo(590);
+};
+
+SOLUTIONS["HIGH WATER"] = () => {
+  // slots: 0 tide, 1 spring
+  const ferryOver = () => {
+    Bot.walkTo(172);
+    Bot.waitUntil(() => Math.abs(tideOf().x + PW / 2 - 172) < 2 && G.t < 160, 600, "the tide to wait at the edge");
+    Bot.jumpTo(tideOf().x + PW / 2, 12);
+    Bot.expect(G.p.stand === tideOf(), "standing on the tide echo");
+    Bot.waitUntil(() => G.t >= 120 + 50 + 33, 900, "the ride out over the gap");
+    Bot.jumpTo(345, 24);
+  };
+  Bot.record(0);
+  Bot.walkTo(172);
+  Bot.run(120);
+  Bot.jumpKey(true);
+  Bot.dir(1);
+  for (let i = 0; i < 36; i++) Bot.tick();
+  Bot.jumpKey(false);
+  Bot.dir(0);
+  Bot.stop();
+  Bot.record(1);
+  ferryOver();
+  Bot.walkTo(430);
+  Bot.run(6);
+  Bot.stop();
+  ferryOver();
+  Bot.walkTo(430);
+  Bot.waitUntil(restOf("spring"), 900, "the spring to settle");
+  jumpToSpring(430, 1);
+  Bot.expect(G.p.y < 150, "up on the wall");
+  Bot.walkTo(570);
+};
