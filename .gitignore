@@ -1,10 +1,20 @@
-.env*
-*.key
+# secrets
+.env
+.env.*
 *.pem
+*.key
+
+# editors
 .vscode/
 .idea/
+
+# python leftovers
 __pycache__/
 *.pyc
-test-output/
+
+# test output
+tests/output/
+
+# OS files
 .DS_Store
 Thumbs.db
