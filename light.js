@@ -27,17 +27,30 @@ function lightPos() {
   return { x: player.x + player.w / 2, y: player.y + player.h / 2 };
 }
 
-// A platform exists if any part of it is inside the light circle.
+// True if any part of the rectangle is inside the light circle.
 function isLit(r, l) {
   const nx = Math.max(r.x, Math.min(l.x, r.x + r.w));
   const ny = Math.max(r.y, Math.min(l.y, r.y + r.h));
   return (nx - l.x) ** 2 + (ny - l.y) ** 2 <= RADIUS * RADIUS;
 }
 
+// Only the part of a platform inside the light is solid: cut it into thin columns and keep the lit ones.
+const SLICE = 4;
+function litSolids(l) {
+  const out = [];
+  for (const p of lightOnly) {
+    for (let x = p.x; x < p.x + p.w; x += SLICE) {
+      const col = { x, y: p.y, w: Math.min(SLICE, p.x + p.w - x), h: p.h };
+      if (isLit(col, l)) out.push(col);
+    }
+  }
+  return out;
+}
+
 function update() {
   if (Core.wasPressed("KeyR")) reset();
   const l = lightPos();
-  const solids = [...always, ...lightOnly.filter((p) => isLit(p, l))];
+  const solids = [...always, ...litSolids(l)];
   Core.step(player, Core.input(), solids);
   if (player.y > Core.H + 100) reset();
   if (Core.overlaps(player, goal)) solved = true;
