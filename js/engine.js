@@ -12,21 +12,41 @@ const MIN_REC = 20;
 const RAMP = 24;
 const PED_W = 26, PED_H = 4; // spawn slab
 const STEP = 5;              // small ledges up to this tall are stepped onto without a jump
+const SPRING_V = 600, SPRING_V_HELD = 720; // bounce speeds (about 120 and 173 px high)
+const GUST_R = 72, GUST_ACC = 700, GUST_V = 120, WIND_DECAY = 300;
 
 const KINDS = {
   shade: { name: "SHADE", color: "#8fb4ff", blurb: "HOLDS PLATES AND IS SOLID TO STAND ON." },
   glow: { name: "GLOW", color: "#ffc857", blurb: "CARRIES LIGHT. SHADOW PLANKS HOLD IN IT AND THORNS WITHER." },
   phase: { name: "PHASE", color: "#c78bff", blurb: "CRYSTAL FADES AWAY AROUND IT." },
   flip: { name: "FLIP", color: "#4fe3c1", blurb: "REVERSES GRAVITY AROUND IT." },
+  tide: { name: "TIDE", color: "#ff8f8f", blurb: "REPLAYS ITS PATH BACK AND FORTH FOREVER, WAITING WHERE YOU WAITED." },
+  spring: { name: "SPRING", color: "#a6e86a", blurb: "BOUNCES YOU HIGH. HOLD JUMP FOR A BIGGER BOUNCE." },
+  gust: { name: "GUST", color: "#dff3ff", blurb: "BLOWS A WIND IN THE DIRECTION IT WAS FACING." },
 };
 const PLATE_COLORS = { a: "#4fd1ff", b: "#ffb347", c: "#ff6fae", d: "#9cff6f" };
 
+// Settings the player can change (the UI loads and saves these).
+const Settings = { music: 0.6, sfx: 0.9, shake: true };
+
 // ---------------------------------------------------------------- input
+const DEFAULT_BIND = {
+  left: ["ArrowLeft", "KeyA"],
+  right: ["ArrowRight", "KeyD"],
+  jump: ["Space", "ArrowUp", "KeyW"],
+  record: ["KeyE"],
+  swap: ["KeyQ", "ShiftLeft", "ShiftRight"],
+  restart: ["KeyR"],
+  clear: ["KeyX"],
+  hint: ["KeyH"],
+  pause: ["Escape", "KeyP"],
+  fullscreen: ["KeyF"],
+};
+
 const Input = (() => {
   const down = {}, pressed = {};
   const GAME_KEYS = ["Space", "ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", "Tab"];
-  const LEFT = ["ArrowLeft", "KeyA"], RIGHT = ["ArrowRight", "KeyD"];
-  const JUMP_KEYS = ["Space", "ArrowUp", "KeyW"];
+  const bind = JSON.parse(JSON.stringify(DEFAULT_BIND));
   const any = (codes) => codes.some((c) => down[c]);
   if (typeof window !== "undefined") {
     window.addEventListener("keydown", (e) => {
@@ -38,13 +58,15 @@ const Input = (() => {
     window.addEventListener("blur", () => { for (const k in down) down[k] = false; });
   }
   return {
-    down, pressed, JUMP_KEYS,
-    left: () => any(LEFT),
-    right: () => any(RIGHT),
-    jump: () => any(JUMP_KEYS),
+    down, pressed, bind,
+    left: () => any(bind.left),
+    right: () => any(bind.right),
+    jump: () => any(bind.jump),
     hit(code) { const v = !!pressed[code]; pressed[code] = false; return v; },
     hitAny(codes) { let v = false; for (const c of codes) { if (pressed[c]) { v = true; pressed[c] = false; } } return v; },
+    hitBind(name) { return this.hitAny(bind[name]); },
     clear() { for (const k in pressed) pressed[k] = false; },
+    resetBind() { for (const k in DEFAULT_BIND) bind[k] = DEFAULT_BIND[k].slice(); },
   };
 })();
 
@@ -64,9 +86,9 @@ function rectDist2(px, py, r) {
 // ---------------------------------------------------------------- world state
 const G = {
   L: null, t: 0, p: null, echoes: {}, rec: null, sel: 0,
-  lights: [], flips: [], phases: [],
+  lights: [], flips: [], phases: [], winds: [],
   dead: false, deadT: 0, won: false, winT: 0,
-  deaths: 0, time: 0, recCount: 0, swapCd: 0,
+  deaths: 0, time: 0, recCount: 0, swapCd: 0, lanternsGot: 0,
   particles: [], shake: 0, onWin: null,
 };
 
@@ -83,8 +105,10 @@ function makeGrid() {
   return g;
 }
 
-function parseLevel(idx) {
-  const def = LEVELS[idx];
+// Accepts a level index into LEVELS, or a level definition (used by the mechanic tests).
+function parseLevel(which) {
+  const idx = typeof which === "number" ? which : -1;
+  const def = typeof which === "number" ? LEVELS[which] : which;
   const g = makeGrid();
   def.build(g);
   const rows = g.rows();
@@ -92,7 +116,8 @@ function parseLevel(idx) {
     idx, def, name: def.name, chapter: def.chapter, dark: !!def.dark,
     echoes: def.echoes || [], recMax: def.recMax || 10, swap: !!def.swap, hint: def.hint || "",
     rows, walls: [], doorTiles: [], plates: [], planks: [], crystals: [], spikes: [], thorns: [], lamps: [],
-    spawn: { x: 40, y: 100 }, exit: null, doorOpen: {}, hasDoor: {},
+    oneways: [], gates: [], lanterns: [],
+    spawn: { x: 40, y: 100 }, exit: null, doorOpen: {}, hasDoor: {}, hasLamp: {},
   };
   let ex0 = 1e9, ey0 = 1e9, ex1 = -1, ey1 = -1;
   for (let r = 0; r < ROWS; r++) {
@@ -116,11 +141,20 @@ function parseLevel(idx) {
       else if (ch === "t") L.thorns.push({ x: x + 1, y: y + 8, w: 18, h: 12, cx: x + 10, cy: y + 14, tx: c, ty: r, lit: false, wither: 0 });
       else if (ch >= "a" && ch <= "d") L.plates.push({ id: ch, x: x + 2, y: y + 14, w: 16, h: 6, ceil: false, pressed: false, amt: 0 });
       else if (ch >= "1" && ch <= "4") L.plates.push({ id: "abcd"[Number(ch) - 1], x: x + 2, y, w: 16, h: 6, ceil: true, pressed: false, amt: 0 });
+      else if (ch >= "5" && ch <= "8") L.plates.push({ id: "abcd"[Number(ch) - 5], x: x + 2, y: y + 14, w: 16, h: 6, ceil: false, sensor: true, pressed: false, amt: 0 });
       else if (ch >= "A" && ch <= "D") {
         const id = ch.toLowerCase();
         L.doorTiles.push({ id, x, y, w: TILE, h: TILE, door: true, amt: 0, tx: c, ty: r });
         L.hasDoor[id] = true;
-      } else if (ch === "L") L.lamps.push({ x: x + 10, y: y + 10, tx: c, ty: r });
+      } else if (ch === "=") L.oneways.push({ x, y, w: TILE, h: 6, ow: true, src: null });
+      else if (ch === "G") L.gates.push({ x, y, w: TILE, h: TILE, door: true, amt: 0, tx: c, ty: r, open: false });
+      else if (ch === "o") L.lanterns.push({ x: x + 10, y: y + 10, tx: c, ty: r, got: false });
+      else if (ch === "L") L.lamps.push({ x: x + 10, y: y + 10, tx: c, ty: r });
+      else if (ch >= "P" && ch <= "S") {
+        const id = "abcd"[ch.charCodeAt(0) - 80];
+        L.lamps.push({ x: x + 10, y: y + 10, tx: c, ty: r, switchId: id });
+        L.hasLamp[id] = true;
+      }
       else if (ch === "@") {
         // The spawn stands on a small gray slab: a solid step PED_H tall.
         L.ped = { x: x + TILE / 2 - PED_W / 2, y: y + TILE - PED_H, w: PED_W, h: PED_H };
@@ -189,15 +223,19 @@ function inPhase(r) {
 
 function computeFields() {
   const L = G.L;
-  G.lights = L.lamps.map((l) => ({ x: l.x, y: l.y, r: LAMP_R }));
+  // Switch lamps burn only while their plate is held.
+  G.lights = L.lamps.filter((l) => !l.switchId || L.doorOpen[l.switchId]).map((l) => ({ x: l.x, y: l.y, r: LAMP_R }));
   G.flips = [];
   G.phases = [];
+  G.winds = [];
   // Echo powers switch on only once the echo has come to rest, growing in over a short ramp.
   const e = G.echoes;
   const power = (echo) => (echo.moving ? 0 : Math.min(1, (echo.restT + 1) / RAMP));
   if (e.glow && power(e.glow) > 0) G.lights.push({ x: e.glow.x + PW / 2, y: e.glow.y + PH / 2, r: GLOW_R * power(e.glow), echo: true });
   if (e.flip && power(e.flip) > 0) G.flips.push({ x: e.flip.x + PW / 2, y: e.flip.y + PH / 2, r: FLIP_R * power(e.flip) });
   if (e.phase && power(e.phase) > 0) G.phases.push({ x: e.phase.x + PW / 2, y: e.phase.y + PH / 2, r: PHASE_R * power(e.phase) });
+  if (e.gust && power(e.gust) > 0) G.winds.push({ x: e.gust.x + PW / 2, y: e.gust.y + PH / 2, r: GUST_R * power(e.gust), dir: e.gust.face >= 0 ? 1 : -1 });
+  for (const gt of L.gates) gt.open = litRect(gt);
 }
 
 // ---------------------------------------------------------------- echoes
@@ -223,6 +261,14 @@ function updateEchoes() {
     if (e.frozen) {
       e.x = e.frozen.x; e.y = e.frozen.y;
       e.moving = false;
+    } else if (e.kind === "tide" && e.trace.length > 1) {
+      // Tide plays its path forward, then backward, forever: smooth, never snapping back to the start.
+      const n = e.trace.length, period = 2 * (n - 1), k = G.t % period;
+      const fwd = k < n;
+      const i = fwd ? k : period - k;
+      const s = e.trace[i];
+      e.x = s.x; e.y = s.y; e.face = fwd ? s.f : -s.f; e.st = s.s; e.g = s.g; e.i = i;
+      e.moving = true;
     } else {
       const i = Math.min(G.t, e.trace.length - 1);
       const s = e.trace[i];
@@ -232,6 +278,7 @@ function updateEchoes() {
     e.dx = e.x - e.px;
     e.dy = e.y - e.py;
     e.restT = e.moving ? 0 : e.restT + 1;
+    if (e.bounceT > 0) e.bounceT--;
   }
 }
 
@@ -241,7 +288,7 @@ function restartAttempt() {
   G.t = 0;
   G.dead = false;
   G.deadT = 0;
-  G.p = { x: s.x, y: s.y, w: PW, h: PH, vx: 0, vy: 0, onGround: false, face: 1, coy: 0, buf: 0, jumping: false, stand: null, g: 1, sq: 0 };
+  G.p = { x: s.x, y: s.y, w: PW, h: PH, vx: 0, vy: 0, windV: 0, onGround: false, face: 1, coy: 0, buf: 0, jumping: false, stand: null, g: 1, sq: 0 };
   placeEchoes();
   computeFields();
 }
@@ -336,6 +383,12 @@ function buildSolids(p, withEchoes, g) {
   const L = G.L, out = [];
   for (const w of L.walls) out.push(w);
   for (const d of L.doorTiles) if (!L.doorOpen[d.id]) out.push(d);
+  for (const gt of L.gates) if (!gt.open) out.push(gt);
+  if (g !== undefined) {
+    for (const o of L.oneways) {
+      if (g > 0 ? p.y + PH <= o.y + 4 : p.y >= o.y + o.h - 4) out.push(o);
+    }
+  }
   const pad = 36;
   for (const pl of L.planks) {
     if (pl.x > p.x - pad - TILE && pl.x < p.x + PW + pad && pl.y > p.y - pad - TILE && pl.y < p.y + PH + pad) {
@@ -386,7 +439,7 @@ function stepPlayer() {
 
   const dir = (Input.right() ? 1 : 0) - (Input.left() ? 1 : 0);
   const jumpHeld = Input.jump();
-  const jumpPressed = Input.hitAny(Input.JUMP_KEYS);
+  const jumpPressed = Input.hitBind("jump");
 
   let acc = p.onGround ? (dir ? ACC_G : DEC_G) : (dir ? ACC_A : DEC_A);
   if (dir && p.vx * dir < 0) acc *= 1.7;
@@ -394,6 +447,17 @@ function stepPlayer() {
   if (p.vx < target) p.vx = Math.min(target, p.vx + acc * DT);
   else if (p.vx > target) p.vx = Math.max(target, p.vx - acc * DT);
   if (dir) p.face = dir;
+
+  // Wind from a gust echo adds a sideways drift on top of your own running.
+  let windTarget = 0;
+  for (const w of G.winds) {
+    const dx = cx - w.x, dy = cy - w.y;
+    if (dx * dx + dy * dy <= w.r * w.r) windTarget += w.dir * GUST_V;
+  }
+  windTarget = Math.max(-GUST_V, Math.min(GUST_V, windTarget));
+  const wacc = windTarget !== 0 ? GUST_ACC : WIND_DECAY;
+  if (p.windV < windTarget) p.windV = Math.min(windTarget, p.windV + wacc * DT);
+  else if (p.windV > windTarget) p.windV = Math.max(windTarget, p.windV - wacc * DT);
 
   p.buf = jumpPressed ? JUMP_BUF : Math.max(0, p.buf - DT);
   p.coy = p.onGround ? COYOTE : Math.max(0, p.coy - DT);
@@ -411,15 +475,19 @@ function stepPlayer() {
   let gr = GRAV;
   if (!p.onGround && Math.abs(p.vy) < 80 && jumpHeld) gr *= 0.65;
   p.vy += gr * g * DT;
-  p.vy = Math.max(-MAXFALL, Math.min(MAXFALL, p.vy));
+  // Terminal speed applies to falling only, so strong bounces are not clipped.
+  const along = p.vy * g;
+  if (along > MAXFALL) p.vy = MAXFALL * g;
+  else if (along < -900) p.vy = -900 * g;
 
   if (p.stand) { p.x += p.stand.dx; p.y += p.stand.dy; }
   p.stand = null;
 
   const solids = buildSolids(p, true, g);
 
-  p.x += p.vx * DT;
-  if (p.vx !== 0) {
+  const evx = p.vx + p.windV;
+  p.x += evx * DT;
+  if (evx !== 0) {
     for (const s of solids) {
       if (s.ow) continue;
       if (!overlap(p, s)) continue;
@@ -428,18 +496,26 @@ function stepPlayer() {
         const up = { x: p.x, y: s.y - PH, w: PW, h: PH };
         if (!solids.some((o) => !o.ow && overlap(up, o))) { p.y = up.y; continue; }
       }
-      p.x = p.vx > 0 ? s.x - PW : s.x + s.w;
+      p.x = evx > 0 ? s.x - PW : s.x + s.w;
     }
   }
 
   const vyBefore = p.vy;
   p.y += p.vy * DT;
-  let hitDown = false, hitUp = false;
+  let hitDown = false, hitUp = false, bounced = null;
   for (const s of solids) {
     if (!overlap(p, s)) continue;
     if (s.ow) {
       if (g > 0 ? p.vy >= 0 : p.vy <= 0) {
-        if (g > 0) { p.y = s.y - PH; hitDown = true; } else { p.y = s.y + s.h; hitUp = true; }
+        if (g > 0) p.y = s.y - PH; else p.y = s.y + s.h;
+        if (s.src && s.src.kind === "spring" && s.src.restT >= 6) {
+          // Landing on a resting spring throws you back up (higher if jump is held).
+          p.vy = -g * (jumpHeld ? SPRING_V_HELD : SPRING_V);
+          p.jumping = false;
+          bounced = s.src;
+          continue;
+        }
+        if (g > 0) hitDown = true; else hitUp = true;
         p.vy = 0;
         p.stand = s.src;
       }
@@ -455,6 +531,12 @@ function stepPlayer() {
     p.sq = 0.28;
     SFX("land");
     burst(p.x + PW / 2, p.y + (g > 0 ? PH : 0), 6, "#cfd8e8", 50, 0.3, 2, 0);
+  }
+  if (bounced) {
+    bounced.bounceT = 14;
+    p.sq = -0.4;
+    SFX("spring");
+    burst(p.x + PW / 2, p.y + (g > 0 ? PH : 0), 8, KINDS.spring.color, 80, 0.4, 2, 0);
   }
   p.sq *= 0.82;
 
@@ -479,8 +561,11 @@ function updatePlates() {
   for (const pl of L.plates) count[pl.id] = (count[pl.id] || 0) + 1;
   for (const pl of L.plates) {
     let on = false;
-    for (const b of bodies) {
-      if (b.x < pl.x + pl.w && b.x + PW > pl.x && b.y < pl.y + pl.h && b.y + PH > pl.y) { on = true; break; }
+    if (pl.sensor) on = litRect(pl); // light sensors are pressed by light, not by weight
+    else {
+      for (const b of bodies) {
+        if (b.x < pl.x + pl.w && b.x + PW > pl.x && b.y < pl.y + pl.h && b.y + PH > pl.y) { on = true; break; }
+      }
     }
     if (on && !pl.pressed) { SFX("plateOn"); burst(pl.x + 8, pl.y + 3, 6, PLATE_COLORS[pl.id], 50, 0.4, 2, 0); }
     if (!on && pl.pressed) SFX("plateOff");
@@ -498,7 +583,7 @@ function updatePlates() {
 
 function handleActions() {
   const L = G.L;
-  if (Input.hit("KeyR")) {
+  if (Input.hitBind("restart")) {
     if (G.rec) { cancelRec(); SFX("cancel"); }
     restartAttempt();
   }
@@ -507,12 +592,12 @@ function handleActions() {
   for (let i = 0; i < n; i++) {
     if (Input.hit("Digit" + (i + 1)) || Input.hit("Numpad" + (i + 1))) { G.sel = i; SFX("ui"); }
   }
-  if (!G.rec && Input.hit("KeyX")) clearSelected();
-  if (n && Input.hit("KeyE")) {
+  if (!G.rec && Input.hitBind("clear")) clearSelected();
+  if (n && Input.hitBind("record")) {
     if (G.rec) stopRec();
     else startRec();
   }
-  if (L.swap && Input.hitAny(["KeyQ", "ShiftLeft", "ShiftRight"])) doSwap();
+  if (L.swap && Input.hitBind("swap")) doSwap();
 }
 
 function tick() {
@@ -546,9 +631,17 @@ function tick() {
     th.lit = lit;
     if (!lit && overlap({ x: p.x + 2, y: p.y + 2, w: PW - 4, h: PH - 4 }, th)) { kill(); updateParticles(); return; }
   }
+  const pcx = p.x + PW / 2, pcy = p.y + PH / 2;
+  for (const ln of L.lanterns) {
+    if (!ln.got && Math.abs(pcx - ln.x) < 11 && Math.abs(pcy - ln.y) < 13) {
+      ln.got = true;
+      G.lanternsGot++;
+      burst(ln.x, ln.y, 18, "#ffe08a", 90, 0.8, 2, -30);
+      SFX("lantern");
+    }
+  }
   if (L.exit) {
     const ex = L.exit;
-    const pcx = p.x + PW / 2, pcy = p.y + PH / 2;
     if (pcx > ex.x && pcx < ex.x + ex.w && pcy > ex.y && pcy < ex.y + ex.h) win();
   }
   if (G.rec) {
@@ -565,14 +658,15 @@ function tick() {
 
 // ---------------------------------------------------------------- public API
 const Game = {
-  load(idx) {
-    G.L = parseLevel(idx);
+  load(which) {
+    G.L = parseLevel(which);
     G.echoes = {};
     G.rec = null;
     G.sel = 0;
     G.deaths = 0;
     G.time = 0;
     G.recCount = 0;
+    G.lanternsGot = 0;
     G.won = false;
     G.winT = 0;
     G.swapCd = 0;

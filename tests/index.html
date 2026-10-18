@@ -15,6 +15,7 @@
 <script src="../js/engine.js"></script>
 <script src="bot.js"></script>
 <script src="solutions.js"></script>
+<script src="mechanics.js"></script>
 <script>
   // Optional ?only=3 or ?only=3,5 to run a subset. Results are also in window.RESULTS.
   const only = (new URLSearchParams(location.search).get("only") || "").split(",").filter(Boolean).map(Number);
@@ -22,8 +23,19 @@
   const out = document.getElementById("out");
   let html = "";
 
+  // Mechanic checks on small throwaway levels (skipped when ?only= picks levels).
+  if (!only.length) {
+    for (const m of MECHANICS) {
+      let ok = true, info = "ok";
+      try { m.fn(); } catch (e) { ok = false; info = e.message; }
+      RESULTS.push({ name: "mechanic: " + m.name, ok, info });
+      html += '<span class="' + (ok ? "ok" : "bad") + '">' + (ok ? "PASS " : "FAIL ") + "mechanic: " + m.name + (ok ? "" : " - " + info) + "</span>\n";
+    }
+    html += "\n";
+  }
+
   // Structural checks on every level layout.
-  const VALID = new Set(".#%~^vtabcd1234ABCDL@X".split(""));
+  const VALID = new Set(".#%~^vtabcd1234ABCDL@X=G5678PQRSo".split(""));
   for (let i = 0; i < LEVELS.length; i++) {
     const problems = [];
     const L = parseLevel(i);
@@ -34,12 +46,16 @@
     });
     if (!L.rows.some((r) => r.includes("@"))) problems.push("no spawn");
     if (!L.exit) problems.push("no exit");
-    for (const p of L.plates) if (!L.hasDoor[p.id]) problems.push("plate " + p.id + " has no door");
+    for (const p of L.plates) if (!L.hasDoor[p.id] && !L.hasLamp[p.id]) problems.push("plate " + p.id + " does nothing");
     for (const id in L.hasDoor) if (!L.plates.some((p) => p.id === id)) problems.push("door " + id + " has no plate");
+    for (const id in L.hasLamp) if (!L.plates.some((p) => p.id === id)) problems.push("switch lamp " + id + " has no plate");
     const kinds = new Set(L.echoes);
+    const anyLight = kinds.has("glow") || L.lamps.length > 0;
     if (L.crystals.length && !kinds.has("phase")) problems.push("crystal without a phase echo");
-    if (L.planks.length && !kinds.has("glow") && !L.lamps.length) problems.push("planks without any light");
-    if (L.thorns.length && !kinds.has("glow")) problems.push("thorns without a glow echo");
+    if (L.planks.length && !anyLight) problems.push("planks without any light");
+    if (L.thorns.length && !anyLight) problems.push("thorns without any light");
+    if ((L.gates.length || L.plates.some((p) => p.sensor)) && !anyLight) problems.push("gate or sensor without any light");
+    if (L.lanterns.length > 1) problems.push("more than one lantern");
     const ok = problems.length === 0;
     RESULTS.push({ i, name: "layout " + (i + 1) + " " + LEVELS[i].name, ok, info: ok ? "ok" : problems.join("; ") });
     html += '<span class="' + (ok ? "ok" : "bad") + '">' + (ok ? "PASS " : "FAIL ") + "layout " + (i + 1) + " " + LEVELS[i].name + (ok ? "" : " - " + problems.join("; ")) + "</span>\n";

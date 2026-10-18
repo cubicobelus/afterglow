@@ -4,13 +4,14 @@
 const Sfx = (() => {
   let ac = null, master = null, sfxBus = null, musicBus = null, noiseBuf = null;
   let muted = false, mood = 0, step = 0, nextT = 0, timer = null;
+  const vol = { music: 0.6, sfx: 0.9 };
   try { muted = localStorage.getItem("afterglow.muted") === "1"; } catch (e) { /* storage unavailable */ }
 
   const mtof = (m) => 440 * Math.pow(2, (m - 69) / 12);
   const SCALES = [[0, 3, 5, 7, 10], [0, 2, 4, 7, 9], [0, 3, 5, 7, 10], [0, 2, 5, 7, 9], [0, 2, 4, 7, 9]];
   const ROOTS = [45, 43, 41, 38, 48];
   const CHORDS = [0, 5, 3, 7];
-  const KIND_NOTE = { shade: 67, glow: 72, phase: 70, flip: 65 };
+  const KIND_NOTE = { shade: 67, glow: 72, phase: 70, flip: 65, tide: 62, spring: 69, gust: 74 };
 
   function ensure() {
     if (ac) return true;
@@ -20,13 +21,13 @@ const Sfx = (() => {
       master.gain.value = muted ? 0 : 0.7;
       master.connect(ac.destination);
       sfxBus = ac.createGain();
-      sfxBus.gain.value = 0.9;
+      sfxBus.gain.value = vol.sfx;
       sfxBus.connect(master);
       const lp = ac.createBiquadFilter();
       lp.type = "lowpass";
       lp.frequency.value = 1500;
       musicBus = ac.createGain();
-      musicBus.gain.value = 0.55;
+      musicBus.gain.value = vol.music;
       musicBus.connect(lp);
       lp.connect(master);
       noiseBuf = ac.createBuffer(1, ac.sampleRate, ac.sampleRate);
@@ -95,6 +96,8 @@ const Sfx = (() => {
     ui() { tone(700, 0.05, "square", 0.04); },
     ok() { tone(880, 0.09, "square", 0.05); tone(1320, 0.1, "square", 0.04, 1, 0.06); },
     card() { [0, 7, 12].forEach((n, i) => tone(mtof(57 + n), 1.2, "sine", 0.07, 1, i * 0.18)); },
+    spring() { tone(200, 0.26, "sine", 0.13, 3.4); tone(420, 0.2, "triangle", 0.06, 2, 0.05); },
+    lantern() { [0, 7, 12, 19].forEach((n, i) => tone(mtof(76 + n), 0.55, "sine", 0.07, 1, i * 0.06)); },
   };
 
   function scheduleStep(t, n) {
@@ -134,6 +137,13 @@ const Sfx = (() => {
       if (S[name]) S[name](arg);
     },
     setMood(i) { mood = Math.max(0, Math.min(SCALES.length - 1, i)); },
+    // Music and effects volume, each 0 to 1.
+    setVolumes(music, sfx) {
+      vol.music = music;
+      vol.sfx = sfx;
+      if (musicBus) musicBus.gain.value = music;
+      if (sfxBus) sfxBus.gain.value = sfx;
+    },
     toggleMute() {
       muted = !muted;
       if (master) master.gain.value = muted ? 0 : 0.7;
