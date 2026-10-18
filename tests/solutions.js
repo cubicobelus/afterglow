@@ -82,21 +82,6 @@ SOLUTIONS["LAMPLIGHT"] = () => {
   Bot.walkTo(570);
 };
 
-// 5 THORN HALL
-SOLUTIONS["THORN HALL"] = () => {
-  Bot.record(0);
-  toThornPlatform();
-  Bot.walkTo(390); // the lantern at the end of the platform
-  Bot.walkTo(310);
-  Bot.run(6);
-  Bot.stop();
-  Bot.walkTo(150);
-  Bot.jumpTo(210, 24);
-  Bot.waitUntil(() => G.L.thorns.every((t) => t.lit), 900, "thorns to wither");
-  Bot.walkTo(440);
-  Bot.walkTo(570);
-};
-
 // 6 RELAY
 SOLUTIONS["RELAY"] = () => {
   Bot.record(1);
@@ -227,36 +212,6 @@ SOLUTIONS["CEILING PLATE"] = () => {
   Bot.walkTo(570);
 };
 
-// 12 HIGH PLATE
-SOLUTIONS["HIGH PLATE"] = () => {
-  const flipRest = () => G.echoes.flip.restT > 30;
-  const rideUp = () => {
-    Bot.walkTo(130);
-    Bot.waitUntil(flipRest, 900, "flip zone to open");
-    Bot.dir(1);
-    for (let i = 0; i < 300 && !(G.p.onGround && Bot.px() > 250 && G.p.y < 170); i++) Bot.tick();
-    Bot.dir(0);
-    Bot.expect(G.p.onGround && G.p.y < 170, "landed on the high ledge");
-  };
-  Bot.record(0);
-  Bot.walkTo(215);
-  Bot.run(6);
-  Bot.stop();
-  Bot.record(1);
-  rideUp();
-  Bot.walkTo(290);
-  Bot.expect(G.L.plates[0].pressed, "high plate pressed");
-  Bot.run(6);
-  Bot.stop();
-  rideUp();
-  Bot.walkTo(330);
-  Bot.dir(1);
-  for (let i = 0; i < 200 && !(G.p.onGround && G.p.y > 250); i++) Bot.tick();
-  Bot.dir(0);
-  Bot.waitUntil(() => G.L.doorOpen.a, 300, "door open");
-  Bot.walkTo(570);
-};
-
 // 13 LEAPFROG: carry the light across a long dark bridge by swapping with the glow echo.
 SOLUTIONS["LEAPFROG"] = () => {
   Bot.record(0);
@@ -327,8 +282,8 @@ SOLUTIONS["SECOND WIND"] = () => {
   Bot.walkTo(550);
 };
 
-// 15 THE BEACON
-SOLUTIONS["THE BEACON"] = () => {
+// HALL OF MIRRORS (the old Beacon, now the last level of tier 2)
+SOLUTIONS["HALL OF MIRRORS"] = () => {
   const rest = (k) => () => G.echoes[k] && G.echoes[k].restT > 30;
   const throughWall = () => {
     Bot.walkTo(110);
@@ -377,22 +332,6 @@ SOLUTIONS["THE BEACON"] = () => {
 
 // ---------------------------------------------------------------- tier 1 additions
 
-SOLUTIONS["BOOST"] = () => {
-  Bot.record(0);
-  Bot.walkTo(272);
-  Bot.run(6);
-  Bot.stop();
-  Bot.walkTo(236);
-  Bot.waitUntil(echoDone("shade"), 600, "shade to settle by the wall");
-  const e = G.echoes.shade;
-  Bot.jumpTo(e.x + PW / 2, 24);
-  Bot.expect(G.p.stand === e, "standing on the echo");
-  Bot.jumpTo(305, 24);
-  Bot.expect(G.p.y + PH < 230, "up on the wall top");
-  Bot.jumpTo(425, 24); // over the spikes
-  Bot.walkTo(560);
-};
-
 SOLUTIONS["SUNKEN GATE"] = () => {
   const climb = () => {
     Bot.walkTo(88);
@@ -437,69 +376,6 @@ SOLUTIONS["SWITCHBOARD"] = () => {
 };
 
 // ---------------------------------------------------------------- tier 2 additions
-
-SOLUTIONS["TRAPDOOR"] = () => {
-  Bot.record(0);
-  Bot.walkTo(230);
-  Bot.run(6);
-  Bot.stop();
-  Bot.walkTo(230);
-  Bot.waitUntil(() => G.p.onGround && G.p.y > 320, 600, "to drop into the tunnel");
-  Bot.walkTo(490);
-  Bot.jumpTo(542, 24);
-  Bot.walkTo(570);
-};
-
-SOLUTIONS["TWIN ECHOES"] = () => {
-  const rest = (k) => () => G.echoes[k] && G.echoes[k].restT > 30;
-  Bot.record(0);
-  Bot.walkTo(150);
-  Bot.run(6);
-  Bot.stop();
-  Bot.record(1);
-  Bot.walkTo(150);
-  Bot.waitUntil(rest("phase"), 600, "phase to settle");
-  Bot.walkTo(360);
-  Bot.run(6);
-  Bot.stop();
-  Bot.walkTo(150);
-  Bot.waitUntil(rest("phase"), 600, "phase to settle");
-  Bot.walkTo(280);
-  Bot.waitUntil(rest("flip"), 600, "flip to settle");
-  Bot.dir(1);
-  for (let i = 0; i < 300 && !(G.p.onGround && Bot.px() > 420 && G.p.y < 170); i++) Bot.tick();
-  Bot.dir(0);
-  Bot.expect(G.p.onGround && G.p.y < 170, "landed on the ledge");
-  Bot.walkTo(570);
-};
-
-SOLUTIONS["LANTERN LIFT"] = () => {
-  const rest = (k) => () => G.echoes[k] && G.echoes[k].restT > 30;
-  const rideUp = () => {
-    Bot.walkTo(130);
-    Bot.waitUntil(rest("flip"), 900, "flip zone to open");
-    Bot.dir(1);
-    for (let i = 0; i < 300 && !(G.p.onGround && Bot.px() > 250 && G.p.y < 170); i++) Bot.tick();
-    Bot.dir(0);
-    Bot.expect(G.p.onGround && G.p.y < 170, "landed on ledge A");
-  };
-  Bot.record(0); // flip
-  Bot.walkTo(215);
-  Bot.run(6);
-  Bot.stop();
-  Bot.record(1); // glow on the ledge
-  rideUp();
-  Bot.walkTo(330);
-  Bot.run(6);
-  Bot.stop();
-  rideUp();
-  Bot.walkTo(330);
-  Bot.waitUntil(rest("glow"), 600, "glow to settle");
-  Bot.jumpTo(392, 24);
-  Bot.walkTo(422);
-  Bot.jumpTo(486, 24);
-  Bot.walkTo(570);
-};
 
 // ---------------------------------------------------------------- tier 3: the tideworks
 const tideOf = () => G.echoes.tide;
@@ -572,20 +448,6 @@ SOLUTIONS["LIFT"] = () => {
   Bot.walkTo(590);
 };
 
-SOLUTIONS["SLUICE"] = () => {
-  Bot.record(0);
-  Bot.walkTo(150);
-  Bot.run(150);
-  Bot.walkTo(214);
-  Bot.run(4);
-  Bot.stop();
-  Bot.walkTo(285);
-  Bot.waitUntil(() => G.L.doorOpen.a, 900, "the door to open");
-  Bot.walkTo(420);
-  Bot.jumpTo(505, 24);
-  Bot.walkTo(570);
-};
-
 SOLUTIONS["TRAMPOLINE"] = () => {
   Bot.record(0);
   Bot.walkTo(372);
@@ -597,23 +459,6 @@ SOLUTIONS["TRAMPOLINE"] = () => {
   Bot.expect(G.p.y < 130, "up on the ledge");
   Bot.walkTo(470);
   Bot.jumpTo(470, 24); // the lantern high over the ledge
-  Bot.walkTo(570);
-};
-
-SOLUTIONS["BOUNCE COURSE"] = () => {
-  const toPillar = () => {
-    Bot.walkTo(172);
-    Bot.jumpTo(215, 24);
-    Bot.walkTo(250);
-  };
-  Bot.record(0);
-  toPillar();
-  Bot.run(6);
-  Bot.stop();
-  toPillar();
-  Bot.waitUntil(restOf("spring"), 600, "the spring to settle");
-  jumpToSpring(250, 1);
-  Bot.expect(G.p.y < 130, "up on the far ledge");
   Bot.walkTo(570);
 };
 
@@ -695,38 +540,6 @@ SOLUTIONS["FERRY LIGHT"] = () => {
   Bot.walkTo(590);
 };
 
-SOLUTIONS["HIGH WATER"] = () => {
-  // slots: 0 tide, 1 spring
-  const ferryOver = () => {
-    Bot.walkTo(172);
-    Bot.waitUntil(() => Math.abs(tideOf().x + PW / 2 - 172) < 2 && G.t < 160, 600, "the tide to wait at the edge");
-    Bot.jumpTo(tideOf().x + PW / 2, 12);
-    Bot.expect(G.p.stand === tideOf(), "standing on the tide echo");
-    Bot.waitUntil(() => G.t >= 120 + 50 + 33, 900, "the ride out over the gap");
-    Bot.jumpTo(345, 24);
-  };
-  Bot.record(0);
-  Bot.walkTo(172);
-  Bot.run(120);
-  Bot.jumpKey(true);
-  Bot.dir(1);
-  for (let i = 0; i < 36; i++) Bot.tick();
-  Bot.jumpKey(false);
-  Bot.dir(0);
-  Bot.stop();
-  Bot.record(1);
-  ferryOver();
-  Bot.walkTo(430);
-  Bot.run(6);
-  Bot.stop();
-  ferryOver();
-  Bot.walkTo(430);
-  Bot.waitUntil(restOf("spring"), 900, "the spring to settle");
-  jumpToSpring(430, 1);
-  Bot.expect(G.p.y < 150, "up on the wall");
-  Bot.walkTo(570);
-};
-
 // ---------------------------------------------------------------- tier 4: the beacon
 // Run up to xJump, then jump toward targetX (keeps the running speed into the jump).
 const runJump = (xJump, targetX) => {
@@ -754,28 +567,6 @@ SOLUTIONS["BREEZE"] = () => {
   Bot.walkTo(570);
 };
 
-SOLUTIONS["LOW TUNNEL"] = () => {
-  Bot.record(0);
-  Bot.walkTo(190);
-  Bot.run(6);
-  Bot.stop();
-  Bot.walkTo(130);
-  Bot.waitUntil(gustReady, 600, "the gust to start blowing");
-  runJump(192, 310);
-  Bot.walkTo(570);
-};
-
-SOLUTIONS["TAILWIND"] = () => {
-  Bot.record(0);
-  Bot.walkTo(166);
-  Bot.run(6);
-  Bot.stop();
-  Bot.walkTo(100);
-  Bot.waitUntil(gustReady, 600, "the gust to start blowing");
-  runJump(166, 345);
-  Bot.walkTo(570);
-};
-
 SOLUTIONS["TAXI"] = () => {
   // slots: 0 shade, 1 tide
   Bot.record(0);
@@ -800,39 +591,6 @@ SOLUTIONS["TAXI"] = () => {
   Bot.expect(Bot.px() > 500, "swapped to the far side");
   Bot.waitUntil(() => G.L.doorOpen.b, 300, "door b to open");
   Bot.walkTo(610);
-};
-
-SOLUTIONS["DELIVERY"] = () => {
-  // slots: 0 gust, 1 shade
-  Bot.record(0);
-  Bot.walkTo(172);
-  Bot.run(6);
-  Bot.stop();
-  Bot.record(1);
-  crossWithWind(335);
-  Bot.walkTo(370);
-  Bot.run(6);
-  Bot.stop();
-  crossWithWind(335);
-  Bot.waitUntil(() => G.L.doorOpen.a, 900, "the door to open");
-  Bot.walkTo(570);
-};
-
-SOLUTIONS["LANTERN WIND"] = () => {
-  // slots: 0 gust, 1 glow
-  Bot.record(0);
-  Bot.walkTo(172);
-  Bot.run(6);
-  Bot.stop();
-  Bot.record(1);
-  crossWithWind(335);
-  Bot.walkTo(390);
-  Bot.run(6);
-  Bot.stop();
-  crossWithWind(335);
-  Bot.walkTo(390);
-  Bot.waitUntil(() => G.L.gates.every((x) => x.open), 900, "the gate to open");
-  Bot.walkTo(570);
 };
 
 SOLUTIONS["SAIL"] = () => {

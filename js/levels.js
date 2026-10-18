@@ -34,7 +34,6 @@ function def(chapter, name, opts, build) {
 }
 
 // ================================================================ tier 1: the cellar
-// ---------------------------------------------------------------- intro
 def(0, "FIRST STEPS", {
   echoes: [],
   hint: "ARROWS OR A AND D TO MOVE. SPACE TO JUMP. REACH THE DOOR OF LIGHT.",
@@ -52,7 +51,6 @@ def(0, "FIRST STEPS", {
   g.set(4, 9, "L").set(16, 7, "L").set(24, 8, "L");
 });
 
-// ---------------------------------------------------------------- shade
 def(0, "THE PLATE", {
   unlock: "shade", echoes: ["shade"], recMax: 8,
   hint: "PRESS E TO RECORD. WALK TO THE PLATE. PRESS E AGAIN. YOUR ECHO WILL HOLD IT FOR YOU.",
@@ -67,18 +65,6 @@ def(0, "THE PLATE", {
   g.set(5, 9, "L").set(14, 6, "L").set(25, 9, "L");
 });
 
-def(0, "BOOST", {
-  echoes: ["shade"], recMax: 8,
-  hint: "AN ECHO IS A STEP. LEAVE ONE BY THE WALL, JUMP ON IT, THEN JUMP ON TO THE TOP.",
-}, (g) => {
-  g.base();
-  g.set(2, 14, "@");
-  g.fill(14, 11, 15, 14, "#");
-  g.fill(17, 14, 18, 14, "^");
-  g.fill(27, 13, 27, 14, "X");
-  g.set(6, 8, "L").set(16, 6, "L").set(24, 8, "L");
-});
-
 def(0, "STEPPING STONE", {
   echoes: ["shade"], recMax: 8,
   hint: "ECHOES FREEZE WHERE YOU STOP. JUMP OUT OVER THE GAP, STOP RECORDING IN MID AIR, THEN STAND ON YOUR ECHO.",
@@ -91,7 +77,6 @@ def(0, "STEPPING STONE", {
   g.set(5, 8, "L").set(15, 5, "L").set(25, 8, "L");
 });
 
-// ---------------------------------------------------------------- glow
 def(0, "LAMPLIGHT", {
   unlock: "glow", echoes: ["glow"], recMax: 10, dark: true,
   hint: "THE DARK PLANKS ARE REAL ONLY WHERE LIGHT TOUCHES THEM. ECHO A GLOW ON THE ISLAND.",
@@ -105,21 +90,6 @@ def(0, "LAMPLIGHT", {
   g.set(10, 12, "L");
   g.fill(28, 13, 28, 14, "X");
   g.set(29, 10, "L");
-});
-
-def(0, "THORN HALL", {
-  echoes: ["glow"], recMax: 10, dark: true,
-  hint: "THORNS KILL IN THE DARK AND WITHER IN THE LIGHT. THE PLATFORM ABOVE HAS A GOOD VIEW.",
-}, (g) => {
-  g.base();
-  g.set(2, 14, "@");
-  g.fill(8, 14, 9, 14, "#");
-  g.fill(11, 12, 19, 12, "#");
-  g.fill(12, 14, 18, 14, "t");
-  g.fill(20, 1, 20, 12, "#");
-  g.set(19, 11, "o");
-  g.fill(28, 13, 28, 14, "X");
-  g.set(4, 11, "L").set(26, 11, "L");
 });
 
 def(0, "SUNKEN GATE", {
@@ -141,7 +111,6 @@ def(0, "SUNKEN GATE", {
   g.set(1, 10, "L").set(27, 3, "L");
 });
 
-// ---------------------------------------------------------------- mix
 def(0, "RELAY", {
   echoes: ["shade", "glow"], recMax: 12, dark: true,
   hint: "ONE ECHO OF EACH KIND AT A TIME. RECORD THEM IN ORDER. THEY ALL REPLAY TOGETHER.",
@@ -175,7 +144,6 @@ def(0, "SWITCHBOARD", {
 });
 
 // ================================================================ tier 2: the gallery
-// ---------------------------------------------------------------- phase
 def(1, "GLASS WALL", {
   unlock: "phase", echoes: ["phase"], recMax: 8,
   hint: "STAND NEXT TO THE CRYSTAL AND RECORD. WHEREVER YOUR ECHO STANDS, THE GLASS GIVES WAY.",
@@ -204,21 +172,6 @@ def(1, "UNDER GLASS", {
   g.set(6, 8, "L").set(26, 8, "L");
 });
 
-def(1, "TRAPDOOR", {
-  echoes: ["phase"], recMax: 8,
-  hint: "THE FLOOR ITSELF IS GLASS. STAND ON IT, RECORD, AND LET IT FADE. THE WAY ON IS BELOW.",
-}, (g) => {
-  g.base();
-  g.set(2, 14, "@");
-  g.fill(10, 15, 12, 15, "%");
-  g.fill(10, 16, 27, 16, ".");
-  g.fill(18, 1, 18, 14, "#");
-  g.fill(24, 15, 25, 15, ".");
-  g.fill(28, 13, 28, 14, "X");
-  g.set(6, 8, "L").set(22, 8, "L");
-});
-
-// ---------------------------------------------------------------- flip
 def(1, "UPDRAFT", {
   unlock: "flip", echoes: ["flip"], recMax: 8,
   hint: "STEP INTO THE FLIP ZONE AND FALL UPWARD. LET GO AT THE TOP AND DRIFT ONTO THE LEDGE.",
@@ -244,22 +197,6 @@ def(1, "CEILING PLATE", {
   g.set(5, 9, "L").set(26, 9, "L");
 });
 
-def(1, "HIGH PLATE", {
-  echoes: ["flip", "shade"], recMax: 12,
-  hint: "A PLATE ON A HIGH LEDGE. YOUR SHADE CAN RIDE THE UPDRAFT FOR YOU.",
-}, (g) => {
-  g.base();
-  g.set(2, 14, "@");
-  g.fill(12, 9, 16, 14, "#");
-  g.set(14, 8, "a");
-  g.set(16, 8, "o");
-  g.fill(22, 1, 22, 8, "#");
-  g.fill(22, 9, 22, 14, "A");
-  g.fill(28, 13, 28, 14, "X");
-  g.set(5, 9, "L").set(26, 9, "L");
-});
-
-// ---------------------------------------------------------------- mix
 def(1, "TWO KEYS", {
   echoes: ["phase", "glow"], recMax: 12, dark: true,
   hint: "YOU CANNOT REACH THE PLATFORM WITHOUT THE PHASE. THE THORNS NEED THE GLOW.",
@@ -275,33 +212,25 @@ def(1, "TWO KEYS", {
   g.set(5, 11, "L").set(27, 11, "L");
 });
 
-def(1, "TWIN ECHOES", {
-  echoes: ["phase", "flip"], recMax: 10,
-  hint: "THE UPDRAFT IS BEHIND GLASS. OPEN THE GLASS, THEN PLACE THE FLIP.",
+def(1, "HALL OF MIRRORS", {
+  echoes: ["phase", "glow", "shade", "flip"], recMax: 14, dark: true,
+  hint: "FOUR KINDS, ONE ROUTE. WORK OUT WHAT MUST BE IN PLACE BEFORE EACH RECORDING.",
 }, (g) => {
   g.base();
   g.set(2, 14, "@");
-  g.fill(8, 1, 9, 14, "%");
-  g.fill(20, 9, 30, 14, "#");
-  g.fill(28, 7, 28, 8, "X");
-  g.set(5, 8, "L").set(14, 6, "L");
-});
-
-def(1, "LANTERN LIFT", {
-  echoes: ["flip", "glow"], recMax: 12, dark: true,
-  hint: "RIDE THE UPDRAFT UP TO THE LEDGE. THE PLANKS BEYOND NEED A GLOW.",
-}, (g) => {
-  g.base();
-  g.set(2, 14, "@");
-  g.fill(12, 9, 16, 14, "#");
-  g.fill(19, 6, 22, 6, "~");
-  g.fill(23, 6, 30, 14, "#");
-  g.fill(28, 4, 28, 5, "X");
-  g.set(4, 10, "L").set(27, 2, "L");
+  g.fill(6, 1, 7, 14, "%");
+  g.fill(9, 14, 10, 14, "#");
+  g.fill(12, 12, 19, 12, "#");
+  g.fill(13, 14, 18, 14, "t");
+  g.set(12, 11, "a");
+  g.fill(20, 1, 20, 12, "#");
+  g.fill(20, 13, 20, 14, "A");
+  g.fill(27, 9, 30, 14, "#");
+  g.fill(29, 7, 29, 8, "X");
+  g.set(4, 11, "L").set(23, 11, "L");
 });
 
 // ================================================================ tier 3: the tideworks
-// ---------------------------------------------------------------- tide
 def(2, "FERRY", {
   unlock: "tide", echoes: ["tide"], recMax: 10,
   hint: "TIDE REPLAYS YOUR PATH BACK AND FORTH, WAITING WHERE YOU WAITED. WAIT AT THE EDGE, JUMP OUT, STOP IN MID AIR, THEN RIDE IT.",
@@ -333,21 +262,6 @@ def(2, "LIFT", {
   g.set(27, 3, "L");
 });
 
-def(2, "SLUICE", {
-  echoes: ["tide"], recMax: 10,
-  hint: "A TIDE ECHO CANNOT HOLD A PLATE FOR GOOD. IT LEAVES AND COMES BACK, SO BE READY AT THE DOOR.",
-}, (g) => {
-  g.base();
-  g.set(2, 14, "@");
-  g.set(7, 14, "a");
-  g.fill(15, 1, 17, 8, "#");
-  g.fill(15, 9, 17, 14, "A");
-  g.fill(22, 14, 23, 14, "^");
-  g.fill(27, 13, 27, 14, "X");
-  g.set(5, 9, "L").set(12, 6, "L").set(25, 9, "L");
-});
-
-// ---------------------------------------------------------------- spring
 def(2, "TRAMPOLINE", {
   unlock: "spring", echoes: ["spring"], recMax: 8,
   hint: "LAND ON A SPRING TO BOUNCE. HOLD JUMP AS YOU LAND FOR A MUCH BIGGER BOUNCE.",
@@ -358,19 +272,6 @@ def(2, "TRAMPOLINE", {
   g.fill(28, 5, 28, 6, "X");
   g.set(23, 4, "o");
   g.set(6, 9, "L").set(14, 6, "L");
-});
-
-def(2, "BOUNCE COURSE", {
-  echoes: ["spring"], recMax: 8,
-  hint: "LEAVE A SPRING ON THE PILLAR, THEN BOUNCE ACROSS. HOLD JUMP TO GO FAR ENOUGH.",
-}, (g) => {
-  g.base();
-  g.set(2, 14, "@");
-  g.pit(9, 16);
-  g.fill(10, 12, 12, 17, "#");
-  g.fill(17, 6, 30, 14, "#");
-  g.fill(28, 4, 28, 5, "X");
-  g.set(5, 9, "L").set(14, 4, "L");
 });
 
 def(2, "SKYHOOK", {
@@ -385,7 +286,6 @@ def(2, "SKYHOOK", {
   g.set(5, 8, "L").set(12, 4, "L");
 });
 
-// ---------------------------------------------------------------- mix
 def(2, "TWO STAGES", {
   echoes: ["spring", "tide"], recMax: 14,
   hint: "THE SPRING MUST BE ON THE LEDGE. USE YOUR TIDE TO GET IT THERE.",
@@ -415,20 +315,7 @@ def(2, "FERRY LIGHT", {
   g.set(30, 8, "L");
 });
 
-def(2, "HIGH WATER", {
-  echoes: ["tide", "spring"], recMax: 14,
-  hint: "A FERRY ACROSS, THEN A SPRING TO CLEAR THE WALL.",
-}, (g) => {
-  g.base();
-  g.set(2, 14, "@");
-  g.pit(9, 15);
-  g.fill(24, 8, 30, 14, "#");
-  g.fill(28, 6, 28, 7, "X");
-  g.set(5, 8, "L").set(12, 5, "L").set(20, 8, "L");
-});
-
 // ================================================================ tier 4: the beacon
-// ---------------------------------------------------------------- gust
 def(3, "BREEZE", {
   unlock: "gust", echoes: ["gust"], recMax: 8,
   hint: "A GUST BLOWS THE WAY YOU FACED WHEN YOU STOPPED. STAND AT THE EDGE FACING THE GAP, THEN JUMP INTO THE WIND.",
@@ -441,32 +328,17 @@ def(3, "BREEZE", {
   g.set(5, 8, "L").set(13, 5, "L").set(24, 8, "L");
 });
 
-def(3, "LOW TUNNEL", {
-  echoes: ["gust"], recMax: 8,
-  hint: "THE CEILING IS TOO LOW FOR A REAL JUMP. LET THE WIND CARRY YOU OVER THE SPIKES.",
+def(3, "SAIL", {
+  echoes: ["gust", "tide"], recMax: 14,
+  hint: "RECORD THE TIDE'S JUMP WITH THE WIND BEHIND YOU, AND IT REACHES FARTHER THAN YOU COULD ALONE.",
 }, (g) => {
   g.base();
   g.set(2, 14, "@");
-  g.fill(5, 1, 22, 11, "#");
-  g.fill(10, 14, 12, 14, "^");
+  g.pit(9, 18);
   g.fill(28, 13, 28, 14, "X");
-  g.set(3, 9, "L").set(26, 9, "L");
+  g.set(5, 8, "L").set(14, 5, "L").set(25, 8, "L");
 });
 
-def(3, "TAILWIND", {
-  echoes: ["gust"], recMax: 8,
-  hint: "A LONG DROP GIVES A JUMP MORE TIME. WITH THE WIND BEHIND YOU, YOU CAN CLEAR THE PIT.",
-}, (g) => {
-  g.base();
-  g.fill(1, 10, 8, 14, "#");
-  g.set(2, 9, "@");
-  g.pit(9, 15);
-  g.fill(9, 17, 15, 17, "^");
-  g.fill(28, 13, 28, 14, "X");
-  g.set(4, 5, "L").set(13, 8, "L").set(24, 8, "L");
-});
-
-// ---------------------------------------------------------------- swap
 def(3, "LEAPFROG", {
   unlock: "swap", echoes: ["glow"], recMax: 8, dark: true, swap: true,
   hint: "THE BRIDGE IS LONGER THAN ONE LIGHT. WALK TO THE EDGE OF THE LIGHT, THEN PRESS Q.",
@@ -507,102 +379,32 @@ def(3, "TAXI", {
   g.fill(30, 13, 30, 14, "X");
 });
 
-// ---------------------------------------------------------------- mix
-def(3, "DELIVERY", {
-  echoes: ["gust", "shade"], recMax: 12,
-  hint: "CROSS WITH THE WIND, THEN SEND A SHADE ACROSS TO THE PLATE THAT OPENS THE DOOR.",
-}, (g) => {
-  g.base();
-  g.set(2, 14, "@");
-  g.pit(9, 14);
-  g.set(18, 14, "a");
-  g.fill(23, 1, 23, 8, "#");
-  g.fill(23, 9, 23, 14, "A");
-  g.fill(28, 13, 28, 14, "X");
-  g.set(5, 8, "L").set(13, 5, "L").set(26, 8, "L");
-});
-
-def(3, "LANTERN WIND", {
-  echoes: ["gust", "glow"], recMax: 12, dark: true,
-  hint: "THE WIND GETS YOU ACROSS. THE GATE ON THE FAR SIDE NEEDS A GLOW NEAR IT.",
-}, (g) => {
-  g.base();
-  g.set(2, 14, "@");
-  g.pit(9, 14);
-  g.fill(22, 1, 22, 12, "#");
-  g.fill(22, 13, 22, 14, "G");
-  g.fill(28, 13, 28, 14, "X");
-  g.set(5, 11, "L").set(30, 8, "L");
-});
-
-def(3, "SAIL", {
-  echoes: ["gust", "tide"], recMax: 14,
-  hint: "RECORD THE TIDE'S JUMP WITH THE WIND BEHIND YOU, AND IT REACHES FARTHER THAN YOU COULD ALONE.",
-}, (g) => {
-  g.base();
-  g.set(2, 14, "@");
-  g.pit(9, 18);
-  g.fill(28, 13, 28, 14, "X");
-  g.set(5, 8, "L").set(14, 5, "L").set(25, 8, "L");
-});
-
-def(3, "THE BEACON", {
-  echoes: ["phase", "glow", "shade", "flip"], recMax: 14, dark: true, swap: true,
-  hint: "EVERYTHING YOU HAVE LEARNED. THE LAMP IS AT THE TOP.",
-}, (g) => {
-  g.base();
-  g.set(2, 14, "@");
-  g.fill(6, 1, 7, 14, "%");
-  g.fill(9, 14, 10, 14, "#");
-  g.fill(12, 12, 19, 12, "#");
-  g.fill(13, 14, 18, 14, "t");
-  g.set(12, 11, "a");
-  g.fill(20, 1, 20, 12, "#");
-  g.fill(20, 13, 20, 14, "A");
-  g.fill(27, 9, 30, 14, "#");
-  g.fill(29, 7, 29, 8, "X");
-  g.set(4, 11, "L").set(23, 11, "L");
-});
-
 // Par for the two bonus stars: finish under par.t seconds, and use no more than par.r recordings.
 // Set from the scripted solutions in tests/ with plenty of slack for a person.
 const PAR = {
   "FIRST STEPS": { t: 15, r: 0 },
   "THE PLATE": { t: 20, r: 1 },
-  "BOOST": { t: 20, r: 1 },
   "STEPPING STONE": { t: 20, r: 1 },
   "LAMPLIGHT": { t: 20, r: 1 },
-  "THORN HALL": { t: 20, r: 1 },
   "SUNKEN GATE": { t: 20, r: 1 },
   "RELAY": { t: 25, r: 2 },
   "SWITCHBOARD": { t: 25, r: 2 },
   "GLASS WALL": { t: 20, r: 1 },
   "UNDER GLASS": { t: 30, r: 2 },
-  "TRAPDOOR": { t: 20, r: 1 },
   "UPDRAFT": { t: 20, r: 1 },
   "CEILING PLATE": { t: 25, r: 2 },
-  "HIGH PLATE": { t: 25, r: 2 },
   "TWO KEYS": { t: 25, r: 2 },
-  "TWIN ECHOES": { t: 25, r: 2 },
-  "LANTERN LIFT": { t: 25, r: 2 },
+  "HALL OF MIRRORS": { t: 40, r: 4 },
   "FERRY": { t: 25, r: 1 },
   "LIFT": { t: 30, r: 3 },
-  "SLUICE": { t: 20, r: 1 },
   "TRAMPOLINE": { t: 20, r: 1 },
-  "BOUNCE COURSE": { t: 20, r: 1 },
   "SKYHOOK": { t: 20, r: 1 },
   "TWO STAGES": { t: 40, r: 3 },
   "FERRY LIGHT": { t: 45, r: 3 },
-  "HIGH WATER": { t: 35, r: 2 },
   "BREEZE": { t: 15, r: 1 },
-  "LOW TUNNEL": { t: 15, r: 1 },
-  "TAILWIND": { t: 15, r: 1 },
   "LEAPFROG": { t: 25, r: 1 },
   "SECOND WIND": { t: 35, r: 3 },
   "TAXI": { t: 35, r: 3 },
-  "DELIVERY": { t: 20, r: 2 },
-  "LANTERN WIND": { t: 25, r: 2 },
   "SAIL": { t: 25, r: 2 },
-  "THE BEACON": { t: 40, r: 4 },
 };
 for (const l of LEVELS) l.par = PAR[l.name];
