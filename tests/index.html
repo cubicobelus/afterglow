@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Solution tests</title>
+<style>
+  body { font: 14px ui-monospace, Consolas, monospace; background: #111; color: #ddd; padding: 16px; }
+  .ok { color: #7fdc8a; } .bad { color: #ff7b72; }
+</style>
+</head>
+<body>
+<h1>Level solution tests</h1>
+<pre id="out">running...</pre>
+<script src="../js/levels.js"></script>
+<script src="../js/engine.js"></script>
+<script src="bot.js"></script>
+<script src="solutions.js"></script>
+<script>
+  // Optional ?only=3 or ?only=3,5 to run a subset. Results are also in window.RESULTS.
+  const only = (new URLSearchParams(location.search).get("only") || "").split(",").filter(Boolean).map(Number);
+  window.RESULTS = [];
+  const out = document.getElementById("out");
+  let html = "";
+
+  // Structural checks on every level layout.
+  const VALID = new Set(".#%~^vtabcd1234ABCDL@X".split(""));
+  for (let i = 0; i < LEVELS.length; i++) {
+    const problems = [];
+    const L = parseLevel(i);
+    if (L.rows.length !== ROWS) problems.push("row count " + L.rows.length);
+    L.rows.forEach((r, n) => {
+      if (r.length !== COLS) problems.push("row " + n + " has width " + r.length);
+      for (const ch of r) if (!VALID.has(ch)) problems.push("unknown tile " + ch);
+    });
+    if (!L.rows.some((r) => r.includes("@"))) problems.push("no spawn");
+    if (!L.exit) problems.push("no exit");
+    for (const p of L.plates) if (!L.hasDoor[p.id]) problems.push("plate " + p.id + " has no door");
+    for (const id in L.hasDoor) if (!L.plates.some((p) => p.id === id)) problems.push("door " + id + " has no plate");
+    const kinds = new Set(L.echoes);
+    if (L.crystals.length && !kinds.has("phase")) problems.push("crystal without a phase echo");
+    if (L.planks.length && !kinds.has("glow") && !L.lamps.length) problems.push("planks without any light");
+    if (L.thorns.length && !kinds.has("glow")) problems.push("thorns without a glow echo");
+    const ok = problems.length === 0;
+    RESULTS.push({ i, name: "layout " + (i + 1) + " " + LEVELS[i].name, ok, info: ok ? "ok" : problems.join("; ") });
+    html += '<span class="' + (ok ? "ok" : "bad") + '">' + (ok ? "PASS " : "FAIL ") + "layout " + (i + 1) + " " + LEVELS[i].name + (ok ? "" : " - " + problems.join("; ")) + "</span>\n";
+  }
+  html += "\n";
+  for (let i = 0; i < LEVELS.length; i++) {
+    if (only.length && !only.includes(i)) continue;
+    const name = (i + 1) + " " + LEVELS[i].name;
+    let res;
+    try {
+      Bot.load(i);
+      if (!SOLUTIONS[i]) throw new Error("no solution written yet");
+      SOLUTIONS[i]();
+      Bot.run(2);
+      if (!G.won) throw new Error("finished the script but did not reach the exit (at " + Math.round(G.p.x) + "," + Math.round(G.p.y) + ")");
+      res = { i, name, ok: true, info: "won, ticks " + G.t + ", deaths " + G.deaths };
+    } catch (e) {
+      res = { i, name, ok: false, info: e.message };
+    }
+    RESULTS.push(res);
+    html += '<span class="' + (res.ok ? "ok" : "bad") + '">' + (res.ok ? "PASS " : "FAIL ") + name + " - " + res.info + "</span>\n";
+  }
+  out.innerHTML = html;
+</script>
+</body>
+</html>
