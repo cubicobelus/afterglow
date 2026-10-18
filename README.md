@@ -17,10 +17,12 @@ To run it offline, download the repo and open `index.html` from a local web serv
 
 Press **E** to start recording and **E** again to stop. You go back to the start and your echo walks the path you
 just took, then stays wherever you stopped, even in mid-jump, so a frozen jump makes a stepping stone in the air.
-You can have one echo of each kind at a time, and an echo's power switches on once it comes to rest.
+Each slot along the bottom of the screen holds one echo, and an echo's power switches on once it comes to rest.
+Later levels give you several slots, sometimes two or three of the same kind. An echo does not care about walls or
+glass, so one you no longer need can be recorded again somewhere else.
 
-The game has 37 levels in four tiers, each with its own scenery. A tier teaches one echo in three levels, then the
-next echo in three more, then mixes them.
+The game has 31 levels in four tiers, each with its own scenery. Every echo gets one or two easy levels, then the
+tiers mix them and climb to levels that need several echoes working at once. The last one uses seven.
 
 | Echo | What it does |
 |---|---|
@@ -44,7 +46,7 @@ its par. A few levels hide a lantern worth finding.
 | Move | Arrow keys or A and D |
 | Jump | Space, Up or W |
 | Record, stop | E |
-| Pick an echo kind | 1 to 4 |
+| Pick an echo slot | 1 to 7 |
 | Swap places with the picked echo (late game) | Q |
 | Restart the attempt | R |
 | Clear the picked echo | X |
@@ -59,8 +61,8 @@ reset button that erases all saved times, stars, lanterns and settings.
 
 `tests/index.html` runs, through the real game engine, small checks of each mechanic, a layout check on every
 level, and a scripted solution for every level that must reach the exit (and pick up the level's lantern, if it
-has one). Open it from a local web server. Adding or changing a level means writing or re-running its solution in
-`tests/solutions.js`.
+has one). `tests/shortcuts.html` makes sure no level can be won by a bot that only runs right and jumps. Open them
+from a local web server. Adding or changing a level means writing or re-running its solution in `tests/solutions.js`.
 
 `demos/` holds the three small mechanic demos the game grew out of.
 

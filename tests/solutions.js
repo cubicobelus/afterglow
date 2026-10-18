@@ -677,34 +677,50 @@ SOLUTIONS["CHANDELIER"] = () => {
 
 SOLUTIONS["STACKED SPRINGS"] = () => {
   // slots: spring (floor), spring2 (low ledge), glow (top, by the gate)
-  const toLedge = () => {
-    Bot.walkTo(100);
+  // The lantern hangs right over the first spring: bounce straight up, land on the spring again, then bounce across.
+  const toLedge = (lantern) => {
+    Bot.walkTo(110);
     Bot.waitUntil(restOf("spring"), 600, "the first spring to settle");
-    jumpToSpring(100, 1);
+    const need = lantern ? 2 : 1;
+    let n = 0, prev = 0;
+    Bot.jumpKey(true);
+    for (let i = 0; i < 400 && !(n >= need && G.p.onGround); i++) {
+      const dx = 110 - Bot.px();
+      Bot.dir(n >= need ? 1 : Math.abs(dx) < 3 ? 0 : Math.sign(dx));
+      Bot.tick();
+      if (G.dead) Bot.fail("died at the first spring");
+      if (G.p.vy < -520 && prev >= -520) n++;
+      prev = G.p.vy;
+    }
+    Bot.jumpKey(false);
+    Bot.dir(0);
     Bot.expect(G.p.y < 130, "up on the low ledge");
   };
-  const toTop = () => {
-    toLedge();
+  const toTop = (lantern) => {
+    toLedge(lantern);
     Bot.walkTo(240);
     Bot.waitUntil(restOf("spring2"), 900, "the second spring to settle");
+    // Let the glow echo finish replaying its own climb first, or you can land on it mid-air.
+    Bot.waitUntil(() => !G.echoes.glow || !G.echoes.glow.moving, 1500, "the glow echo to finish its replay");
     jumpToSpring(240, 0);
     Bot.expect(G.p.y < 50, "up on the top ledge");
   };
   Bot.record(0);
-  Bot.walkTo(100);
+  Bot.walkTo(110);
   Bot.run(6);
   Bot.stop();
   Bot.record(1);
-  toLedge();
+  toLedge(false);
   Bot.walkTo(240);
   Bot.run(6);
   Bot.stop();
   Bot.record(2);
-  toTop();
+  toTop(true);
+  Bot.expect(G.lanternsGot === 1, "the lantern over the first spring");
   Bot.walkTo(470);
   Bot.run(6);
   Bot.stop();
-  toTop();
+  toTop(false);
   Bot.walkTo(470);
   Bot.waitUntil(() => G.L.gates.every((x) => x.open), 900, "the gate to open");
   Bot.walkTo(570);
@@ -726,14 +742,19 @@ SOLUTIONS["CHORUS"] = () => {
     Bot.waitUntil(rest("gust"), 900, "the first gust to blow");
     runJump(164, 335);
   };
-  const upShaft = () => {
+  const upShaft = (lantern) => {
     Bot.walkTo(590);
     Bot.waitUntil(restOf("spring"), 900, "the spring to settle");
     jumpToSpring(590, -1);
     Bot.expect(G.p.y < 150 && Bot.px() < 560, "up on the slab");
+    if (lantern) {
+      Bot.walkTo(430);
+      Bot.jumpTo(430, 24); // the lantern floating over the long slab
+      Bot.expect(G.lanternsGot === 1, "the lantern over the slab");
+    }
   };
   const crossUpperGap = () => {
-    Bot.walkTo(330);
+    Bot.walkTo(330, 8); // the wind from the second gust makes a precise stop here awkward
     Bot.waitUntil(rest("gust2"), 900, "the second gust to blow");
     runJumpLeft(306, 139);
     Bot.expect(G.p.y < 150 && Bot.px() < 180, "across the upper gap");
@@ -769,7 +790,7 @@ SOLUTIONS["CHORUS"] = () => {
   Bot.run(6);
   Bot.stop();
   crossFloorPit();
-  upShaft();
+  upShaft(true);
   crossUpperGap();
   Bot.walkTo(90);
   Bot.waitUntil(() => G.L.gates.every((x) => x.open) && G.L.doorOpen.a, 600, "the gate to open");

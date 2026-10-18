@@ -369,6 +369,7 @@ def(2, "STACKED SPRINGS", {
   g.fill(10, 3, 30, 3, "=");
   g.fill(25, 1, 25, 2, "G");
   g.fill(28, 1, 28, 2, "X");
+  g.set(5, 5, "o");
   g.set(3, 11, "L").set(11, 5, "L").set(19, 11, "L");
 });
 
@@ -463,6 +464,7 @@ def(3, "CHORUS", {
   g.fill(5, 1, 5, 5, "#").fill(5, 6, 5, 7, "A").set(7, 7, "a");
   g.fill(3, 1, 3, 5, "#").fill(3, 6, 3, 7, "G");
   g.fill(1, 6, 1, 7, "X");
+  g.set(21, 5, "o");
   g.set(6, 13, "L").set(16, 12, "L").set(24, 12, "L").set(20, 5, "L").set(12, 5, "L").set(29, 10, "L");
 });
 
@@ -510,7 +512,7 @@ const PAR = {
   "SKYHOOK": { t: 20, r: 1 },
   "TWO STAGES": { t: 40, r: 3 },
   "FERRY LIGHT": { t: 45, r: 3 },
-  "STACKED SPRINGS": { t: 35, r: 3 },
+  "STACKED SPRINGS": { t: 40, r: 3 },
   "PUMP ROOM": { t: 70, r: 6 },
   "BREEZE": { t: 15, r: 1 },
   "LEAPFROG": { t: 25, r: 1 },
