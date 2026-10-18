@@ -54,6 +54,17 @@ const Render = (() => {
     x.fillRect(0, 0, W, H);
   }
 
+  // A 5x5 emblem per echo kind, so kinds can be told apart without relying on colour.
+  const EMBLEMS = {
+    shade: ["..#..", ".###.", "#####", ".###.", "..#.."],
+    glow: ["#.#.#", ".###.", "#####", ".###.", "#.#.#"],
+    phase: ["#####", "#...#", "#...#", "#...#", "#####"],
+    flip: ["..#..", ".###.", ".....", ".###.", "..#.."],
+    tide: [".#.#.", "#.#.#", ".....", ".#.#.", "#.#.#"],
+    spring: ["..#..", ".###.", "#.#.#", "..#..", "..#.."],
+    gust: ["###..", ".....", "#####", ".....", "###.."],
+  };
+
   // ------------------------------------------------------------ baking
   function solidAt(L, c, r) {
     if (c < 0 || c >= COLS || r < 0 || r >= ROWS) return true;
@@ -96,9 +107,10 @@ const Render = (() => {
       }
       if (hash(c, r) > 0.7) x.fillRect(px + Math.floor(hash(r, c) * 16), py + 2, 1, 5);
     }
-    if (theme === "reversal" && (!up || !dn) && hash(c, r) > 0.55) {
-      x.fillStyle = rgba(pal.accent, 0.8);
-      x.fillRect(px + Math.floor(hash(c, r * 2) * 16) + 1, py + (up ? 17 : 2), 2, 1);
+    if (theme === "tideworks") {
+      // copper rivets, and a wet sheen on top edges
+      if (hash(c, r) > 0.3) { x.fillStyle = "#c98a5a"; x.fillRect(px + 2, py + 2, 2, 2); x.fillRect(px + 16, py + 2, 2, 2); }
+      if (!up && hash(c * 5, r) > 0.45) { x.fillStyle = "rgba(127,224,230,0.4)"; x.fillRect(px + 3, py + 2, 12, 1); }
     }
     if (theme === "gallery" && hash(c * 3, r) > 0.8) {
       x.fillStyle = rgba(pal.accent, 0.5);
@@ -136,6 +148,7 @@ const Render = (() => {
       }
     }
     for (const sp of L.spikes) drawSpike(x, sp);
+    drawOneWays(x, L, pal);
     return c;
   }
 
@@ -173,30 +186,47 @@ const Render = (() => {
         x.fillRect(cx, 0, 1, len);
         for (let k = 3; k < len; k += 4) x.fillRect(cx - 1, k, 3, 1);
       }
-    } else if (th.theme === "archive") {
-      const cols = ["#7a3b2e", "#2e5a7a", "#6a7a2e", "#7a6a2e", "#5a2e7a", "#2e7a5a"];
-      for (let row = 0; row < 5; row++) {
-        const base = 56 + row * 68;
-        let cx = 4;
-        while (cx < W) {
-          if (rng() < 0.12) { cx += 10 + Math.floor(rng() * 20); continue; }
-          const w = 5 + Math.floor(rng() * 6), h = 18 + Math.floor(rng() * 20);
-          x.fillStyle = rgba(cols[Math.floor(rng() * cols.length)], 0.28);
-          x.fillRect(cx, base - h, w, h);
-          x.fillStyle = "rgba(255,255,255,0.05)";
-          x.fillRect(cx, base - h, 1, h);
-          cx += w + 1;
+    } else if (th.theme === "tideworks") {
+      const gear = (gx, gy, r, teeth, rot) => {
+        x.save();
+        x.translate(gx, gy);
+        x.rotate(rot);
+        x.fillStyle = "rgba(0,0,0,0.26)";
+        x.beginPath();
+        for (let i = 0; i <= teeth * 4; i++) {
+          const ang = (i / (teeth * 4)) * TAU, rad = (i % 4 < 2) ? r + 8 : r;
+          if (i === 0) x.moveTo(Math.cos(ang) * rad, Math.sin(ang) * rad); else x.lineTo(Math.cos(ang) * rad, Math.sin(ang) * rad);
         }
-        x.fillStyle = "rgba(0,0,0,0.35)";
-        x.fillRect(0, base, W, 5);
-        x.fillStyle = "rgba(255,200,120,0.07)";
-        x.fillRect(0, base, W, 1);
-      }
+        x.closePath();
+        x.fill();
+        x.fillStyle = "rgba(127,224,230,0.07)";
+        x.beginPath(); x.arc(0, 0, r * 0.38, 0, TAU); x.fill();
+        x.strokeStyle = "rgba(127,224,230,0.1)";
+        x.lineWidth = 3;
+        for (let k = 0; k < 4; k++) { x.beginPath(); x.moveTo(0, 0); x.lineTo(Math.cos(k * TAU / 4) * r * 0.9, Math.sin(k * TAU / 4) * r * 0.9); x.stroke(); }
+        x.restore();
+      };
+      gear(90, 110, 46, 10, 0.2);
+      gear(300, 64, 30, 8, 0.5);
+      gear(530, 150, 58, 12, 0.1);
+      gear(210, 300, 40, 9, 0.35);
+      x.fillStyle = "rgba(201,138,90,0.2)";
+      x.fillRect(0, 36, W, 8);
+      x.fillRect(150, 0, 7, H);
+      x.fillRect(396, 0, 7, H);
+      x.fillStyle = "rgba(201,138,90,0.32)";
+      for (let k = 40; k < W; k += 96) x.fillRect(k, 33, 5, 14);
+      for (let k = 60; k < H; k += 80) { x.fillRect(147, k, 13, 4); x.fillRect(393, k + 20, 13, 4); }
       for (let i = 0; i < 3; i++) {
-        const bx = 90 + i * 220;
-        x.fillStyle = "rgba(255,200,120,0.045)";
-        x.beginPath(); x.moveTo(bx, 0); x.lineTo(bx + 40, 0); x.lineTo(bx + 120, H); x.lineTo(bx + 50, H); x.closePath(); x.fill();
+        const bx = 60 + i * 230;
+        x.fillStyle = "rgba(127,224,230,0.045)";
+        x.beginPath(); x.moveTo(bx, 0); x.lineTo(bx + 50, 0); x.lineTo(bx + 130, H); x.lineTo(bx + 40, H); x.closePath(); x.fill();
       }
+      const wg = x.createLinearGradient(0, H - 90, 0, H);
+      wg.addColorStop(0, "rgba(127,224,230,0)");
+      wg.addColorStop(1, "rgba(127,224,230,0.16)");
+      x.fillStyle = wg;
+      x.fillRect(0, H - 90, W, 90);
     } else if (th.theme === "gallery") {
       for (let i = 0; i < 5; i++) {
         const fx = 30 + i * 130 + Math.floor(rng() * 20), fy = 36 + Math.floor(rng() * 30), fw = 64, fh = 120;
@@ -215,22 +245,6 @@ const Render = (() => {
         const sx = rng() * W, sy = H - rng() * 90, sh = 10 + rng() * 28;
         x.fillStyle = rgba(pal.accent, 0.12 + rng() * 0.1);
         x.beginPath(); x.moveTo(sx, sy); x.lineTo(sx + 6, sy - sh); x.lineTo(sx + 12, sy); x.closePath(); x.fill();
-      }
-    } else if (th.theme === "reversal") {
-      for (let i = 0; i < 18; i++) {
-        const sx = rng() * W, sh = 14 + rng() * 60, sw = 8 + rng() * 14;
-        x.fillStyle = "rgba(0,0,0,0.3)";
-        x.beginPath(); x.moveTo(sx, 0); x.lineTo(sx + sw, 0); x.lineTo(sx + sw / 2, sh); x.closePath(); x.fill();
-        const gx = rng() * W, gh = 14 + rng() * 60;
-        x.beginPath(); x.moveTo(gx, H); x.lineTo(gx + sw, H); x.lineTo(gx + sw / 2, H - gh); x.closePath(); x.fill();
-      }
-      for (let i = 0; i < 26; i++) {
-        const sx = rng() * W, sy = rng() * H, sr = 6 + rng() * 14;
-        const gr = x.createRadialGradient(sx, sy, 0, sx, sy, sr);
-        gr.addColorStop(0, rgba(pal.accent, 0.22));
-        gr.addColorStop(1, rgba(pal.accent, 0));
-        x.fillStyle = gr;
-        x.fillRect(sx - sr, sy - sr, sr * 2, sr * 2);
       }
     } else {
       for (let i = 0; i < 110; i++) {
@@ -325,6 +339,11 @@ const Render = (() => {
     ctx.fillStyle = o.cloakDark;
     ctx.fillRect(-6, -3, 12, 1);
     ctx.fillRect(-6, -9, 2, 6);
+    if (o.emblem) {
+      const pat = EMBLEMS[o.emblem];
+      ctx.fillStyle = "rgba(255,255,255,0.92)";
+      for (let r = 0; r < 5; r++) for (let c = 0; c < 5; c++) if (pat[r][c] === "#") ctx.fillRect(-2 + c, -8 + r - Math.round(bob * 0), 1, 1);
+    }
     // feet
     const lift = run ? 2 : 0;
     ctx.fillStyle = o.cloakDark;
@@ -349,7 +368,7 @@ const Render = (() => {
 
   function actorLook(kind) {
     const k = KINDS[kind];
-    return { cloak: rgbaSolid(k.color, 0.5), cloakDark: rgbaSolid(k.color, 0.28), eye: "#ffffff", flame: k.color, core: "#ffffff" };
+    return { cloak: rgbaSolid(k.color, 0.5), cloakDark: rgbaSolid(k.color, 0.28), eye: "#ffffff", flame: k.color, core: "#ffffff", emblem: kind };
   }
 
   function rgbaSolid(hex, a) { return rgba(hex, a); }
@@ -369,6 +388,13 @@ const Render = (() => {
     ctx.fillRect(pl.x, pl.y + d, pl.w, 3 - d + 1);
     ctx.fillStyle = tint(col, pl.pressed ? 0.7 : 0.1);
     ctx.fillRect(pl.x + 1, pl.y + d, pl.w - 2, 1);
+    if (pl.sensor) {
+      // a light sensor: a small eye on the plate that opens when lit
+      ctx.fillStyle = "#0c0f16";
+      ctx.fillRect(pl.x + 5, pl.y + d, 6, 3);
+      ctx.fillStyle = pl.pressed ? "#ffffff" : tint(col, -0.2);
+      ctx.fillRect(pl.x + 7, pl.y + d, 2, 2);
+    }
     ctx.restore();
     if (pl.pressed) {
       ctx.save();
@@ -398,6 +424,63 @@ const Render = (() => {
       for (let i = 0; i < 3; i++) ctx.fillRect(x + 4 + i * 5, y, 1, h);
       ctx.fillStyle = tint(col, -0.1);
       ctx.fillRect(x + 3, y + 8, 14, 2);
+    }
+  }
+
+  // A light gate: iron bars with a sun mark that lift while light falls on them.
+  function drawGate(ctx, gt, t) {
+    gt.amt += ((gt.open ? 1 : 0) - gt.amt) * 0.12;
+    const x = gt.x, y = gt.y, h = Math.round(TILE * (1 - gt.amt));
+    ctx.fillStyle = "#1a1d26";
+    ctx.fillRect(x, y, 3, TILE);
+    ctx.fillRect(x + 17, y, 3, TILE);
+    ctx.fillStyle = "#ffd27a";
+    ctx.globalAlpha = 0.25 + gt.amt * 0.5;
+    ctx.fillRect(x, y, 1, TILE);
+    ctx.fillRect(x + 19, y, 1, TILE);
+    ctx.globalAlpha = 1;
+    if (h > 0) {
+      ctx.fillStyle = "#5a5446";
+      for (let i = 0; i < 3; i++) ctx.fillRect(x + 4 + i * 5, y, 3, h);
+      ctx.fillStyle = "#a89d80";
+      for (let i = 0; i < 3; i++) ctx.fillRect(x + 4 + i * 5, y, 1, h);
+      if (h > 12) {
+        ctx.fillStyle = "#ffd27a";
+        ctx.fillRect(x + 8, y + 8, 4, 4);
+        ctx.fillRect(x + 9, y + 6, 2, 8);
+        ctx.fillRect(x + 6, y + 9, 8, 2);
+      }
+    }
+  }
+
+  function drawLantern(ctx, ln, t) {
+    if (ln.got) return;
+    const bob = Math.sin(t * 0.06 + ln.tx) * 2;
+    const x = ln.x, y = ln.y + bob;
+    ctx.save();
+    ctx.globalCompositeOperation = "lighter";
+    glowAt(ctx, x, y, 22, "#ffe08a", 0.3 + 0.1 * Math.sin(t * 0.1));
+    ctx.restore();
+    ctx.fillStyle = "#2b2f3c";
+    ctx.fillRect(x - 1, y - 8, 2, 3);
+    ctx.fillRect(x - 4, y - 5, 8, 2);
+    ctx.fillRect(x - 4, y + 4, 8, 2);
+    ctx.fillStyle = "rgba(255,236,170,0.55)";
+    ctx.fillRect(x - 3, y - 3, 6, 7);
+    drawFlame(ctx, x, y + 2, t + ln.tx * 7, "#ffd35a", "#ffffff", 0, 1);
+  }
+
+  function drawOneWays(x, L, pal) {
+    for (const o of L.oneways) {
+      x.fillStyle = pal.wallLo;
+      x.fillRect(o.x, o.y + 2, TILE, 4);
+      x.fillStyle = pal.wallHi;
+      x.fillRect(o.x, o.y, TILE, 3);
+      x.fillStyle = tint(pal.wallHi, 0.4);
+      x.fillRect(o.x, o.y, TILE, 1);
+      x.fillStyle = pal.mortar;
+      x.fillRect(o.x + 3, o.y + 3, 1, 1);
+      x.fillRect(o.x + 16, o.y + 3, 1, 1);
     }
   }
 
@@ -481,18 +564,25 @@ const Render = (() => {
     }
   }
 
-  function drawLamp(ctx, lamp, t, dark) {
+  function drawLamp(ctx, lamp, t, dark, on) {
     const x = lamp.x, y = lamp.y;
     ctx.fillStyle = "#1b1e27";
     ctx.fillRect(x - 1, y + 2, 2, 8);
     ctx.fillRect(x - 5, y + 8, 10, 2);
     ctx.fillRect(x - 4, y - 6, 8, 2);
-    ctx.fillStyle = "rgba(255,225,160,0.35)";
+    ctx.fillStyle = on ? "rgba(255,225,160,0.35)" : "rgba(160,170,190,0.18)";
     ctx.fillRect(x - 3, y - 4, 6, 8);
     ctx.fillStyle = "#2a2f3c";
     ctx.fillRect(x - 4, y - 4, 1, 8);
     ctx.fillRect(x + 3, y - 4, 1, 8);
-    drawFlame(ctx, x, y + 2, t + lamp.tx * 13, "#ffb347", "#fff3b0", 0, 1.2);
+    if (lamp.switchId) {
+      // a switch lamp wears its plate's colour on the frame
+      ctx.fillStyle = PLATE_COLORS[lamp.switchId];
+      ctx.fillRect(x - 4, y - 6, 8, 1);
+      ctx.fillRect(x - 5, y + 8, 10, 1);
+    }
+    if (on) drawFlame(ctx, x, y + 2, t + lamp.tx * 13, "#ffb347", "#fff3b0", 0, 1.2);
+    else { ctx.fillStyle = "#3a3f4d"; ctx.fillRect(x - 1, y + 3, 2, 2); }
   }
 
   function drawExit(ctx, L, t) {
@@ -576,6 +666,24 @@ const Render = (() => {
         }
       }
     }
+    for (const w of G.winds) {
+      ctx.strokeStyle = "rgba(223,243,255,0.45)";
+      ctx.lineWidth = 1;
+      ctx.setLineDash([3, 4]);
+      ctx.lineDashOffset = -t * 0.3 * w.dir;
+      ctx.beginPath(); ctx.arc(w.x, w.y, w.r - 0.5, 0, TAU); ctx.stroke();
+      ctx.setLineDash([]);
+      // streaks drifting the way the wind blows
+      for (let i = 0; i < 12; i++) {
+        const lane = ((i * 37) % 100) / 100;
+        const py = w.y - w.r * 0.8 + lane * w.r * 1.6;
+        const half = Math.sqrt(Math.max(0, w.r * w.r - (py - w.y) * (py - w.y)));
+        const span = half * 2 || 1;
+        const px = w.x - half + ((((t * 1.3 + i * 31) * w.dir) % span) + span) % span;
+        ctx.fillStyle = "rgba(235,248,255," + (0.35 + 0.3 * lane) + ")";
+        ctx.fillRect(Math.round(px), Math.round(py), 4, 1);
+      }
+    }
     for (const f of G.phases) {
       ctx.strokeStyle = "rgba(199,139,255,0.5)";
       ctx.lineWidth = 1;
@@ -624,6 +732,21 @@ const Render = (() => {
     const look = actorLook(e.kind);
     const rec = G.rec;
     const emerge = Math.min(1, G.t / 14);
+    if (e.kind === "tide") {
+      // a faint dotted line along the path it shuttles back and forth on
+      ctx.fillStyle = rgba(k.color, 0.3);
+      for (let i = 0; i < e.trace.length; i += 4) {
+        const s = e.trace[i];
+        ctx.fillRect(Math.round(s.x + PW / 2), Math.round(s.y + (s.g < 0 ? 0 : PH)), 1, 1);
+      }
+    }
+    if (e.kind === "spring" && !e.moving) {
+      const b = e.bounceT > 0 ? (14 - e.bounceT) : 0;
+      ctx.save();
+      ctx.strokeStyle = rgba(k.color, e.bounceT > 0 ? 0.8 * (e.bounceT / 14) : 0.0);
+      ctx.beginPath(); ctx.ellipse(e.x + PW / 2, e.y + (e.g < 0 ? PH : 0), 8 + b, 2 + b * 0.3, 0, 0, TAU); ctx.stroke();
+      ctx.restore();
+    }
     if (e.moving) {
       for (let n = 4; n >= 1; n--) {
         const idx = Math.max(0, e.i - n * 3);
@@ -718,7 +841,7 @@ const Render = (() => {
     const t = T;
     const pal = CHAPTERS[L.chapter].pal;
     ctx.save();
-    if (G.shake > 0) ctx.translate(Math.round((Math.random() - 0.5) * G.shake), Math.round((Math.random() - 0.5) * G.shake));
+    if (G.shake > 0 && Settings.shake) ctx.translate(Math.round((Math.random() - 0.5) * G.shake), Math.round((Math.random() - 0.5) * G.shake));
     ctx.drawImage(L.bg, 0, 0);
     if (CHAPTERS[L.chapter].theme === "beacon") {
       ctx.save();
@@ -733,11 +856,18 @@ const Render = (() => {
       ctx.fill();
       ctx.restore();
     }
+    const bubbles = CHAPTERS[L.chapter].theme === "tideworks";
     for (const m of L.motes) {
-      const x = (m.x + Math.sin(t * 0.01 * m.s + m.ph) * 14 + t * 0.05 * m.s) % W;
-      const y = (m.y + Math.cos(t * 0.008 * m.s + m.ph) * 8 + H) % H;
+      let x, y;
+      if (bubbles) {
+        x = m.x + Math.sin(t * 0.03 * m.s + m.ph) * 4;
+        y = ((m.y - t * 0.35 * m.s) % H + H) % H;
+      } else {
+        x = (m.x + Math.sin(t * 0.01 * m.s + m.ph) * 14 + t * 0.05 * m.s) % W;
+        y = (m.y + Math.cos(t * 0.008 * m.s + m.ph) * 8 + H) % H;
+      }
       ctx.fillStyle = rgba(pal.accent, 0.12 + 0.12 * Math.sin(t * 0.03 + m.ph));
-      ctx.fillRect(Math.round(x), Math.round(y), 1, 1);
+      ctx.fillRect(Math.round(x), Math.round(y), bubbles && m.s > 0.7 ? 2 : 1, bubbles && m.s > 0.7 ? 2 : 1);
     }
     ctx.drawImage(L.tiles, 0, 0);
     drawPedestal(ctx, L, t);
@@ -745,16 +875,19 @@ const Render = (() => {
     drawCrystals(ctx, L, t);
     drawPlanks(ctx, L, t);
     drawThorns(ctx, L, t);
-    for (const lamp of L.lamps) drawLamp(ctx, lamp, t, L.dark);
+    const lampOn = (l) => !l.switchId || !!L.doorOpen[l.switchId];
+    for (const lamp of L.lamps) drawLamp(ctx, lamp, t, L.dark, lampOn(lamp));
     drawExit(ctx, L, t);
     for (const d of L.doorTiles) drawDoorTile(ctx, d, !!L.doorOpen[d.id], t, L);
+    for (const gt of L.gates) drawGate(ctx, gt, t);
+    for (const ln of L.lanterns) drawLantern(ctx, ln, t);
     if (L.dark) {
       drawDarkness(ctx, L, t);
       drawDarkHints(ctx, L, t);
     } else {
       ctx.save();
       ctx.globalCompositeOperation = "lighter";
-      for (const l of L.lamps) glowAt(ctx, l.x, l.y, 46, "#ffb860", 0.16);
+      for (const l of L.lamps) if (lampOn(l)) glowAt(ctx, l.x, l.y, 46, "#ffb860", 0.16);
       ctx.restore();
     }
     drawZones(ctx, t);
@@ -768,10 +901,19 @@ const Render = (() => {
   // ------------------------------------------------------------ HUD
   function slotIcon(ctx, x, y, kind, t, on) {
     const k = KINDS[kind];
+    const pat = EMBLEMS[kind];
     ctx.fillStyle = on ? k.color : rgba(k.color, 0.45);
-    ctx.fillRect(x - 3, y + 1, 6, 5);
+    for (let r = 0; r < 5; r++) for (let c = 0; c < 5; c++) if (pat[r][c] === "#") ctx.fillRect(x - 5 + c * 2, y - 5 + r * 2, 2, 2);
+  }
+
+  function drawLanternIcon(ctx, x, y, got) {
+    ctx.fillStyle = got ? "#ffd35a" : "rgba(160,168,185,0.35)";
+    ctx.fillRect(x - 1, y - 5, 2, 2);
+    ctx.fillRect(x - 3, y - 3, 6, 6);
+    ctx.fillStyle = got ? "#fff3b0" : "rgba(20,24,34,0.9)";
     ctx.fillRect(x - 2, y - 2, 4, 4);
-    drawFlame(ctx, x, y - 1, t, on ? k.color : rgba(k.color, 0.6), "#ffffff", 0, 0.8);
+    ctx.fillStyle = got ? "#ffd35a" : "rgba(160,168,185,0.35)";
+    ctx.fillRect(x - 3, y + 3, 6, 1);
   }
 
   function hud(ctx, T, num) {
@@ -808,15 +950,18 @@ const Render = (() => {
         ctx.fillRect(bx - 1, 5, bwid + 2, 7);
         ctx.fillStyle = frac > 0.8 ? "#ff6b6b" : KINDS[G.rec.kind].color;
         ctx.fillRect(bx, 6, Math.round(bwid * frac), 5);
-        Font.draw(ctx, "RECORDING  E TO STOP", W / 2, 15, { scale: 1, color: "#ffd0d0", align: "center" });
+        Font.draw(ctx, "RECORDING  " + keyName(Input.bind.record[0]) + " TO STOP", W / 2, 15, { scale: 1, color: "#ffd0d0", align: "center" });
       }
-      const keys = "E " + (G.rec ? "STOP" : "RECORD") + "   R RESTART" + (L.swap ? "   Q SWAP" : "") + "   X CLEAR";
+      const kn = (name) => keyName(Input.bind[name][0]);
+      // The clear hint only appears once there is an echo to clear.
+      const keys = kn("record") + " " + (G.rec ? "STOP" : "RECORD") + "   " + kn("restart") + " RESTART" + (L.swap ? "   " + kn("swap") + " SWAP" : "") + (Object.keys(G.echoes).length ? "   " + kn("clear") + " CLEAR" : "");
       Font.draw(ctx, keys, W / 2, H - 41, { scale: 1, color: "rgba(220,226,240,0.55)", align: "center", shadow: null });
     } else {
-      Font.draw(ctx, "R RESTART", W / 2, H - 14, { scale: 1, color: "rgba(220,226,240,0.45)", align: "center", shadow: null });
+      Font.draw(ctx, keyName(Input.bind.restart[0]) + " RESTART", W / 2, H - 14, { scale: 1, color: "rgba(220,226,240,0.45)", align: "center", shadow: null });
     }
-    Font.draw(ctx, "ESC MENU", W - 8, 6, { scale: 1, color: "rgba(220,226,240,0.45)", align: "right", shadow: null });
+    Font.draw(ctx, keyName(Input.bind.pause[0]) + " MENU", W - 8, 6, { scale: 1, color: "rgba(220,226,240,0.45)", align: "right", shadow: null });
+    if (L.lanterns.length) drawLanternIcon(ctx, W - 14, 28, G.lanternsGot > 0);
   }
 
-  return { world, hud, bake, drawActor, drawFlame, glowAt, PLAYER_LOOK, rgba, tint, mulberry, hash };
+  return { world, hud, bake, drawActor, drawFlame, glowAt, drawLanternIcon, slotIcon, EMBLEMS, PLAYER_LOOK, rgba, tint, mulberry, hash };
 })();

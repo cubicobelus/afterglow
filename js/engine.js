@@ -72,6 +72,17 @@ const Input = (() => {
 
 const SFX = (name, arg) => { if (typeof Sfx !== "undefined") Sfx.play(name, arg); };
 
+// Short readable name for a key code, for hints and the key settings.
+function keyName(code) {
+  if (!code) return "NONE";
+  const map = { Space: "SPACE", ArrowLeft: "LEFT", ArrowRight: "RIGHT", ArrowUp: "UP", ArrowDown: "DOWN", ShiftLeft: "SHIFT", ShiftRight: "SHIFT", Escape: "ESC", Enter: "ENTER", Backspace: "BKSP", Tab: "TAB", ControlLeft: "CTRL", ControlRight: "CTRL", AltLeft: "ALT", AltRight: "ALT" };
+  if (map[code]) return map[code];
+  if (code.startsWith("Key")) return code.slice(3);
+  if (code.startsWith("Digit")) return code.slice(5);
+  if (code.startsWith("Numpad")) return "NUM" + code.slice(6);
+  return code.toUpperCase();
+}
+
 // ---------------------------------------------------------------- geometry
 function overlap(a, b) {
   return a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y;

@@ -7,7 +7,7 @@ const SOLUTIONS = [];
 const echoDone = (kind) => () => !G.echoes[kind].moving;
 
 // 1 FIRST STEPS
-SOLUTIONS[0] = () => {
+SOLUTIONS["FIRST STEPS"] = () => {
   Bot.route([
     ["to", 98], ["jump", 180],
     ["jump", 226],
@@ -21,7 +21,7 @@ SOLUTIONS[0] = () => {
 };
 
 // 2 THE PLATE
-SOLUTIONS[1] = () => {
+SOLUTIONS["THE PLATE"] = () => {
   Bot.record(0);
   Bot.walkTo(190);
   Bot.run(8);
@@ -31,7 +31,7 @@ SOLUTIONS[1] = () => {
 };
 
 // 3 STEPPING STONE: freeze an echo in mid air over the gap, stand on it, hop across.
-SOLUTIONS[2] = () => {
+SOLUTIONS["STEPPING STONE"] = () => {
   Bot.record(0);
   Bot.walkTo(250);
   Bot.jumpKey(true);
@@ -63,7 +63,7 @@ const toThornPlatform = () => {
 };
 
 // 4 LAMPLIGHT
-SOLUTIONS[3] = () => {
+SOLUTIONS["LAMPLIGHT"] = () => {
   const toIsland = () => {
     Bot.walkTo(150);
     Bot.jumpTo(175, 24);
@@ -81,7 +81,7 @@ SOLUTIONS[3] = () => {
 };
 
 // 5 THORN HALL
-SOLUTIONS[4] = () => {
+SOLUTIONS["THORN HALL"] = () => {
   Bot.record(0);
   toThornPlatform();
   Bot.walkTo(310);
@@ -95,7 +95,7 @@ SOLUTIONS[4] = () => {
 };
 
 // 6 RELAY
-SOLUTIONS[5] = () => {
+SOLUTIONS["RELAY"] = () => {
   Bot.record(1);
   toThornPlatform();
   Bot.walkTo(310);
@@ -114,7 +114,7 @@ SOLUTIONS[5] = () => {
 };
 
 // 7 GLASS WALL
-SOLUTIONS[6] = () => {
+SOLUTIONS["GLASS WALL"] = () => {
   Bot.record(0);
   Bot.walkTo(290);
   Bot.run(6);
@@ -127,7 +127,7 @@ SOLUTIONS[6] = () => {
 };
 
 // 8 UNDER GLASS
-SOLUTIONS[7] = () => {
+SOLUTIONS["UNDER GLASS"] = () => {
   Bot.record(0);
   Bot.walkTo(330);
   Bot.run(6);
@@ -151,7 +151,7 @@ SOLUTIONS[7] = () => {
 };
 
 // 9 TWO KEYS
-SOLUTIONS[8] = () => {
+SOLUTIONS["TWO KEYS"] = () => {
   const throughWall = () => {
     Bot.walkTo(190);
     Bot.waitUntil(echoDone("phase"), 600, "phase echo to settle");
@@ -176,7 +176,7 @@ SOLUTIONS[8] = () => {
 };
 
 // 10 UPDRAFT
-SOLUTIONS[9] = () => {
+SOLUTIONS["UPDRAFT"] = () => {
   Bot.record(0);
   Bot.walkTo(360);
   Bot.run(6);
@@ -194,7 +194,7 @@ SOLUTIONS[9] = () => {
 };
 
 // 11 CEILING PLATE
-SOLUTIONS[10] = () => {
+SOLUTIONS["CEILING PLATE"] = () => {
   const flipRest = () => G.echoes.flip.restT > 30;
   Bot.record(0);
   Bot.walkTo(250);
@@ -218,7 +218,7 @@ SOLUTIONS[10] = () => {
 };
 
 // 12 HIGH PLATE
-SOLUTIONS[11] = () => {
+SOLUTIONS["HIGH PLATE"] = () => {
   const flipRest = () => G.echoes.flip.restT > 30;
   const rideUp = () => {
     Bot.walkTo(130);
@@ -248,7 +248,7 @@ SOLUTIONS[11] = () => {
 };
 
 // 13 LEAPFROG: carry the light across a long dark bridge by swapping with the glow echo.
-SOLUTIONS[12] = () => {
+SOLUTIONS["LEAPFROG"] = () => {
   Bot.record(0);
   Bot.walkTo(100);
   Bot.run(6);
@@ -279,7 +279,7 @@ SOLUTIONS[12] = () => {
 
 // 14 SECOND WIND: ride zone 1 to place a shade on the ledge, then swap to it while recording the flip,
 // so the flip ends up on the ledge. Finally swap up and ride zone 2 to the exit.
-SOLUTIONS[13] = () => {
+SOLUTIONS["SECOND WIND"] = () => {
   const flipRest = () => G.echoes.flip && G.echoes.flip.restT > 30;
   const shadeRest = () => G.echoes.shade && G.echoes.shade.restT > 30;
   // slot 0 = shade, slot 1 = flip
@@ -318,7 +318,7 @@ SOLUTIONS[13] = () => {
 };
 
 // 15 THE BEACON
-SOLUTIONS[14] = () => {
+SOLUTIONS["THE BEACON"] = () => {
   const rest = (k) => () => G.echoes[k] && G.echoes[k].restT > 30;
   const throughWall = () => {
     Bot.walkTo(110);
@@ -363,4 +363,129 @@ SOLUTIONS[14] = () => {
   Bot.dir(0);
   Bot.expect(G.p.onGround && G.p.y < 170, "landed on the final ledge");
   Bot.walkTo(590);
+};
+
+// ---------------------------------------------------------------- tier 1 additions
+
+SOLUTIONS["BOOST"] = () => {
+  Bot.record(0);
+  Bot.walkTo(272);
+  Bot.run(6);
+  Bot.stop();
+  Bot.walkTo(236);
+  Bot.waitUntil(echoDone("shade"), 600, "shade to settle by the wall");
+  const e = G.echoes.shade;
+  Bot.jumpTo(e.x + PW / 2, 24);
+  Bot.expect(G.p.stand === e, "standing on the echo");
+  Bot.jumpTo(305, 24);
+  Bot.expect(G.p.y + PH < 230, "up on the wall top");
+  Bot.jumpTo(425, 24); // over the spikes
+  Bot.walkTo(560);
+};
+
+SOLUTIONS["SUNKEN GATE"] = () => {
+  const climb = () => {
+    Bot.walkTo(88);
+    Bot.jumpTo(118, 24); // ledge A
+    Bot.jumpTo(182, 24); // ledge B
+    Bot.jumpTo(242, 24); // ledge C
+    Bot.jumpTo(305, 24); // platform D
+  };
+  Bot.record(0);
+  climb();
+  Bot.walkTo(362);
+  Bot.run(6);
+  Bot.stop();
+  climb();
+  Bot.walkTo(366);
+  Bot.waitUntil(() => G.L.gates.every((x) => x.open), 600, "the gate to open");
+  Bot.walkTo(570);
+};
+
+SOLUTIONS["SWITCHBOARD"] = () => {
+  const rest = (k) => () => G.echoes[k] && G.echoes[k].restT > 30;
+  const toIsland = () => {
+    Bot.walkTo(188);
+    Bot.waitUntil(() => G.lights.length > 0, 900, "the switch lamp to light");
+    Bot.jumpTo(212, 24);
+    Bot.walkTo(392);
+  };
+  Bot.record(0); // shade on the plate
+  Bot.walkTo(130);
+  Bot.run(6);
+  Bot.stop();
+  Bot.record(1); // glow on the island
+  toIsland();
+  Bot.run(6);
+  Bot.stop();
+  toIsland();
+  Bot.waitUntil(rest("glow"), 600, "glow to settle");
+  Bot.walkTo(494);
+  Bot.jumpTo(545, 24);
+  Bot.walkTo(570);
+};
+
+// ---------------------------------------------------------------- tier 2 additions
+
+SOLUTIONS["TRAPDOOR"] = () => {
+  Bot.record(0);
+  Bot.walkTo(230);
+  Bot.run(6);
+  Bot.stop();
+  Bot.walkTo(230);
+  Bot.waitUntil(() => G.p.onGround && G.p.y > 320, 600, "to drop into the tunnel");
+  Bot.walkTo(490);
+  Bot.jumpTo(542, 24);
+  Bot.walkTo(570);
+};
+
+SOLUTIONS["TWIN ECHOES"] = () => {
+  const rest = (k) => () => G.echoes[k] && G.echoes[k].restT > 30;
+  Bot.record(0);
+  Bot.walkTo(150);
+  Bot.run(6);
+  Bot.stop();
+  Bot.record(1);
+  Bot.walkTo(150);
+  Bot.waitUntil(rest("phase"), 600, "phase to settle");
+  Bot.walkTo(360);
+  Bot.run(6);
+  Bot.stop();
+  Bot.walkTo(150);
+  Bot.waitUntil(rest("phase"), 600, "phase to settle");
+  Bot.walkTo(280);
+  Bot.waitUntil(rest("flip"), 600, "flip to settle");
+  Bot.dir(1);
+  for (let i = 0; i < 300 && !(G.p.onGround && Bot.px() > 420 && G.p.y < 170); i++) Bot.tick();
+  Bot.dir(0);
+  Bot.expect(G.p.onGround && G.p.y < 170, "landed on the ledge");
+  Bot.walkTo(570);
+};
+
+SOLUTIONS["LANTERN LIFT"] = () => {
+  const rest = (k) => () => G.echoes[k] && G.echoes[k].restT > 30;
+  const rideUp = () => {
+    Bot.walkTo(130);
+    Bot.waitUntil(rest("flip"), 900, "flip zone to open");
+    Bot.dir(1);
+    for (let i = 0; i < 300 && !(G.p.onGround && Bot.px() > 250 && G.p.y < 170); i++) Bot.tick();
+    Bot.dir(0);
+    Bot.expect(G.p.onGround && G.p.y < 170, "landed on ledge A");
+  };
+  Bot.record(0); // flip
+  Bot.walkTo(215);
+  Bot.run(6);
+  Bot.stop();
+  Bot.record(1); // glow on the ledge
+  rideUp();
+  Bot.walkTo(330);
+  Bot.run(6);
+  Bot.stop();
+  rideUp();
+  Bot.walkTo(330);
+  Bot.waitUntil(rest("glow"), 600, "glow to settle");
+  Bot.jumpTo(392, 24);
+  Bot.walkTo(422);
+  Bot.jumpTo(486, 24);
+  Bot.walkTo(570);
 };

@@ -67,11 +67,11 @@
     let res;
     try {
       Bot.load(i);
-      if (!SOLUTIONS[i]) throw new Error("no solution written yet");
-      SOLUTIONS[i]();
+      if (!SOLUTIONS[LEVELS[i].name]) throw new Error("no solution written yet");
+      SOLUTIONS[LEVELS[i].name]();
       Bot.run(2);
       if (!G.won) throw new Error("finished the script but did not reach the exit (at " + Math.round(G.p.x) + "," + Math.round(G.p.y) + ")");
-      res = { i, name, ok: true, info: "won, ticks " + G.t + ", deaths " + G.deaths };
+      res = { i, name, ok: true, secs: Math.round(G.time * 10) / 10, rec: G.recCount, info: "won, " + (Math.round(G.time * 10) / 10) + "s, " + G.recCount + " recordings, deaths " + G.deaths };
     } catch (e) {
       res = { i, name, ok: false, info: e.message };
     }
