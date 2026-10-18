@@ -592,10 +592,38 @@ const Render = (() => {
     ctx.restore();
   }
 
+  // A small rune plate under the spawn point. Echoes fade in here at the start of every attempt.
+  function drawPedestal(ctx, L, t) {
+    const pal = CHAPTERS[L.chapter].pal, sp = L.spawn;
+    const cx = Math.round(sp.x + PW / 2), fy = Math.round(sp.y + PH);
+    const kinds = Object.keys(G.echoes);
+    ctx.fillStyle = pal.wallLo;
+    ctx.fillRect(cx - 13, fy, 26, 3);
+    ctx.fillStyle = pal.wallHi;
+    ctx.fillRect(cx - 12, fy, 24, 2);
+    ctx.fillStyle = tint(pal.wallHi, 0.35);
+    ctx.fillRect(cx - 12, fy, 24, 1);
+    const color = kinds.length ? KINDS[kinds[Math.floor(t / 70) % kinds.length]].color : pal.accent;
+    const pulse = 0.55 + 0.35 * Math.sin(t * 0.07);
+    ctx.save();
+    ctx.strokeStyle = rgba(color, pulse);
+    ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.ellipse(cx, fy + 1, 9, 1.6, 0, 0, TAU); ctx.stroke();
+    ctx.globalCompositeOperation = "lighter";
+    glowAt(ctx, cx, fy, 14, color, 0.18 * pulse);
+    if (kinds.length && G.t < 22) {
+      const a = 1 - G.t / 22;
+      ctx.fillStyle = rgba(color, 0.35 * a);
+      ctx.fillRect(cx - 5, fy - 26 * (1 - a * 0.4), 10, 26 * (1 - a * 0.4));
+    }
+    ctx.restore();
+  }
+
   function drawEcho(ctx, e, t) {
     const k = KINDS[e.kind];
     const look = actorLook(e.kind);
     const rec = G.rec;
+    const emerge = Math.min(1, G.t / 14);
     if (e.moving) {
       for (let n = 4; n >= 1; n--) {
         const idx = Math.max(0, e.i - n * 3);
@@ -611,7 +639,7 @@ const Render = (() => {
       ctx.beginPath(); ctx.ellipse(e.x + PW / 2, fy, 9 + pulse * 2, 3, 0, 0, TAU); ctx.stroke();
       ctx.restore();
     }
-    drawActor(ctx, e.x, e.y, Object.assign({ face: e.face, st: e.st, g: e.g, t, sq: 0, vx: e.dx * 60, alpha: 0.85, eyesClosed: false }, look));
+    drawActor(ctx, e.x, e.y, Object.assign({ face: e.face, st: e.st, g: e.g, t, sq: 0, vx: e.dx * 60, alpha: 0.85 * emerge, eyesClosed: false }, look));
     ctx.save();
     ctx.globalCompositeOperation = "lighter";
     glowAt(ctx, e.x + PW / 2, e.y + (e.g < 0 ? PH + 2 : -3), 16, k.color, 0.28);
@@ -712,6 +740,7 @@ const Render = (() => {
       ctx.fillRect(Math.round(x), Math.round(y), 1, 1);
     }
     ctx.drawImage(L.tiles, 0, 0);
+    drawPedestal(ctx, L, t);
     for (const pl of L.plates) drawPlate(ctx, pl, t);
     drawCrystals(ctx, L, t);
     drawPlanks(ctx, L, t);
