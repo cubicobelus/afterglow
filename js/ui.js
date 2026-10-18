@@ -63,7 +63,7 @@ const App = (() => {
   const A = {
     state: "title", T: 0, idx: 0, sel: 0, hits: [], settingsBack: "title",
     fade: 1, fadeTarget: 0, fadeCb: null, cards: [], cardT: 0, introT: 0, hintT: 0, hintForce: 0,
-    result: null, selLevel: 0, endT: 0, rebind: null, resetArm: 0,
+    result: null, selLevel: 0, endT: 0, rebind: null, resetArm: 0, toast: null,
   };
 
   function fadeTo(cb) {
@@ -197,6 +197,7 @@ const App = (() => {
     return [
       { label: "RESUME", act: () => { A.state = "play"; } },
       { label: "RESTART LEVEL", act: () => startLevel(A.idx) },
+      { label: fsElement() ? "LEAVE FULLSCREEN" : "FULLSCREEN", fsToggle: true, act: () => {} },
       { label: "SETTINGS", act: () => openSettings("pause") },
       { label: "LEVELS", act: goSelect },
     ];
@@ -244,6 +245,7 @@ const App = (() => {
       { label: "EFFECTS", type: "slider", get: () => Settings.sfx, adjust: (d) => { Settings.sfx = Math.max(0, Math.min(1, Math.round((Settings.sfx + d * 0.1) * 10) / 10)); applySettings(); persistSettings(); Sfx.play("ok"); }, act: () => {} },
       { label: "SCREEN SHAKE", type: "toggle", get: () => Settings.shake, adjust: () => { Settings.shake = !Settings.shake; persistSettings(); }, act: () => { Settings.shake = !Settings.shake; persistSettings(); } },
       { label: "SOUND", type: "toggle", get: () => !Sfx.isMuted(), adjust: toggleSound, act: toggleSound },
+      { label: "FULLSCREEN", type: "toggle", get: () => !!fsElement(), fsToggle: true, adjust: () => {}, act: () => {} },
       { label: "KEYS", type: "link", act: () => { A.state = "keys"; A.sel = 0; A.rebind = null; } },
       { label: resetArmed() ? "SURE? PRESS AGAIN" : "RESET ALL DATA", type: "danger", act: () => { if (resetArmed()) wipeAllData(); else A.resetArm = A.T; } },
       { label: "BACK", type: "link", act: () => { A.state = A.settingsBack; A.sel = 0; } },
@@ -258,7 +260,7 @@ const App = (() => {
   function keyItems() {
     const items = KEY_ROWS.map(([name, label]) => ({ label, name, act: () => { A.rebind = name; } }));
     items.push({ label: "RESET KEYS", act: () => { Input.resetBind(); persistSettings(); } });
-    items.push({ label: "BACK", act: () => { A.state = "settings"; A.sel = 4; } });
+    items.push({ label: "BACK", act: () => { A.state = "settings"; A.sel = 5; } });
     return items;
   }
 
@@ -307,14 +309,14 @@ const App = (() => {
       }
       case "settings": {
         navMenu(settingsItems());
-        if (A.sel !== 5) A.resetArm = 0; // moving off the reset item cancels it
+        if (A.sel !== 6) A.resetArm = 0; // moving off the reset item cancels it
         if (Input.hitAny(["Escape", "Backspace"])) { A.state = A.settingsBack; A.sel = 0; }
         break;
       }
       case "keys": {
         if (A.rebind) { captureRebind(); break; }
         navMenu(keyItems());
-        if (Input.hitAny(["Escape", "Backspace"])) { A.state = "settings"; A.sel = 4; }
+        if (Input.hitAny(["Escape", "Backspace"])) { A.state = "settings"; A.sel = 5; }
         break;
       }
       case "select": {
@@ -644,7 +646,7 @@ const App = (() => {
     dim(0.7);
     Font.draw(ctx, "PAUSED", W / 2, 70, { scale: 4, color: "#ffe9a8", align: "center" });
     menu(pauseItems(), hits, W / 2, 140, 28);
-    Font.draw(ctx, keyName(Input.bind.pause[0]) + " TO RESUME", W / 2, H - 24, { scale: 1, color: "rgba(200,210,235,0.5)", align: "center" });
+    Font.draw(ctx, keyName(Input.bind.pause[0]) + " TO RESUME   " + keyName(Input.bind.fullscreen[0]) + " FULLSCREEN", W / 2, H - 24, { scale: 1, color: "rgba(200,210,235,0.5)", align: "center" });
   }
 
   function drawComplete(hits) {
@@ -707,6 +709,15 @@ const App = (() => {
       case "complete": drawComplete(A.hits); break;
       case "ending": drawEnding(); break;
     }
+    if (A.toast && A.T - A.toast.t < 240) {
+      const a = Math.min(1, (240 - (A.T - A.toast.t)) / 40);
+      const w = Font.width(A.toast.text, 1) + 20;
+      ctx.globalAlpha = a;
+      ctx.fillStyle = "rgba(5,6,14,0.85)";
+      ctx.fillRect((W - w) / 2, 6, w, 18);
+      Font.draw(ctx, A.toast.text, W / 2, 11, { scale: 1, color: "#ffe9a8", align: "center", shadow: null });
+      ctx.globalAlpha = 1;
+    }
     if (A.fade > 0) {
       ctx.fillStyle = "rgba(0,0,0," + A.fade + ")";
       ctx.fillRect(0, 0, W, H);
@@ -740,7 +751,9 @@ const App = (() => {
         } else if (h.act) {
           A.sel = h.i;
           Sfx.play("ok");
-          if (A.state === "title" && titleItems()[h.i] && titleItems()[h.i].fs) enterFullscreen();
+          const clicked = menuItemFor(A.state, h.i);
+          if (clicked && clicked.fs) enterFullscreen();
+          else if (clicked && clicked.fsToggle) toggleFullscreen();
           h.act();
         }
         return;
@@ -754,6 +767,19 @@ const App = (() => {
   // Browsers only allow fullscreen from a key press or click, so it is requested straight from the event handlers.
   const fsElement = () => document.fullscreenElement || document.webkitFullscreenElement;
 
+  // Chrome and Edge can hand Esc to the page while fullscreen, so one tap of Esc leaves fullscreen like F does.
+  function lockEsc() {
+    try {
+      if (navigator.keyboard && navigator.keyboard.lock) navigator.keyboard.lock(["Escape"]).catch(() => { /* not allowed */ });
+    } catch (e) { /* not supported */ }
+  }
+
+  function unlockEsc() {
+    try {
+      if (navigator.keyboard && navigator.keyboard.unlock) navigator.keyboard.unlock();
+    } catch (e) { /* not supported */ }
+  }
+
   function enterFullscreen() {
     if (fsElement()) return;
     const el = document.documentElement;
@@ -761,12 +787,16 @@ const App = (() => {
     if (!req) return;
     try {
       const p = req.call(el);
-      if (p && p.catch) p.catch(() => { /* refused: stay windowed */ });
+      if (p && p.then) {
+        p.then(() => {
+          lockEsc();
+          A.toast = { text: keyName(Input.bind.fullscreen[0]) + " OR ESC LEAVES FULLSCREEN", t: A.T };
+        }).catch(() => { /* refused: stay windowed */ });
+      }
     } catch (e) { /* refused: stay windowed */ }
   }
 
-  function toggleFullscreen() {
-    if (!fsElement()) { enterFullscreen(); return; }
+  function exitFullscreen() {
     try {
       const ex = document.exitFullscreen || document.webkitExitFullscreen;
       const p = ex.call(document);
@@ -774,13 +804,30 @@ const App = (() => {
     } catch (e) { /* ignore */ }
   }
 
+  function toggleFullscreen() {
+    if (!fsElement()) enterFullscreen(); else exitFullscreen();
+  }
+
+  // The menu item under the cursor for the screens that have a fullscreen entry. Called from the key and click
+  // handlers themselves, because browsers only allow fullscreen straight from a user action.
+  function menuItemFor(state, i) {
+    const items = state === "title" ? titleItems() : state === "pause" ? pauseItems() : state === "settings" ? settingsItems() : null;
+    return items ? items[i] : null;
+  }
+
   window.addEventListener("keydown", (e) => {
     Sfx.resume();
     if (e.repeat || A.rebind) return;
     if (Input.bind.fullscreen.includes(e.code)) { toggleFullscreen(); return; }
-    if (A.state === "title" && A.fadeTarget !== 1 && (e.code === "Enter" || e.code === "Space" || e.code === "NumpadEnter")) {
-      const it = titleItems()[A.sel];
+    if (e.code === "Escape" && fsElement()) {
+      Input.pressed.Escape = false;
+      exitFullscreen();
+      return;
+    }
+    if (A.fadeTarget !== 1 && (e.code === "Enter" || e.code === "Space" || e.code === "NumpadEnter")) {
+      const it = menuItemFor(A.state, A.sel);
       if (it && it.fs) enterFullscreen();
+      else if (it && it.fsToggle) toggleFullscreen();
     }
   });
 
@@ -796,6 +843,7 @@ const App = (() => {
   // Leaving fullscreen with Esc never reaches the game, so pause instead of losing the moment.
   function onFullscreenChange() {
     fit();
+    if (!fsElement()) unlockEsc();
     if (!fsElement() && A.state === "play" && !G.won) { A.state = "pause"; A.sel = 0; }
   }
   document.addEventListener("fullscreenchange", onFullscreenChange);

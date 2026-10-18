@@ -152,3 +152,45 @@ mech("gust: carries a jump farther in the direction it faced", () => {
   const plain = jumpDist(false), windy = jumpDist(true);
   ensure(windy > plain + 25, "wind should add distance: plain " + Math.round(plain) + ", windy " + Math.round(windy));
 });
+
+mech("two echoes of one kind: separate slots, both hold plates, one can be re-recorded alone", () => {
+  Bot.load(tiny({ echoes: ["shade", "shade"], recMax: 8 }, (g) => { g.base(); g.set(2, 14, "@"); g.set(6, 14, "a"); g.set(9, 14, "b"); g.fill(20, 9, 20, 14, "A"); g.fill(21, 9, 21, 14, "B"); }));
+  ensure(G.L.slotKeys.join() === "shade,shade2", "slot keys " + G.L.slotKeys.join());
+  Bot.record(0);
+  Bot.walkTo(130);
+  Bot.run(6);
+  Bot.stop();
+  Bot.record(1);
+  Bot.walkTo(190);
+  Bot.run(6);
+  Bot.stop();
+  ensure(G.echoes.shade && G.echoes.shade2, "both echoes exist");
+  Bot.walkTo(100);
+  Bot.run(200);
+  ensure(G.L.plates.every((p) => p.pressed), "both plates held at once");
+  // re-record the second slot somewhere else; the first must stay
+  Bot.record(1);
+  Bot.walkTo(260);
+  Bot.run(6);
+  Bot.stop();
+  ensure(G.echoes.shade && G.echoes.shade2 && Math.abs(G.echoes.shade2.trace[G.echoes.shade2.trace.length - 1].x + PW / 2 - 260) < 6, "second slot replaced, first kept");
+});
+
+mech("two gusts of opposite facing both blow", () => {
+  Bot.load(tiny({ echoes: ["gust", "gust"], recMax: 8 }, (g) => { g.base(); g.set(2, 14, "@"); }));
+  Bot.record(0);
+  Bot.walkTo(150);
+  Bot.run(6);
+  Bot.stop();
+  Bot.record(1);
+  Bot.walkTo(400);
+  Bot.walkTo(380);
+  Bot.dir(-1);
+  Bot.run(8);
+  Bot.dir(0);
+  Bot.run(6);
+  Bot.stop();
+  Bot.run(260);
+  ensure(G.winds.length === 2, "two winds active, got " + G.winds.length);
+  ensure(G.winds.some((w) => w.dir === 1) && G.winds.some((w) => w.dir === -1), "one blows each way");
+});

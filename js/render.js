@@ -767,7 +767,11 @@ const Render = (() => {
     ctx.globalCompositeOperation = "lighter";
     glowAt(ctx, e.x + PW / 2, e.y + (e.g < 0 ? PH + 2 : -3), 16, k.color, 0.28);
     ctx.restore();
-    if (G.L.swap && G.L.echoes[G.sel] === e.kind && !(rec && rec.kind === e.kind)) {
+    if (G.L.dupKinds.has(e.kind)) {
+      // several echoes of one kind: number them like the slots in the bar
+      Font.draw(ctx, String(G.L.slotKeys.indexOf(e.key) + 1), e.x + PW / 2, e.y - 24, { scale: 1, color: k.color, align: "center", shadow: null });
+    }
+    if (G.L.swap && G.L.slotKeys[G.sel] === e.key && !(rec && rec.key === e.key)) {
       Font.draw(ctx, "Q", e.x + PW / 2, e.y - 17, { scale: 1, color: k.color, align: "center", alpha: 0.7 + 0.3 * Math.sin(t * 0.1) });
     }
   }
@@ -920,16 +924,17 @@ const Render = (() => {
     const L = G.L;
     Font.draw(ctx, num + "  " + L.name, 8, 6, { scale: 1, color: "#e8e2d0" });
     if (L.echoes.length) {
-      const n = L.echoes.length, bw = 74, gap = 6;
+      const n = L.echoes.length, bw = n > 5 ? 72 : 76, gap = n > 5 ? 3 : 6;
       const total = n * bw + (n - 1) * gap;
       let x0 = Math.round((W - total) / 2);
       const y0 = H - 30;
       for (let i = 0; i < n; i++) {
-        const kind = L.echoes[i], k = KINDS[kind];
+        const kind = L.echoes[i], k = KINDS[kind], key = L.slotKeys[i];
         const x = x0 + i * (bw + gap);
         const sel = G.sel === i;
-        const recording = G.rec && G.rec.kind === kind;
-        const have = !!G.echoes[kind];
+        const recording = G.rec && G.rec.key === key;
+        const have = !!G.echoes[key];
+        const label = k.name + (L.dupKinds.has(kind) ? " " + L.slotNum[i] : "");
         ctx.fillStyle = "rgba(6,8,16,0.72)";
         ctx.fillRect(x, y0, bw, 24);
         ctx.strokeStyle = sel ? k.color : "rgba(255,255,255,0.18)";
@@ -938,7 +943,7 @@ const Render = (() => {
         if (sel) { ctx.fillStyle = rgba(k.color, 0.14); ctx.fillRect(x + 1, y0 + 1, bw - 2, 22); }
         slotIcon(ctx, x + 14, y0 + 13, kind, T, have || recording);
         Font.draw(ctx, String(i + 1), x + 4, y0 + 3, { scale: 1, color: "#9fa7b8", shadow: null });
-        Font.draw(ctx, k.name, x + 24, y0 + 4, { scale: 1, color: sel ? "#ffffff" : "#b6bdcc", shadow: null });
+        Font.draw(ctx, label, x + 24, y0 + 4, { scale: 1, color: sel ? "#ffffff" : "#b6bdcc", shadow: null });
         const status = recording ? "REC" : have ? "READY" : "EMPTY";
         const sc = recording ? (Math.floor(T / 15) % 2 ? "#ff6b6b" : "#ffb0b0") : have ? k.color : "#6b7385";
         Font.draw(ctx, status, x + 24, y0 + 14, { scale: 1, color: sc, shadow: null });

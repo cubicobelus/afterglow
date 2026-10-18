@@ -130,6 +130,11 @@ function parseLevel(which) {
     oneways: [], gates: [], lanterns: [],
     spawn: { x: 40, y: 100 }, exit: null, doorOpen: {}, hasDoor: {}, hasLamp: {},
   };
+  // A level may list a kind more than once. The first slot of a kind is keyed by its name, later ones as name2, name3.
+  const seen = {};
+  L.slotKeys = L.echoes.map((k) => { seen[k] = (seen[k] || 0) + 1; return seen[k] === 1 ? k : k + seen[k]; });
+  L.slotNum = L.echoes.map((k, i) => L.slotKeys[i] === k ? 1 : Number(L.slotKeys[i].slice(k.length)));
+  L.dupKinds = new Set(L.echoes.filter((k) => L.echoes.filter((x) => x === k).length > 1));
   let ex0 = 1e9, ey0 = 1e9, ex1 = -1, ey1 = -1;
   for (let r = 0; r < ROWS; r++) {
     let run = -1;
@@ -240,19 +245,23 @@ function computeFields() {
   G.phases = [];
   G.winds = [];
   // Echo powers switch on only once the echo has come to rest, growing in over a short ramp.
-  const e = G.echoes;
   const power = (echo) => (echo.moving ? 0 : Math.min(1, (echo.restT + 1) / RAMP));
-  if (e.glow && power(e.glow) > 0) G.lights.push({ x: e.glow.x + PW / 2, y: e.glow.y + PH / 2, r: GLOW_R * power(e.glow), echo: true });
-  if (e.flip && power(e.flip) > 0) G.flips.push({ x: e.flip.x + PW / 2, y: e.flip.y + PH / 2, r: FLIP_R * power(e.flip) });
-  if (e.phase && power(e.phase) > 0) G.phases.push({ x: e.phase.x + PW / 2, y: e.phase.y + PH / 2, r: PHASE_R * power(e.phase) });
-  if (e.gust && power(e.gust) > 0) G.winds.push({ x: e.gust.x + PW / 2, y: e.gust.y + PH / 2, r: GUST_R * power(e.gust), dir: e.gust.face >= 0 ? 1 : -1 });
+  for (const k in G.echoes) {
+    const e = G.echoes[k], pw = power(e);
+    if (pw <= 0) continue;
+    const cx = e.x + PW / 2, cy = e.y + PH / 2;
+    if (e.kind === "glow") G.lights.push({ x: cx, y: cy, r: GLOW_R * pw, echo: true });
+    else if (e.kind === "flip") G.flips.push({ x: cx, y: cy, r: FLIP_R * pw });
+    else if (e.kind === "phase") G.phases.push({ x: cx, y: cy, r: PHASE_R * pw });
+    else if (e.kind === "gust") G.winds.push({ x: cx, y: cy, r: GUST_R * pw, dir: e.face >= 0 ? 1 : -1 });
+  }
   for (const gt of L.gates) gt.open = litRect(gt);
 }
 
 // ---------------------------------------------------------------- echoes
-function makeEcho(kind, trace) {
+function makeEcho(kind, trace, key) {
   const s = trace[0];
-  return { kind, trace, x: s.x, y: s.y, px: s.x, py: s.y, dx: 0, dy: 0, face: s.f, st: s.s, g: s.g, frozen: null, i: 0, moving: true, restT: 0 };
+  return { kind, key: key || kind, trace, x: s.x, y: s.y, px: s.x, py: s.y, dx: 0, dy: 0, face: s.f, st: s.s, g: s.g, frozen: null, i: 0, moving: true, restT: 0 };
 }
 
 function placeEchoes() {
@@ -308,16 +317,16 @@ function cancelRec() {
   const r = G.rec;
   if (!r) return;
   G.rec = null;
-  if (r.prev) G.echoes[r.kind] = r.prev;
+  if (r.prev) G.echoes[r.key] = r.prev;
 }
 
 function startRec() {
   const L = G.L;
-  const kind = L.echoes[G.sel];
+  const kind = L.echoes[G.sel], key = L.slotKeys[G.sel];
   if (!kind) return;
-  const prev = G.echoes[kind];
-  delete G.echoes[kind];
-  G.rec = { kind, trace: [], prev };
+  const prev = G.echoes[key];
+  delete G.echoes[key];
+  G.rec = { kind, key, trace: [], prev };
   restartAttempt();
   SFX("recStart");
 }
@@ -327,22 +336,22 @@ function stopRec() {
   if (!r) return;
   G.rec = null;
   if (r.trace.length >= MIN_REC) {
-    G.echoes[r.kind] = makeEcho(r.kind, r.trace);
+    G.echoes[r.key] = makeEcho(r.kind, r.trace, r.key);
     G.recCount++;
     SFX("recStop", r.kind);
     const s0 = G.L.spawn;
     burst(s0.x + PW / 2, s0.y + PH / 2, 16, KINDS[r.kind].color, 80, 0.6, 2, -20);
   } else {
-    if (r.prev) G.echoes[r.kind] = r.prev;
+    if (r.prev) G.echoes[r.key] = r.prev;
     SFX("cancel");
   }
   restartAttempt();
 }
 
 function clearSelected() {
-  const kind = G.L.echoes[G.sel];
-  if (kind && G.echoes[kind] && !G.rec) {
-    delete G.echoes[kind];
+  const key = G.L.slotKeys[G.sel];
+  if (key && G.echoes[key] && !G.rec) {
+    delete G.echoes[key];
     SFX("cancel");
     restartAttempt();
   }
@@ -350,9 +359,9 @@ function clearSelected() {
 
 function doSwap() {
   const L = G.L, p = G.p;
-  const kind = L.echoes[G.sel];
-  const e = kind && G.echoes[kind];
-  if (!e || G.swapCd > 0 || (G.rec && G.rec.kind === kind)) { SFX("nope"); return; }
+  const kind = L.echoes[G.sel], key = L.slotKeys[G.sel];
+  const e = key && G.echoes[key];
+  if (!e || G.swapCd > 0 || (G.rec && G.rec.key === key)) { SFX("nope"); return; }
   const probe = { x: e.x, y: e.y, w: PW, h: PH };
   for (const s of buildSolids(probe, false)) {
     if (overlap(probe, s)) { SFX("nope"); return; }
