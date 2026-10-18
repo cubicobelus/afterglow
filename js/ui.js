@@ -63,7 +63,7 @@ const App = (() => {
   const A = {
     state: "title", T: 0, idx: 0, sel: 0, hits: [], settingsBack: "title",
     fade: 1, fadeTarget: 0, fadeCb: null, cards: [], cardT: 0, introT: 0, hintT: 0, hintForce: 0,
-    result: null, selLevel: 0, endT: 0, rebind: null,
+    result: null, selLevel: 0, endT: 0, rebind: null, resetArm: 0,
   };
 
   function fadeTo(cb) {
@@ -211,6 +211,32 @@ const App = (() => {
     ];
   }
 
+  // Erases every saved time, star, lantern and setting, as if the game had never been opened here.
+  function wipeAllData() {
+    try {
+      localStorage.removeItem(SAVE_KEY);
+      localStorage.removeItem(SETTINGS_KEY);
+      localStorage.removeItem("afterglow.muted");
+    } catch (e) { /* storage unavailable */ }
+    save.done = [];
+    save.best = {};
+    save.stars = {};
+    save.lanterns = {};
+    save.seen = {};
+    Settings.music = 0.6;
+    Settings.sfx = 0.9;
+    Settings.shake = true;
+    Input.resetBind();
+    Sfx.setMuted(false);
+    applySettings();
+    A.resetArm = 0;
+    A.selLevel = 0;
+    Sfx.play("cancel");
+    fadeTo(() => { A.state = "title"; A.sel = 0; });
+  }
+
+  const resetArmed = () => A.resetArm > 0 && A.T - A.resetArm < 360;
+
   const steps = (v) => Math.round(v * 10);
   function settingsItems() {
     return [
@@ -219,6 +245,7 @@ const App = (() => {
       { label: "SCREEN SHAKE", type: "toggle", get: () => Settings.shake, adjust: () => { Settings.shake = !Settings.shake; persistSettings(); }, act: () => { Settings.shake = !Settings.shake; persistSettings(); } },
       { label: "SOUND", type: "toggle", get: () => !Sfx.isMuted(), adjust: toggleSound, act: toggleSound },
       { label: "KEYS", type: "link", act: () => { A.state = "keys"; A.sel = 0; A.rebind = null; } },
+      { label: resetArmed() ? "SURE? PRESS AGAIN" : "RESET ALL DATA", type: "danger", act: () => { if (resetArmed()) wipeAllData(); else A.resetArm = A.T; } },
       { label: "BACK", type: "link", act: () => { A.state = A.settingsBack; A.sel = 0; } },
     ];
   }
@@ -280,6 +307,7 @@ const App = (() => {
       }
       case "settings": {
         navMenu(settingsItems());
+        if (A.sel !== 5) A.resetArm = 0; // moving off the reset item cancels it
         if (Input.hitAny(["Escape", "Backspace"])) { A.state = A.settingsBack; A.sel = 0; }
         break;
       }
@@ -465,14 +493,14 @@ const App = (() => {
     drawPlainBg();
     Font.draw(ctx, "SETTINGS", W / 2, 22, { scale: 3, color: "#ffe9a8", align: "center" });
     settingsItems().forEach((it, i) => {
-      const y = 86 + i * 30, on = A.sel === i;
-      const col = on ? "#ffe9a8" : "#aab2c5";
+      const y = 80 + i * 29, on = A.sel === i;
+      const col = it.type === "danger" && resetArmed() ? "#ff8f8f" : on ? "#ffe9a8" : "#aab2c5";
       Font.draw(ctx, (on ? "> " : "  ") + it.label, 150, y, { scale: 2, color: col });
       if (it.type === "slider") slider(380, y + 2, it.get(), on);
       else if (it.type === "toggle") Font.draw(ctx, it.get() ? "ON" : "OFF", 380, y, { scale: 2, color: it.get() ? "#8fe39a" : "#ff8f8f" });
       hits.push({ x: 140, y: y - 4, w: 360, h: 24, i, act: it.act });
     });
-    Font.draw(ctx, "UP AND DOWN PICK   LEFT AND RIGHT CHANGE   ESC BACK", W / 2, H - 24, { scale: 1, color: "rgba(200,210,235,0.5)", align: "center" });
+    Font.draw(ctx, resetArmed() ? "THIS ERASES ALL TIMES, STARS, LANTERNS AND SETTINGS" : "UP AND DOWN PICK   LEFT AND RIGHT CHANGE   ESC BACK", W / 2, H - 24, { scale: 1, color: resetArmed() ? "#ff8f8f" : "rgba(200,210,235,0.5)", align: "center" });
   }
 
   function drawKeys(hits) {

@@ -151,5 +151,9 @@ const Sfx = (() => {
       return muted;
     },
     isMuted() { return muted; },
+    setMuted(v) {
+      muted = !!v;
+      if (master) master.gain.value = muted ? 0 : 0.7;
+    },
   };
 })();

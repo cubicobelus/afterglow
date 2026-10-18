@@ -52,7 +52,8 @@ its par. A few levels hide a lantern worth finding.
 | Fullscreen on or off | F (Play, Continue and Levels on the title screen also go fullscreen) |
 | Pause | Esc or P |
 
-Every key above can be changed in Settings, which also has music and effects volume and a screen-shake switch.
+Every key above can be changed in Settings, which also has music and effects volume, a screen-shake switch, and a
+reset button that erases all saved times, stars, lanterns and settings.
 
 ## Checking the levels
 
