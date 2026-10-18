@@ -640,7 +640,9 @@ const App = (() => {
       }
     }
     const L = G.L;
-    const hintOn = A.hintForce > 0 || (A.hintT > 90 && A.hintT < 90 + 720 && L.hint);
+    // Hints pop up on their own only in the first tier and on levels that unlock an echo; elsewhere you ask for one.
+    const autoHint = !!L.def.unlock || L.chapter === 0;
+    const hintOn = A.hintForce > 0 || (autoHint && A.hintT > 90 && A.hintT < 90 + 720 && L.hint);
     if (hintOn && L.hint) {
       const lines = Font.wrap(L.hint, 380, 1);
       const h = lines.length * 10 + 8, w = 392;
@@ -651,7 +653,7 @@ const App = (() => {
       ctx.fillRect((W - w) / 2, 28, w, h);
       lines.forEach((l, i) => Font.draw(ctx, l, W / 2, 32 + i * 10, { scale: 1, color: "#ffe9a8", align: "center", shadow: null }));
       ctx.globalAlpha = 1;
-    } else if (L.hint && A.hintT >= 90 + 720) {
+    } else if (L.hint && (A.hintT >= 90 + 720 || (!autoHint && A.hintT > 90))) {
       Font.draw(ctx, keyName(Input.bind.hint[0]) + " HINT", W - 8, 18, { scale: 1, color: "rgba(220,226,240,0.35)", align: "right", shadow: null });
     }
     if (G.won) {

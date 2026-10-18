@@ -257,21 +257,19 @@ def(1, "CHANDELIER", {
 });
 
 def(1, "HALL OF MIRRORS", {
-  echoes: ["phase", "glow", "shade", "flip"], recMax: 14, dark: true,
-  hint: "FOUR KINDS, ONE ROUTE. WORK OUT WHAT MUST BE IN PLACE BEFORE EACH RECORDING.",
+  echoes: ["phase", "glow", "shade", "flip"], recMax: 24,
+  hint: "NOT EVERY BUTTON IS PRESSED THE SAME WAY. AND NOT EVERY ECHO HAS TO STAY WHERE YOU FIRST PUT IT.",
 }, (g) => {
   g.base();
   g.set(2, 14, "@");
-  g.fill(6, 1, 7, 14, "%");
-  g.fill(9, 14, 10, 14, "#");
-  g.fill(12, 12, 19, 12, "#");
-  g.fill(13, 14, 18, 14, "t");
-  g.set(12, 11, "a");
-  g.fill(20, 1, 20, 12, "#");
-  g.fill(20, 13, 20, 14, "A");
-  g.fill(27, 9, 30, 14, "#");
+  g.fill(4, 1, 5, 14, "%");
+  g.fill(15, 10, 20, 11, "#");
+  g.set(16, 9, "5").set(19, 9, "b");
+  g.fill(21, 1, 21, 8, "#").fill(21, 9, 21, 14, "A");
+  g.fill(22, 1, 22, 8, "#").fill(22, 9, 22, 14, "B");
+  g.fill(28, 9, 30, 14, "#");
   g.fill(29, 7, 29, 8, "X");
-  g.set(4, 11, "L").set(23, 11, "L");
+  g.set(9, 12, "L").set(24, 5, "L");
 });
 
 // ================================================================ tier 3: the tideworks
@@ -357,6 +355,19 @@ def(2, "FERRY LIGHT", {
   g.fill(26, 13, 26, 14, "G");
   g.fill(29, 13, 29, 14, "X");
   g.set(30, 8, "L");
+});
+
+def(2, "SLUICE", {
+  echoes: ["shade", "tide"], recMax: 14,
+  hint: "THREE DOORS AND ONE SHADE. A TIDE NEVER RESTS, BUT IT KEEPS VISITING.",
+}, (g) => {
+  g.base();
+  g.set(2, 14, "@");
+  g.set(6, 14, "a").fill(9, 1, 9, 8, "#").fill(9, 9, 9, 14, "A");
+  g.set(12, 14, "b").fill(15, 1, 15, 8, "#").fill(15, 9, 15, 14, "B");
+  g.set(18, 14, "c").fill(22, 1, 22, 8, "#").fill(22, 9, 22, 14, "C");
+  g.fill(27, 13, 27, 14, "X");
+  g.set(4, 9, "L").set(13, 6, "L").set(25, 9, "L");
 });
 
 def(2, "STACKED SPRINGS", {
@@ -452,39 +463,49 @@ def(3, "TAXI", {
   g.fill(30, 13, 30, 14, "X");
 });
 
-def(3, "CHORUS", {
-  echoes: ["gust", "spring", "gust", "shade", "glow"], recMax: 22, dark: true,
-  hint: "TWO GUSTS, ONE FACING EACH WAY. THE LAST ROOM NEEDS A SHADE FOR THE DOOR AND A GLOW FOR THE GATE.",
+def(3, "AFTERIMAGE", {
+  echoes: ["glow", "phase", "shade"], recMax: 24, dark: true,
+  hint: "THE THORNS ARE ONLY SAFE WHILE LIT. WHAT YOU RECORDED CROSSING THEM STILL WALKS THERE.",
 }, (g) => {
   g.base();
   g.set(2, 14, "@");
-  g.pit(9, 14);
-  g.fill(1, 8, 8, 9, "#");
-  g.fill(15, 8, 27, 9, "#");
-  g.fill(5, 1, 5, 5, "#").fill(5, 6, 5, 7, "A").set(7, 7, "a");
-  g.fill(3, 1, 3, 5, "#").fill(3, 6, 3, 7, "G");
-  g.fill(1, 6, 1, 7, "X");
-  g.set(21, 5, "o");
-  g.set(6, 13, "L").set(16, 12, "L").set(24, 12, "L").set(20, 5, "L").set(12, 5, "L").set(29, 10, "L");
+  g.fill(6, 14, 11, 14, "t");
+  g.fill(14, 14, 19, 14, "t");
+  g.fill(22, 1, 23, 14, "%");
+  g.fill(26, 1, 26, 8, "#").fill(26, 9, 26, 14, "G");
+  g.fill(29, 13, 29, 14, "X");
+  g.set(8, 11, "L").set(17, 6, "L").set(5, 12, "L");
+});
+
+def(3, "CHORUS", {
+  echoes: ["gust", "gust", "spring", "shade"], recMax: 30,
+  hint: "THE DOOR UP HERE ANSWERS TO A PLATE DOWN BELOW. WIND ONLY HAS TO BE THERE WHEN YOU RECORD, IF SOMETHING ELSE CAN CARRY YOU.",
+}, (g) => {
+  g.base();
+  g.set(2, 14, "@");
+  g.pit(6, 11).pit(15, 20);
+  g.fill(1, 8, 5, 9, "#").fill(12, 8, 14, 9, "#").fill(21, 8, 26, 9, "#").fill(30, 8, 30, 9, "#");
+  g.set(28, 14, "a");
+  g.fill(23, 1, 23, 3, "#").fill(23, 4, 23, 7, "A");
+  g.fill(2, 6, 2, 7, "X");
+  g.set(4, 12, "L").set(24, 12, "L").set(9, 4, "L").set(17, 4, "L");
 });
 
 def(3, "THE BEACON", {
-  echoes: ["phase", "phase", "shade", "glow", "glow", "spring", "flip"], recMax: 40, dark: true,
-  hint: "THE WHOLE LIGHTHOUSE IN ONE CLIMB. EVERY STEP NEEDS WHAT YOU PLACED BEFORE IT, AND SOME THINGS COME IN PAIRS.",
+  echoes: ["phase", "glow", "tide", "shade", "flip"], recMax: 40, dark: true,
+  hint: "THE LAMP IS AT THE TOP. THE TIDE KNOWS THE WAY, BUT IT CANNOT OPEN WHAT ONLY LIGHT OR GLASS WILL OPEN.",
 }, (g) => {
   g.base();
   g.set(2, 14, "@");
-  g.fill(1, 7, 26, 8, "#").fill(30, 7, 30, 8, "#");
-  g.fill(6, 9, 7, 14, "%");
-  g.set(10, 14, "a");
-  g.fill(14, 9, 14, 14, "A");
-  g.fill(20, 9, 20, 14, "G");
-  g.fill(15, 6, 18, 6, "t");
-  g.fill(10, 1, 11, 6, "%");
-  g.fill(1, 3, 3, 6, "#");
-  g.fill(2, 1, 2, 2, "X");
-  g.set(28, 5, "o");
-  g.set(3, 12, "L").set(12, 12, "L").set(26, 12, "L").set(24, 4, "L").set(7, 5, "L");
+  g.fill(5, 1, 6, 14, "%");
+  g.fill(8, 14, 14, 14, "~").pit(8, 14);
+  g.fill(8, 14, 14, 14, "~");
+  g.set(16, 14, "a").fill(18, 10, 18, 14, "A");
+  g.set(20, 14, "b").fill(22, 10, 22, 14, "B");
+  g.fill(24, 10, 24, 14, "G");
+  g.fill(28, 9, 30, 14, "#");
+  g.fill(29, 7, 29, 8, "X");
+  g.set(3, 10, "L").set(12, 6, "L").set(19, 4, "L");
 });
 
 // Par for the two bonus stars: finish under par.t seconds, and use no more than par.r recordings.
@@ -512,14 +533,16 @@ const PAR = {
   "SKYHOOK": { t: 20, r: 1 },
   "TWO STAGES": { t: 40, r: 3 },
   "FERRY LIGHT": { t: 45, r: 3 },
+  "SLUICE": { t: 60, r: 3 },
   "STACKED SPRINGS": { t: 40, r: 3 },
   "PUMP ROOM": { t: 70, r: 6 },
   "BREEZE": { t: 15, r: 1 },
   "LEAPFROG": { t: 25, r: 1 },
   "SECOND WIND": { t: 35, r: 3 },
   "TAXI": { t: 35, r: 3 },
+  "AFTERIMAGE": { t: 70, r: 4 },
   "CHORUS": { t: 90, r: 5 },
-  "THE BEACON": { t: 110, r: 7 },
+  "THE BEACON": { t: 130, r: 6 },
   "SAIL": { t: 25, r: 2 },
 };
 for (const l of LEVELS) l.par = PAR[l.name];
