@@ -10,14 +10,38 @@ const App = (() => {
   // ---------------------------------------------------------------- save
   const SAVE_KEY = "afterglow.save";
   const SETTINGS_KEY = "afterglow.settings";
+  const SAVE_VERSION = 2;
   let save = { done: [], best: {}, stars: {}, lanterns: {}, seen: {} };
+  let hadSave = false;
   try {
     const raw = localStorage.getItem(SAVE_KEY);
-    if (raw) save = Object.assign(save, JSON.parse(raw));
+    if (raw) { save = Object.assign(save, JSON.parse(raw)); hadSave = true; }
   } catch (e) { /* storage unavailable */ }
   function persist() {
     try { localStorage.setItem(SAVE_KEY, JSON.stringify(save)); } catch (e) { /* ignore */ }
   }
+  // Saves from the first release are keyed by the old level order. Carry them over by level name.
+  if (hadSave && (!save.v || save.v < SAVE_VERSION)) {
+    const OLD_ORDER = ["FIRST STEPS", "THE PLATE", "BOOST", "STEPPING STONE", "LAMPLIGHT", "THORN HALL", "SUNKEN GATE", "RELAY", "SWITCHBOARD",
+      "GLASS WALL", "UNDER GLASS", "TRAPDOOR", "UPDRAFT", "CEILING PLATE", "HIGH PLATE", "TWO KEYS", "TWIN ECHOES", "LANTERN LIFT",
+      "FERRY", "LIFT", "SLUICE", "TRAMPOLINE", "BOUNCE COURSE", "SKYHOOK", "TWO STAGES", "FERRY LIGHT", "HIGH WATER",
+      "BREEZE", "LOW TUNNEL", "TAILWIND", "LEAPFROG", "SECOND WIND", "TAXI", "DELIVERY", "LANTERN WIND", "SAIL", "THE BEACON"];
+    const RENAMED = { "THE BEACON": "HALL OF MIRRORS" };
+    const where = {};
+    LEVELS.forEach((l, i) => { where[l.name] = i; });
+    const moved = { v: SAVE_VERSION, done: [], best: {}, stars: {}, lanterns: {}, seen: save.seen || {} };
+    OLD_ORDER.forEach((name, oi) => {
+      const ni = where[RENAMED[name] || name];
+      if (ni === undefined) return;
+      if (save.done && save.done[oi]) moved.done[ni] = true;
+      if (save.best && save.best[oi] !== undefined) moved.best[ni] = save.best[oi];
+      if (save.stars && save.stars[oi]) moved.stars[ni] = save.stars[oi];
+      if (save.lanterns && save.lanterns[oi]) moved.lanterns[ni] = save.lanterns[oi];
+    });
+    save = moved;
+    persist();
+  }
+  save.v = SAVE_VERSION;
   const isDone = (i) => !!save.done[i];
   const isUnlocked = (i) => UNLOCK_ALL || i === 0 || isDone(i - 1) || isDone(i);
   const firstOpen = () => {
