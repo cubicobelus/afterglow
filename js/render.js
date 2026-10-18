@@ -594,23 +594,23 @@ const Render = (() => {
 
   // A small rune plate under the spawn point. Echoes fade in here at the start of every attempt.
   function drawPedestal(ctx, L, t) {
-    const pal = CHAPTERS[L.chapter].pal, sp = L.spawn;
-    const cx = Math.round(sp.x + PW / 2), fy = Math.round(sp.y + PH);
+    const pal = CHAPTERS[L.chapter].pal, ped = L.ped, sp = L.spawn;
+    const cx = Math.round(sp.x + PW / 2), fy = ped.y;
     const kinds = Object.keys(G.echoes);
-    ctx.fillStyle = pal.wallLo;
-    ctx.fillRect(cx - 13, fy, 26, 3);
-    ctx.fillStyle = pal.wallHi;
-    ctx.fillRect(cx - 12, fy, 24, 2);
-    ctx.fillStyle = tint(pal.wallHi, 0.35);
-    ctx.fillRect(cx - 12, fy, 24, 1);
+    // a plain gray slab
+    ctx.fillStyle = "#4b515e";
+    ctx.fillRect(ped.x, ped.y, ped.w, ped.h);
+    ctx.fillStyle = "#8a92a3";
+    ctx.fillRect(ped.x, ped.y, ped.w, 2);
+    ctx.fillStyle = "#b4bccb";
+    ctx.fillRect(ped.x, ped.y, ped.w, 1);
+    ctx.fillStyle = "#363b46";
+    ctx.fillRect(ped.x, ped.y + ped.h - 1, ped.w, 1);
+    ctx.fillStyle = "#6c7384";
+    ctx.fillRect(ped.x, ped.y + 2, 1, ped.h - 3);
     const color = kinds.length ? KINDS[kinds[Math.floor(t / 70) % kinds.length]].color : pal.accent;
-    const pulse = 0.55 + 0.35 * Math.sin(t * 0.07);
     ctx.save();
-    ctx.strokeStyle = rgba(color, pulse);
-    ctx.lineWidth = 1;
-    ctx.beginPath(); ctx.ellipse(cx, fy + 1, 9, 1.6, 0, 0, TAU); ctx.stroke();
     ctx.globalCompositeOperation = "lighter";
-    glowAt(ctx, cx, fy, 14, color, 0.18 * pulse);
     if (kinds.length && G.t < 22) {
       const a = 1 - G.t / 22;
       ctx.fillStyle = rgba(color, 0.35 * a);

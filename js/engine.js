@@ -10,6 +10,8 @@ const COYOTE = 0.1, JUMP_BUF = 0.12;
 const GLOW_R = 108, LAMP_R = 100, FLIP_R = 72, PHASE_R = 64;
 const MIN_REC = 20;
 const RAMP = 24;
+const PED_W = 26, PED_H = 4; // spawn slab
+const STEP = 5;              // small ledges up to this tall are stepped onto without a jump
 
 const KINDS = {
   shade: { name: "SHADE", color: "#8fb4ff", blurb: "HOLDS PLATES AND IS SOLID TO STAND ON." },
@@ -119,13 +121,18 @@ function parseLevel(idx) {
         L.doorTiles.push({ id, x, y, w: TILE, h: TILE, door: true, amt: 0, tx: c, ty: r });
         L.hasDoor[id] = true;
       } else if (ch === "L") L.lamps.push({ x: x + 10, y: y + 10, tx: c, ty: r });
-      else if (ch === "@") L.spawn = { x: x + (TILE - PW) / 2, y: y + TILE - PH };
+      else if (ch === "@") {
+        // The spawn stands on a small gray slab: a solid step PED_H tall.
+        L.ped = { x: x + TILE / 2 - PED_W / 2, y: y + TILE - PED_H, w: PED_W, h: PED_H };
+        L.spawn = { x: x + (TILE - PW) / 2, y: y + TILE - PED_H - PH };
+      }
       else if (ch === "X") {
         ex0 = Math.min(ex0, x); ey0 = Math.min(ey0, y); ex1 = Math.max(ex1, x + TILE); ey1 = Math.max(ey1, y + TILE);
       }
     }
   }
   if (ex1 > 0) L.exit = { x: ex0, y: ey0, w: ex1 - ex0, h: ey1 - ey0 };
+  if (L.ped) L.walls.push(L.ped);
   return L;
 }
 
@@ -415,7 +422,13 @@ function stepPlayer() {
   if (p.vx !== 0) {
     for (const s of solids) {
       if (s.ow) continue;
-      if (overlap(p, s)) p.x = p.vx > 0 ? s.x - PW : s.x + s.w;
+      if (!overlap(p, s)) continue;
+      const rise = p.y + PH - s.y;
+      if (g > 0 && p.onGround && rise > 0 && rise <= STEP) {
+        const up = { x: p.x, y: s.y - PH, w: PW, h: PH };
+        if (!solids.some((o) => !o.ow && overlap(up, o))) { p.y = up.y; continue; }
+      }
+      p.x = p.vx > 0 ? s.x - PW : s.x + s.w;
     }
   }
 
