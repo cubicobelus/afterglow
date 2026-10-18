@@ -116,8 +116,8 @@ const App = (() => {
   function titleItems() {
     const any = save.done.some(Boolean);
     return [
-      { label: any ? "CONTINUE" : "PLAY", act: () => startLevel(any ? Math.min(firstOpen(), LEVELS.length - 1) : 0) },
-      { label: "LEVELS", act: () => { fadeTo(() => { A.state = "select"; A.selLevel = Math.min(firstOpen(), LEVELS.length - 1); }); } },
+      { label: any ? "CONTINUE" : "PLAY", fs: true, act: () => startLevel(any ? Math.min(firstOpen(), LEVELS.length - 1) : 0) },
+      { label: "LEVELS", fs: true, act: () => { fadeTo(() => { A.state = "select"; A.selLevel = Math.min(firstOpen(), LEVELS.length - 1); }); } },
       { label: soundLabel(), act: toggleSound },
     ];
   }
@@ -307,7 +307,7 @@ const App = (() => {
     ctx.restore();
     Font.draw(ctx, "YOUR PAST SELVES CAN HELP", 200, 78, { scale: 1, color: "#aab8dd", align: "center" });
     menu(titleItems(), hits, 200, 150, 28);
-    Font.draw(ctx, "ARROWS OR WASD + ENTER", 200, H - 22, { scale: 1, color: "rgba(200,210,235,0.5)", align: "center" });
+    Font.draw(ctx, "ARROWS OR WASD + ENTER   F FULLSCREEN", 200, H - 22, { scale: 1, color: "rgba(200,210,235,0.5)", align: "center" });
   }
 
   function drawSelect(hits) {
@@ -487,6 +487,7 @@ const App = (() => {
         } else if (h.act) {
           A.sel = h.i;
           Sfx.play("ok");
+          if (A.state === "title" && titleItems()[h.i] && titleItems()[h.i].fs) enterFullscreen();
           h.act();
         }
         return;
@@ -496,7 +497,39 @@ const App = (() => {
     if (A.state === "ending" && A.endT > 60) goTitle();
   });
 
-  window.addEventListener("keydown", () => Sfx.resume());
+  // ---------------------------------------------------------------- fullscreen
+  // Browsers only allow fullscreen from a key press or click, so it is requested straight from the event handlers.
+  const fsElement = () => document.fullscreenElement || document.webkitFullscreenElement;
+
+  function enterFullscreen() {
+    if (fsElement()) return;
+    const el = document.documentElement;
+    const req = el.requestFullscreen || el.webkitRequestFullscreen;
+    if (!req) return;
+    try {
+      const p = req.call(el);
+      if (p && p.catch) p.catch(() => { /* refused: stay windowed */ });
+    } catch (e) { /* refused: stay windowed */ }
+  }
+
+  function toggleFullscreen() {
+    if (!fsElement()) { enterFullscreen(); return; }
+    try {
+      const ex = document.exitFullscreen || document.webkitExitFullscreen;
+      const p = ex.call(document);
+      if (p && p.catch) p.catch(() => { /* ignore */ });
+    } catch (e) { /* ignore */ }
+  }
+
+  window.addEventListener("keydown", (e) => {
+    Sfx.resume();
+    if (e.repeat) return;
+    if (e.code === "KeyF") { toggleFullscreen(); return; }
+    if (A.state === "title" && A.fadeTarget !== 1 && (e.code === "Enter" || e.code === "Space" || e.code === "NumpadEnter")) {
+      const it = titleItems()[A.sel];
+      if (it && it.fs) enterFullscreen();
+    }
+  });
 
   function fit() {
     const w = window.innerWidth, h = window.innerHeight;
@@ -506,6 +539,14 @@ const App = (() => {
   }
   window.addEventListener("resize", fit);
   fit();
+
+  // Leaving fullscreen with Esc never reaches the game, so pause instead of losing the moment.
+  function onFullscreenChange() {
+    fit();
+    if (!fsElement() && A.state === "play" && !G.won) { A.state = "pause"; A.sel = 0; }
+  }
+  document.addEventListener("fullscreenchange", onFullscreenChange);
+  document.addEventListener("webkitfullscreenchange", onFullscreenChange);
 
   // ---------------------------------------------------------------- loop
   let last = performance.now(), acc = 0;

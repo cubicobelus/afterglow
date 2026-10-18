@@ -40,6 +40,7 @@ Echoes switch on once they come to rest. In the last chapter you can press **Q**
 | Restart the attempt | R |
 | Clear the picked echo | X |
 | Hint | H |
+| Fullscreen on or off | F (Play, Continue and Levels on the title screen also go fullscreen) |
 | Pause | Esc or P |
 
 ## Checking the levels
