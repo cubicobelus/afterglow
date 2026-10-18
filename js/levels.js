@@ -77,6 +77,22 @@ def(0, "STEPPING STONE", {
   g.set(5, 8, "L").set(15, 5, "L").set(25, 8, "L");
 });
 
+def(0, "TWIN PLATES", {
+  echoes: ["shade", "shade"], recMax: 10,
+  hint: "TWO SHADE SLOTS: PRESS 1 OR 2 TO CHOOSE. THE DOOR NEEDS BOTH PLATES HELD, AND AN ECHO IS ALSO A STEP.",
+}, (g) => {
+  g.base();
+  g.set(2, 14, "@");
+  g.set(9, 14, "a");
+  g.fill(10, 11, 15, 14, "#");
+  g.set(13, 10, "a");
+  g.fill(18, 1, 18, 8, "#");
+  g.fill(18, 9, 18, 14, "A");
+  g.fill(22, 14, 23, 14, "^");
+  g.fill(27, 13, 27, 14, "X");
+  g.set(5, 9, "L").set(13, 6, "L").set(25, 9, "L");
+});
+
 def(0, "LAMPLIGHT", {
   unlock: "glow", echoes: ["glow"], recMax: 10, dark: true,
   hint: "THE DARK PLANKS ARE REAL ONLY WHERE LIGHT TOUCHES THEM. ECHO A GLOW ON THE ISLAND.",
@@ -113,7 +129,7 @@ def(0, "SUNKEN GATE", {
 
 def(0, "RELAY", {
   echoes: ["shade", "glow"], recMax: 12, dark: true,
-  hint: "ONE ECHO OF EACH KIND AT A TIME. RECORD THEM IN ORDER. THEY ALL REPLAY TOGETHER.",
+  hint: "EACH SLOT HOLDS ONE ECHO. RECORD THEM IN ORDER. THEY ALL REPLAY TOGETHER.",
 }, (g) => {
   g.base();
   g.set(2, 14, "@");
@@ -210,6 +226,34 @@ def(1, "TWO KEYS", {
   g.fill(24, 1, 24, 12, "#");
   g.fill(28, 13, 28, 14, "X");
   g.set(5, 11, "L").set(27, 11, "L");
+});
+
+def(1, "GHOST GLASS", {
+  echoes: ["phase", "shade"], recMax: 10,
+  hint: "THE PLATE IS SEALED BEHIND GLASS AND SO IS THE WAY ON. YOU CAN RECORD THE PHASE AGAIN, AND AN ECHO DOES NOT CARE ABOUT GLASS.",
+}, (g) => {
+  g.base();
+  g.set(7, 14, "@");
+  g.fill(3, 1, 4, 14, "%");
+  g.set(1, 14, "a");
+  g.fill(12, 1, 13, 14, "%");
+  g.fill(20, 1, 20, 8, "#");
+  g.fill(20, 9, 20, 14, "A");
+  g.fill(27, 13, 27, 14, "X");
+  g.set(9, 8, "L").set(16, 8, "L").set(24, 8, "L").set(1, 9, "L");
+});
+
+def(1, "CHANDELIER", {
+  echoes: ["flip", "flip", "flip"], recMax: 12,
+  hint: "INSIDE A FLIP ZONE THE CEILING IS YOUR FLOOR. EACH NEW ZONE HAS TO BE RECORDED FROM INSIDE THE LAST.",
+}, (g) => {
+  g.base();
+  g.fill(1, 3, 7, 14, "#");
+  g.set(2, 2, "@");
+  g.fill(8, 14, 16, 14, "^");
+  g.fill(17, 3, 30, 14, "#");
+  g.fill(27, 1, 27, 2, "X");
+  g.set(12, 7, "L");
 });
 
 def(1, "HALL OF MIRRORS", {
@@ -315,6 +359,34 @@ def(2, "FERRY LIGHT", {
   g.set(30, 8, "L");
 });
 
+def(2, "STACKED SPRINGS", {
+  echoes: ["spring", "spring", "glow"], recMax: 14, dark: true,
+  hint: "A HELD BOUNCE REACHES THE LOW LEDGE. A SECOND SPRING UP THERE REACHES THE TOP. THE GATE NEEDS A GLOW BESIDE IT.",
+}, (g) => {
+  g.base();
+  g.set(2, 14, "@");
+  g.fill(9, 7, 13, 14, "#");
+  g.fill(10, 3, 30, 3, "=");
+  g.fill(25, 1, 25, 2, "G");
+  g.fill(28, 1, 28, 2, "X");
+  g.set(3, 11, "L").set(11, 5, "L").set(19, 11, "L");
+});
+
+def(2, "PUMP ROOM", {
+  echoes: ["shade", "shade", "tide", "glow"], recMax: 24, dark: true,
+  hint: "A TIDE RIDES THE ROUTE YOU TOOK, AND ECHOES YOU NO LONGER NEED CAN BE RECORDED AGAIN.",
+}, (g) => {
+  g.base();
+  g.set(2, 14, "@");
+  g.set(8, 10, "=");
+  g.fill(9, 10, 30, 14, "#");
+  g.set(16, 9, "a").set(19, 9, "a");
+  g.fill(23, 1, 23, 6, "#").fill(23, 7, 23, 9, "A");
+  g.fill(26, 1, 26, 6, "#").fill(26, 7, 26, 9, "G");
+  g.fill(28, 8, 28, 9, "X");
+  g.set(4, 11, "L").set(11, 6, "L").set(17, 5, "L");
+});
+
 // ================================================================ tier 4: the beacon
 def(3, "BREEZE", {
   unlock: "gust", echoes: ["gust"], recMax: 8,
@@ -379,12 +451,47 @@ def(3, "TAXI", {
   g.fill(30, 13, 30, 14, "X");
 });
 
+def(3, "CHORUS", {
+  echoes: ["gust", "spring", "gust", "shade", "glow"], recMax: 22, dark: true,
+  hint: "TWO GUSTS, ONE FACING EACH WAY. THE LAST ROOM NEEDS A SHADE FOR THE DOOR AND A GLOW FOR THE GATE.",
+}, (g) => {
+  g.base();
+  g.set(2, 14, "@");
+  g.pit(9, 14);
+  g.fill(1, 8, 8, 9, "#");
+  g.fill(15, 8, 27, 9, "#");
+  g.fill(5, 1, 5, 5, "#").fill(5, 6, 5, 7, "A").set(7, 7, "a");
+  g.fill(3, 1, 3, 5, "#").fill(3, 6, 3, 7, "G");
+  g.fill(1, 6, 1, 7, "X");
+  g.set(6, 13, "L").set(16, 12, "L").set(24, 12, "L").set(20, 5, "L").set(12, 5, "L").set(29, 10, "L");
+});
+
+def(3, "THE BEACON", {
+  echoes: ["phase", "phase", "shade", "glow", "glow", "spring", "flip"], recMax: 40, dark: true,
+  hint: "THE WHOLE LIGHTHOUSE IN ONE CLIMB. EVERY STEP NEEDS WHAT YOU PLACED BEFORE IT, AND SOME THINGS COME IN PAIRS.",
+}, (g) => {
+  g.base();
+  g.set(2, 14, "@");
+  g.fill(1, 7, 26, 8, "#").fill(30, 7, 30, 8, "#");
+  g.fill(6, 9, 7, 14, "%");
+  g.set(10, 14, "a");
+  g.fill(14, 9, 14, 14, "A");
+  g.fill(20, 9, 20, 14, "G");
+  g.fill(15, 6, 18, 6, "t");
+  g.fill(10, 1, 11, 6, "%");
+  g.fill(1, 3, 3, 6, "#");
+  g.fill(2, 1, 2, 2, "X");
+  g.set(28, 5, "o");
+  g.set(3, 12, "L").set(12, 12, "L").set(26, 12, "L").set(24, 4, "L").set(7, 5, "L");
+});
+
 // Par for the two bonus stars: finish under par.t seconds, and use no more than par.r recordings.
 // Set from the scripted solutions in tests/ with plenty of slack for a person.
 const PAR = {
   "FIRST STEPS": { t: 15, r: 0 },
   "THE PLATE": { t: 20, r: 1 },
   "STEPPING STONE": { t: 20, r: 1 },
+  "TWIN PLATES": { t: 25, r: 2 },
   "LAMPLIGHT": { t: 20, r: 1 },
   "SUNKEN GATE": { t: 20, r: 1 },
   "RELAY": { t: 25, r: 2 },
@@ -394,6 +501,8 @@ const PAR = {
   "UPDRAFT": { t: 20, r: 1 },
   "CEILING PLATE": { t: 25, r: 2 },
   "TWO KEYS": { t: 25, r: 2 },
+  "GHOST GLASS": { t: 20, r: 3 },
+  "CHANDELIER": { t: 30, r: 3 },
   "HALL OF MIRRORS": { t: 40, r: 4 },
   "FERRY": { t: 25, r: 1 },
   "LIFT": { t: 30, r: 3 },
@@ -401,10 +510,14 @@ const PAR = {
   "SKYHOOK": { t: 20, r: 1 },
   "TWO STAGES": { t: 40, r: 3 },
   "FERRY LIGHT": { t: 45, r: 3 },
+  "STACKED SPRINGS": { t: 35, r: 3 },
+  "PUMP ROOM": { t: 70, r: 6 },
   "BREEZE": { t: 15, r: 1 },
   "LEAPFROG": { t: 25, r: 1 },
   "SECOND WIND": { t: 35, r: 3 },
   "TAXI": { t: 35, r: 3 },
+  "CHORUS": { t: 90, r: 5 },
+  "THE BEACON": { t: 110, r: 7 },
   "SAIL": { t: 25, r: 2 },
 };
 for (const l of LEVELS) l.par = PAR[l.name];

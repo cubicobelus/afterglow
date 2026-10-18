@@ -47,10 +47,13 @@ const Bot = (() => {
   function walkTo(x, tol, max) {
     tol = tol || 2;
     max = max || 900;
+    let still = 0; // a rest a few pixels short of the target counts as arrived
     for (let i = 0; i < max; i++) {
       needAlive();
       if (G.won) return;
       const dx = x - px();
+      still = Math.abs(G.p.vx) < 1 && Math.abs(dx) < 5 ? still + 1 : 0;
+      if (still > 20) { dir(0); return; }
       if (Math.abs(dx) <= tol && Math.abs(G.p.vx) < 12) { dir(0); tick(); return; }
       let d = Math.abs(dx) < 5 && Math.abs(G.p.vx) < 40 ? 0 : Math.sign(dx);
       if (Math.abs(dx) < Math.abs(G.p.vx) * Math.abs(G.p.vx) / 3400 + 1.5) d = 0;

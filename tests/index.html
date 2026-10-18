@@ -56,6 +56,11 @@
     if (L.thorns.length && !anyLight) problems.push("thorns without any light");
     if ((L.gates.length || L.plates.some((p) => p.sensor)) && !anyLight) problems.push("gate or sensor without any light");
     if (L.lanterns.length > 1) problems.push("more than one lantern");
+    // Without any echo, no lamp may already open a gate or wither a thorn.
+    Bot.load(i);
+    Bot.run(2);
+    if (G.L.gates.some((x) => x.open)) problems.push("a lamp already opens a gate");
+    if (G.L.thorns.some((x) => x.lit)) problems.push("a lamp already lights the thorns");
     const ok = problems.length === 0;
     RESULTS.push({ i, name: "layout " + (i + 1) + " " + LEVELS[i].name, ok, info: ok ? "ok" : problems.join("; ") });
     html += '<span class="' + (ok ? "ok" : "bad") + '">' + (ok ? "PASS " : "FAIL ") + "layout " + (i + 1) + " " + LEVELS[i].name + (ok ? "" : " - " + problems.join("; ")) + "</span>\n";

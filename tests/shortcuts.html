@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Shortcut tests</title>
+<style>
+  body { font: 14px ui-monospace, Consolas, monospace; background: #111; color: #ddd; padding: 16px; }
+  .ok { color: #7fdc8a; } .bad { color: #ff7b72; }
+</style>
+</head>
+<body>
+<h1>No level may be won by a plain run-and-jump bot</h1>
+<pre id="out">running...</pre>
+<script src="../js/levels.js"></script>
+<script src="../js/engine.js"></script>
+<script src="bot.js"></script>
+<script>
+  // For every level: hold right and jump on a fixed rhythm (or hold jump) for 40 seconds, with no echoes.
+  // A level that this wins has a shortcut that skips its puzzle.
+  const rhythms = [20, 30, 45, 70, 0];
+  window.RESULTS = [];
+  let html = "";
+  for (let i = 0; i < LEVELS.length; i++) {
+    let won = null;
+    for (const r of rhythms) {
+      Bot.load(i);
+      Bot.dir(1);
+      for (let t = 0; t < 2400 && !G.won; t++) {
+        Bot.jumpKey(r === 0 ? true : t % r < 14);
+        Bot.tick();
+      }
+      Bot.dir(0);
+      Bot.jumpKey(false);
+      if (G.won) { won = r; break; }
+    }
+    const ok = won === null;
+    RESULTS.push({ name: LEVELS[i].name, ok });
+    html += '<span class="' + (ok ? "ok" : "bad") + '">' + (ok ? "PASS " : "FAIL ") + (i + 1) + " " + LEVELS[i].name + (ok ? "" : " - won with jump rhythm " + won) + "</span>\n";
+  }
+  document.getElementById("out").innerHTML = html;
+</script>
+</body>
+</html>
