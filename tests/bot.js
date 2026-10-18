@@ -121,8 +121,11 @@ const Bot = (() => {
     expect(!G.rec, "recording stopped");
   }
 
+  // A slot is a number or a slot key such as "shade2"; keys do not depend on the order the HUD shows.
   function select(slot) {
-    press("Digit" + (slot + 1));
+    const i = typeof slot === "string" ? G.L.slotKeys.indexOf(slot) : slot;
+    if (i < 0) fail("no slot " + slot);
+    press("Digit" + (i + 1));
     tick();
   }
 

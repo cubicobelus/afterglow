@@ -22,7 +22,7 @@ SOLUTIONS["FIRST STEPS"] = () => {
 
 // 2 THE PLATE
 SOLUTIONS["THE PLATE"] = () => {
-  Bot.record(0);
+  Bot.record("shade");
   Bot.walkTo(190);
   Bot.run(8);
   Bot.stop();
@@ -32,7 +32,7 @@ SOLUTIONS["THE PLATE"] = () => {
 
 // 3 STEPPING STONE: freeze an echo in mid air over the gap, stand on it, hop across.
 SOLUTIONS["STEPPING STONE"] = () => {
-  Bot.record(0);
+  Bot.record("shade");
   Bot.walkTo(250);
   Bot.jumpKey(true);
   Bot.dir(1);
@@ -66,7 +66,7 @@ const toThornPlatform = () => {
 
 SOLUTIONS["TWIN PLATES"] = () => {
   // slots: shade, shade2. The first holds the low plate and is the step for the second.
-  Bot.record(0);
+  Bot.record("shade");
   Bot.walkTo(190);
   Bot.run(6);
   Bot.stop();
@@ -78,7 +78,7 @@ SOLUTIONS["TWIN PLATES"] = () => {
     Bot.jumpTo(215, 24);
     Bot.expect(G.p.y + PH < 230, "up on the block");
   };
-  Bot.record(1);
+  Bot.record("shade2");
   up();
   Bot.walkTo(270);
   Bot.run(6);
@@ -96,7 +96,7 @@ SOLUTIONS["LAMPLIGHT"] = () => {
     Bot.jumpTo(175, 24);
     Bot.walkTo(348);
   };
-  Bot.record(0);
+  Bot.record("glow");
   toIsland();
   Bot.run(6);
   Bot.stop();
@@ -109,12 +109,12 @@ SOLUTIONS["LAMPLIGHT"] = () => {
 
 // 6 RELAY
 SOLUTIONS["RELAY"] = () => {
-  Bot.record(1);
+  Bot.record("glow");
   toThornPlatform();
   Bot.walkTo(310);
   Bot.run(6);
   Bot.stop();
-  Bot.record(0);
+  Bot.record("shade");
   toThornPlatform();
   Bot.walkTo(250);
   Bot.run(6);
@@ -128,7 +128,7 @@ SOLUTIONS["RELAY"] = () => {
 
 // 7 GLASS WALL
 SOLUTIONS["GLASS WALL"] = () => {
-  Bot.record(0);
+  Bot.record("phase");
   Bot.walkTo(290);
   Bot.run(6);
   Bot.stop();
@@ -141,14 +141,14 @@ SOLUTIONS["GLASS WALL"] = () => {
 
 // 8 UNDER GLASS
 SOLUTIONS["UNDER GLASS"] = () => {
-  Bot.record(0);
+  Bot.record("phase");
   Bot.walkTo(330);
   Bot.run(6);
   Bot.stop();
   // The hatch dissolves once the phase echo is there; drop in and stand on the plate.
   Bot.walkTo(330, 3);
   Bot.waitUntil(echoDone("phase"), 600, "phase echo to settle");
-  Bot.record(1);
+  Bot.record("shade");
   Bot.walkTo(330, 3);
   Bot.waitUntil(() => G.p.onGround && G.p.y > 320, 160, "player to drop into the vault");
   Bot.walkTo(330, 3);
@@ -178,11 +178,11 @@ SOLUTIONS["TWO KEYS"] = () => {
     Bot.walkTo(224);
     Bot.jumpTo(262, 24); // onto the step
   };
-  Bot.record(0);
+  Bot.record("phase");
   Bot.walkTo(190);
   Bot.run(6);
   Bot.stop();
-  Bot.record(1);
+  Bot.record("glow");
   throughWall();
   Bot.jumpTo(310, 24); // onto the platform
   Bot.walkTo(390);
@@ -197,7 +197,7 @@ SOLUTIONS["TWO KEYS"] = () => {
 
 // 10 UPDRAFT
 SOLUTIONS["UPDRAFT"] = () => {
-  Bot.record(0);
+  Bot.record("flip");
   Bot.walkTo(360);
   Bot.run(6);
   Bot.stop();
@@ -216,13 +216,13 @@ SOLUTIONS["UPDRAFT"] = () => {
 // 11 CEILING PLATE
 SOLUTIONS["CEILING PLATE"] = () => {
   const flipRest = () => G.echoes.flip.restT > 30;
-  Bot.record(0);
+  Bot.record("flip");
   Bot.walkTo(250);
   Bot.jumpTo(310, 24); // up onto the pedestal
   Bot.run(6);
   Bot.stop();
   // Record the shade walking along the ceiling to the hanging plate.
-  Bot.record(1);
+  Bot.record("shade");
   Bot.walkTo(236);
   Bot.waitUntil(flipRest, 900, "flip zone to open");
   Bot.dir(1);
@@ -239,7 +239,7 @@ SOLUTIONS["CEILING PLATE"] = () => {
 
 // 13 LEAPFROG: carry the light across a long dark bridge by swapping with the glow echo.
 SOLUTIONS["LEAPFROG"] = () => {
-  Bot.record(0);
+  Bot.record("glow");
   Bot.walkTo(100);
   Bot.run(6);
   Bot.stop();
@@ -273,11 +273,11 @@ SOLUTIONS["SECOND WIND"] = () => {
   const flipRest = () => G.echoes.flip && G.echoes.flip.restT > 30;
   const shadeRest = () => G.echoes.shade && G.echoes.shade.restT > 30;
   // slot 0 = shade, slot 1 = flip
-  Bot.record(1);
+  Bot.record("flip");
   Bot.walkTo(215);
   Bot.run(6);
   Bot.stop();
-  Bot.record(0);
+  Bot.record("shade");
   Bot.walkTo(130);
   Bot.waitUntil(flipRest, 900, "flip zone to open");
   Bot.dir(1);
@@ -288,15 +288,15 @@ SOLUTIONS["SECOND WIND"] = () => {
   Bot.run(6);
   Bot.stop();
   // Record the flip again; the old one vanishes, so use the shade to get up to the ledge.
-  Bot.record(1);
-  Bot.select(0);
+  Bot.record("flip");
+  Bot.select("shade");
   Bot.waitUntil(shadeRest, 900, "shade to reach the ledge");
   Bot.swap();
   Bot.expect(G.p.y < 170 && G.p.x > 240, "swapped onto ledge A");
   Bot.run(10);
   Bot.stop();
   // Final run.
-  Bot.select(0);
+  Bot.select("shade");
   Bot.waitUntil(() => shadeRest() && flipRest(), 900, "echoes to settle");
   Bot.swap();
   Bot.expect(G.p.y < 170, "swapped onto ledge A (final)");
@@ -320,17 +320,17 @@ SOLUTIONS["HALL OF MIRRORS"] = () => {
     Bot.jumpTo(200, 24);
     Bot.jumpTo(255, 24);
   };
-  // slots: 0 phase, 1 glow, 2 shade, 3 flip
-  Bot.record(0);
+  // slots: phase, glow, shade, flip
+  Bot.record("phase");
   Bot.walkTo(110);
   Bot.run(6);
   Bot.stop();
-  Bot.record(1);
+  Bot.record("glow");
   upToPlatform();
   Bot.walkTo(320);
   Bot.run(6);
   Bot.stop();
-  Bot.record(2);
+  Bot.record("shade");
   upToPlatform();
   Bot.walkTo(250);
   Bot.expect(G.L.plates[0].pressed, "plate pressed");
@@ -342,7 +342,7 @@ SOLUTIONS["HALL OF MIRRORS"] = () => {
     Bot.waitUntil(() => rest("glow")() && G.L.doorOpen.a && G.L.thorns.every((t) => t.lit), 900, "light and door");
     Bot.walkTo(x);
   };
-  Bot.record(3);
+  Bot.record("flip");
   corridor(510);
   Bot.run(6);
   Bot.stop();
@@ -366,7 +366,7 @@ SOLUTIONS["SUNKEN GATE"] = () => {
     Bot.jumpTo(250, 24); // hop up for the lantern above it
     Bot.jumpTo(305, 24); // platform D
   };
-  Bot.record(0);
+  Bot.record("glow");
   climb();
   Bot.walkTo(362);
   Bot.run(6);
@@ -385,11 +385,11 @@ SOLUTIONS["SWITCHBOARD"] = () => {
     Bot.jumpTo(212, 24);
     Bot.walkTo(392);
   };
-  Bot.record(0); // shade on the plate
+  Bot.record("shade"); // shade on the plate
   Bot.walkTo(130);
   Bot.run(6);
   Bot.stop();
-  Bot.record(1); // glow on the island
+  Bot.record("glow"); // glow on the island
   toIsland();
   Bot.run(6);
   Bot.stop();
@@ -411,7 +411,7 @@ const boardAtSpawn = () => {
 };
 
 SOLUTIONS["FERRY"] = () => {
-  Bot.record(0);
+  Bot.record("tide");
   Bot.walkTo(172); // the left floor ends at x 180
   Bot.run(120); // wait at the edge: the echo waits too
   Bot.jumpKey(true);
@@ -449,12 +449,12 @@ const jumpToSpring = (sx, dirAfter) => {
 const restOf = (k) => () => G.echoes[k] && G.echoes[k].restT > 20;
 
 SOLUTIONS["LIFT"] = () => {
-  // slots: 0 shade, 1 tide
-  Bot.record(0);
+  // slots: shade, tide
+  Bot.record("shade");
   Bot.walkTo(110);
   Bot.run(6);
   Bot.stop();
-  Bot.record(1);
+  Bot.record("tide");
   Bot.run(110);
   Bot.walkTo(222);
   Bot.jumpTo(262, 24);
@@ -464,7 +464,7 @@ SOLUTIONS["LIFT"] = () => {
   Bot.walkTo(462);
   Bot.run(110);
   Bot.stop();
-  Bot.record(0);
+  Bot.record("shade");
   Bot.walkTo(170);
   Bot.run(6);
   Bot.stop();
@@ -474,7 +474,7 @@ SOLUTIONS["LIFT"] = () => {
 };
 
 SOLUTIONS["TRAMPOLINE"] = () => {
-  Bot.record(0);
+  Bot.record("spring");
   Bot.walkTo(372);
   Bot.run(6);
   Bot.stop();
@@ -488,7 +488,7 @@ SOLUTIONS["TRAMPOLINE"] = () => {
 };
 
 SOLUTIONS["SKYHOOK"] = () => {
-  Bot.record(0);
+  Bot.record("spring");
   Bot.walkTo(172);
   Bot.jumpKey(true);
   Bot.dir(1);
@@ -505,12 +505,12 @@ SOLUTIONS["SKYHOOK"] = () => {
 };
 
 SOLUTIONS["TWO STAGES"] = () => {
-  // slots: 0 spring, 1 tide
-  Bot.record(0);
+  // slots: spring, tide
+  Bot.record("spring");
   Bot.walkTo(190);
   Bot.run(6);
   Bot.stop();
-  Bot.record(1);
+  Bot.record("tide");
   Bot.run(110);
   Bot.walkTo(190);
   Bot.waitUntil(restOf("spring"), 600, "the spring to settle");
@@ -519,7 +519,7 @@ SOLUTIONS["TWO STAGES"] = () => {
   Bot.walkTo(260);
   Bot.run(110);
   Bot.stop();
-  Bot.record(0);
+  Bot.record("spring");
   boardAtSpawn();
   Bot.waitUntil(() => G.p.y < 190 && Bot.px() > 205, 1500, "the ride up to the middle ledge");
   Bot.walkTo(292);
@@ -535,24 +535,24 @@ SOLUTIONS["TWO STAGES"] = () => {
 };
 
 SOLUTIONS["FERRY LIGHT"] = () => {
-  // slots: 0 glow, 1 tide
+  // slots: glow, tide
   const toIsland = () => {
     Bot.walkTo(150);
     Bot.jumpTo(175, 24);
     Bot.walkTo(352);
   };
-  Bot.record(0);
+  Bot.record("glow");
   toIsland();
   Bot.run(6);
   Bot.stop();
-  Bot.record(1);
+  Bot.record("tide");
   Bot.run(110);
   toIsland();
   Bot.waitUntil(restOf("glow"), 600, "the glow to light the far planks");
   Bot.walkTo(470);
   Bot.run(110);
   Bot.stop();
-  Bot.record(0);
+  Bot.record("glow");
   boardAtSpawn();
   Bot.waitUntil(() => Bot.px() > 450 && G.p.y > 255, 1800, "the ride across the dark bridge");
   Bot.walkTo(490);
@@ -584,7 +584,7 @@ const crossWithWind = (target) => {
 };
 
 SOLUTIONS["BREEZE"] = () => {
-  Bot.record(0);
+  Bot.record("gust");
   Bot.walkTo(172);
   Bot.run(6);
   Bot.stop();
@@ -593,12 +593,12 @@ SOLUTIONS["BREEZE"] = () => {
 };
 
 SOLUTIONS["TAXI"] = () => {
-  // slots: 0 shade, 1 tide
-  Bot.record(0);
+  // slots: shade, tide
+  Bot.record("shade");
   Bot.walkTo(90);
   Bot.run(6);
   Bot.stop();
-  Bot.record(1);
+  Bot.record("tide");
   Bot.run(110);
   Bot.walkTo(190);
   Bot.waitUntil(() => G.lights.length > 0, 600, "the bridge lamps to light");
@@ -606,11 +606,11 @@ SOLUTIONS["TAXI"] = () => {
   Bot.walkTo(540);
   Bot.run(110);
   Bot.stop();
-  Bot.record(0);
+  Bot.record("shade");
   Bot.walkTo(150);
   Bot.run(6);
   Bot.stop();
-  Bot.select(1);
+  Bot.select("tide");
   Bot.waitUntil(() => tideOf().x + PW / 2 > 520, 900, "the tide to reach the far side");
   Bot.swap();
   Bot.expect(Bot.px() > 500, "swapped to the far side");
@@ -619,12 +619,12 @@ SOLUTIONS["TAXI"] = () => {
 };
 
 SOLUTIONS["SAIL"] = () => {
-  // slots: 0 gust, 1 tide
-  Bot.record(0);
+  // slots: gust, tide
+  Bot.record("gust");
   Bot.walkTo(172);
   Bot.run(6);
   Bot.stop();
-  Bot.record(1);
+  Bot.record("tide");
   Bot.run(110);
   Bot.walkTo(172);
   Bot.jumpKey(true);
@@ -648,16 +648,16 @@ SOLUTIONS["CHANDELIER"] = () => {
     Bot.waitUntil(rest("flip"), 900, "the first zone to open");
     Bot.waitUntil(() => G.p.g === -1 && G.p.onGround, 120, "to be on the ceiling");
   };
-  Bot.record(0);
+  Bot.record("flip");
   Bot.walkTo(135);
   Bot.run(6);
   Bot.stop();
-  Bot.record(1);
+  Bot.record("flip2");
   toCeiling();
   Bot.walkTo(190);
   Bot.run(6);
   Bot.stop();
-  Bot.record(2);
+  Bot.record("flip3");
   toCeiling();
   Bot.walkTo(190);
   Bot.waitUntil(rest("flip2"), 900, "the second zone to open");
@@ -705,16 +705,16 @@ SOLUTIONS["STACKED SPRINGS"] = () => {
     jumpToSpring(240, 0);
     Bot.expect(G.p.y < 50, "up on the top ledge");
   };
-  Bot.record(0);
+  Bot.record("spring");
   Bot.walkTo(110);
   Bot.run(6);
   Bot.stop();
-  Bot.record(1);
+  Bot.record("spring2");
   toLedge(false);
   Bot.walkTo(240);
   Bot.run(6);
   Bot.stop();
-  Bot.record(2);
+  Bot.record("glow");
   toTop(true);
   Bot.expect(G.lanternsGot === 1, "the lantern over the first spring");
   Bot.walkTo(470);
@@ -759,29 +759,29 @@ SOLUTIONS["CHORUS"] = () => {
     runJumpLeft(306, 139);
     Bot.expect(G.p.y < 150 && Bot.px() < 180, "across the upper gap");
   };
-  Bot.record(0);
+  Bot.record("gust");
   Bot.walkTo(172);
   Bot.run(6);
   Bot.stop();
-  Bot.record(1);
+  Bot.record("spring");
   crossFloorPit();
   Bot.walkTo(590);
   Bot.run(6);
   Bot.stop();
-  Bot.record(2);
+  Bot.record("gust2");
   crossFloorPit();
   upShaft();
   Bot.walkTo(306);
   Bot.run(6);
   Bot.stop();
-  Bot.record(3);
+  Bot.record("shade");
   crossFloorPit();
   upShaft();
   crossUpperGap();
   Bot.walkTo(150);
   Bot.run(6);
   Bot.stop();
-  Bot.record(4);
+  Bot.record("glow");
   crossFloorPit();
   upShaft();
   crossUpperGap();
@@ -799,18 +799,18 @@ SOLUTIONS["CHORUS"] = () => {
 
 SOLUTIONS["GHOST GLASS"] = () => {
   // One phase slot, used twice: first to let a shade into the sealed plate, then moved to the wall on the route.
-  Bot.record(0);
+  Bot.record("phase");
   Bot.walkTo(112);
   Bot.run(6);
   Bot.stop();
-  Bot.record(1);
+  Bot.record("shade");
   Bot.walkTo(112);
   Bot.waitUntil(echoDone("phase"), 600, "the phase echo to settle");
   Bot.walkTo(30);
   Bot.expect(G.L.plates[0].pressed, "plate pressed in the sealed room");
   Bot.run(6);
   Bot.stop();
-  Bot.record(0);
+  Bot.record("phase");
   Bot.walkTo(232);
   Bot.run(6);
   Bot.stop();
@@ -822,7 +822,7 @@ SOLUTIONS["GHOST GLASS"] = () => {
 };
 
 SOLUTIONS["THE BEACON"] = () => {
-  // slots: 0 phase (low wall), 1 phase2 (high wall), 2 shade (plate), 3 glow (gate), 4 glow2 (thorns), 5 spring (shaft), 6 flip (exit ledge)
+  // slots: phase (low wall), phase2 (high wall), shade (plate), glow (gate), glow2 (thorns), spring (shaft), flip (exit ledge)
   const rest = (k) => () => G.echoes[k] && G.echoes[k].restT > 30;
   const lower = () => {
     Bot.walkTo(110);
@@ -864,37 +864,37 @@ SOLUTIONS["THE BEACON"] = () => {
     Bot.waitUntil(() => G.L.thorns.every((t) => t.lit), 900, "the thorns to wither");
     Bot.walkTo(250);
   };
-  Bot.record(0);
+  Bot.record("phase");
   Bot.walkTo(110);
   Bot.run(6);
   Bot.stop();
-  Bot.record(2);
+  Bot.record("shade");
   lower();
   Bot.walkTo(210);
   Bot.run(6);
   Bot.stop();
-  Bot.record(3);
+  Bot.record("glow");
   lower();
   Bot.waitUntil(() => G.L.doorOpen.a, 900, "the door to open");
   Bot.walkTo(390);
   Bot.run(6);
   Bot.stop();
-  Bot.record(5);
+  Bot.record("spring");
   toGate();
   Bot.walkTo(570);
   Bot.run(6);
   Bot.stop();
-  Bot.record(4);
+  Bot.record("glow2");
   toGate();
   upShaft();
   Bot.walkTo(395);
   Bot.run(6);
   Bot.stop();
-  Bot.record(1);
+  Bot.record("phase2");
   crossThorns();
   Bot.run(6);
   Bot.stop();
-  Bot.record(6);
+  Bot.record("flip");
   crossThorns();
   Bot.waitUntil(rest("phase2"), 900, "the high wall to dissolve");
   Bot.walkTo(100);
@@ -919,18 +919,18 @@ SOLUTIONS["PUMP ROOM"] = () => {
     boardAtSpawn();
     Bot.waitUntil(() => G.p.y < 190 && Bot.px() > 200, 1500, "the ride up onto the ledge");
   };
-  Bot.record(0);
+  Bot.record("shade");
   Bot.walkTo(170);
   Bot.run(6);
   Bot.stop();
-  Bot.record(1);
+  Bot.record("shade2");
   Bot.walkTo(150);
   Bot.waitUntil(rest("shade"), 600, "the first shade to settle");
   Bot.jumpTo(170, 24);
   Bot.expect(G.p.stand === G.echoes.shade, "standing on the first shade");
   Bot.run(6);
   Bot.stop();
-  Bot.record(2);
+  Bot.record("tide");
   Bot.run(60); // the tide waits at the spawn so you can board it there
   Bot.walkTo(150);
   Bot.waitUntil(() => rest("shade")() && rest("shade2")(), 600, "the stair to settle");
@@ -941,19 +941,19 @@ SOLUTIONS["PUMP ROOM"] = () => {
   Bot.walkTo(290);
   Bot.run(6);
   Bot.stop();
-  Bot.record(0);
+  Bot.record("shade");
   ride();
   Bot.walkTo(330);
   Bot.expect(G.L.plates[0].pressed, "first plate pressed");
   Bot.run(6);
   Bot.stop();
-  Bot.record(1);
+  Bot.record("shade2");
   ride();
   Bot.walkTo(390);
   Bot.expect(G.L.plates[1].pressed, "second plate pressed");
   Bot.run(6);
   Bot.stop();
-  Bot.record(3);
+  Bot.record("glow");
   ride();
   Bot.walkTo(400);
   Bot.waitUntil(() => G.L.doorOpen.a, 900, "the door to open");

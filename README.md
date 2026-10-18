@@ -17,7 +17,7 @@ To run it offline, download the repo and open `index.html` from a local web serv
 
 Press **E** to start recording and **E** again to stop. You go back to the start and your echo walks the path you
 just took, then stays wherever you stopped, even in mid-jump, so a frozen jump makes a stepping stone in the air.
-Each slot along the bottom of the screen holds one echo, and an echo's power switches on once it comes to rest.
+Each slot along the bottom of the screen holds one echo, and an echo's power switches on once it comes to rest. While you record, a dashed ring shows how far that power will reach where you stop. Slots always appear in the same order (shade, glow, phase, flip, tide, spring, gust), so the numbers never tell you what to record first.
 Later levels give you several slots, sometimes two or three of the same kind. An echo does not care about walls or
 glass, so one you no longer need can be recorded again somewhere else.
 

@@ -505,12 +505,18 @@ const Render = (() => {
           ctx.globalAlpha = 1;
         }
       }
-      ctx.fillStyle = rgba(pal.accent, 0.28);
-      for (let k = 0; k < TILE; k += 4) {
-        if (pl.a[Math.floor(k / 4)] < 0.5) ctx.fillRect(pl.x + k, pl.y, 2, 1);
+      // Unlit boards stay readable as a ghost: a faint fill, a dashed top edge and a slow shimmer.
+      for (let i = 0; i < 5; i++) {
+        const gone = 1 - Math.min(1, pl.a[i] * 2);
+        if (gone <= 0) continue;
+        const sx = pl.x + i * 4;
+        ctx.fillStyle = rgba(pal.accent, 0.13 * gone);
+        ctx.fillRect(sx, pl.y, 4, 6);
+        ctx.fillStyle = rgba(pal.accent, (0.5 + 0.2 * Math.sin(t * 0.06 + (pl.x + sx) * 0.08)) * gone);
+        ctx.fillRect(sx, pl.y, 3, 1);
+        ctx.fillStyle = rgba(pal.accent, 0.3 * gone);
+        ctx.fillRect(sx, pl.y + 5, 3, 1);
       }
-      ctx.fillRect(pl.x, pl.y + 5, 1, 1);
-      ctx.fillRect(pl.x + 19, pl.y + 5, 1, 1);
     }
   }
 
@@ -621,10 +627,20 @@ const Render = (() => {
     const pal = CHAPTERS[L.chapter].pal;
     ctx.save();
     ctx.globalCompositeOperation = "lighter";
-    ctx.fillStyle = rgba(pal.accent, 0.3);
     for (const pl of L.planks) {
-      for (let k = 0; k < TILE; k += 4) ctx.fillRect(pl.x + k, pl.y, 2, 1);
+      for (let i = 0; i < 5; i++) {
+        const gone = 1 - Math.min(1, (pl.a ? pl.a[i] : 0) * 2);
+        if (gone <= 0) continue;
+        const sx = pl.x + i * 4;
+        ctx.fillStyle = rgba(pal.accent, 0.2 * gone);
+        ctx.fillRect(sx, pl.y, 4, 6);
+        ctx.fillStyle = rgba(pal.accent, (0.65 + 0.2 * Math.sin(t * 0.06 + (pl.x + sx) * 0.08)) * gone);
+        ctx.fillRect(sx, pl.y, 3, 1);
+        ctx.fillStyle = rgba(pal.accent, 0.35 * gone);
+        ctx.fillRect(sx, pl.y + 5, 3, 1);
+      }
     }
+    ctx.fillStyle = rgba(pal.accent, 0.3);
     for (const th of L.thorns) {
       if (th.lit) continue;
       if (Math.sin(t * 0.07 + th.tx * 1.7) > 0.2) {
@@ -776,9 +792,36 @@ const Render = (() => {
     }
   }
 
+  // While recording, a dashed ring shows how far the echo's power will reach where you stop.
+  function drawRecRing(ctx, t) {
+    const r = { glow: GLOW_R, phase: PHASE_R, flip: FLIP_R, gust: GUST_R }[G.rec.kind];
+    if (!r) return;
+    const p = G.p, k = KINDS[G.rec.kind];
+    const cx = p.x + PW / 2, cy = p.y + PH / 2;
+    ctx.save();
+    ctx.strokeStyle = rgba(k.color, 0.4 + 0.12 * Math.sin(t * 0.12));
+    ctx.lineWidth = 1;
+    ctx.setLineDash([2, 4]);
+    ctx.lineDashOffset = -t * 0.2;
+    ctx.beginPath(); ctx.arc(cx, cy, r, 0, TAU); ctx.stroke();
+    ctx.setLineDash([]);
+    if (G.rec.kind === "gust") {
+      const d = p.face >= 0 ? 1 : -1;
+      ctx.fillStyle = rgba(k.color, 0.55);
+      for (let i = 0; i < 3; i++) {
+        const ax = cx + d * (14 + i * 9 + ((t * 0.5) % 9)), ay = cy - 2;
+        ctx.fillRect(Math.round(ax), Math.round(ay), 1, 5);
+        ctx.fillRect(Math.round(ax - d), Math.round(ay + 1), 1, 3);
+        ctx.fillRect(Math.round(ax - 2 * d), Math.round(ay + 2), 1, 1);
+      }
+    }
+    ctx.restore();
+  }
+
   function drawPlayer(ctx, t) {
     const p = G.p;
     if (G.dead) return;
+    if (G.rec) drawRecRing(ctx, t);
     let look = Object.assign({}, PLAYER_LOOK);
     if (G.rec) {
       const k = KINDS[G.rec.kind];

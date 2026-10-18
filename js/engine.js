@@ -17,13 +17,16 @@ const GUST_R = 72, GUST_ACC = 900, GUST_V = 170, GUST_GROUND = 90, WIND_DECAY = 
 
 const KINDS = {
   shade: { name: "SHADE", color: "#8fb4ff", blurb: "HOLDS PLATES AND IS SOLID TO STAND ON." },
-  glow: { name: "GLOW", color: "#ffc857", blurb: "CARRIES LIGHT. SHADOW PLANKS HOLD IN IT AND THORNS WITHER." },
+  glow: { name: "GLOW", color: "#ffc857", blurb: "CARRIES LIGHT. FAINT SHADOW PLANKS TURN SOLID IN IT AND THORNS WITHER." },
   phase: { name: "PHASE", color: "#c78bff", blurb: "CRYSTAL FADES AWAY AROUND IT." },
   flip: { name: "FLIP", color: "#4fe3c1", blurb: "REVERSES GRAVITY AROUND IT." },
   tide: { name: "TIDE", color: "#ff8f8f", blurb: "REPLAYS ITS PATH BACK AND FORTH FOREVER, WAITING WHERE YOU WAITED." },
   spring: { name: "SPRING", color: "#a6e86a", blurb: "BOUNCES YOU HIGH. HOLD JUMP FOR A BIGGER BOUNCE." },
   gust: { name: "GUST", color: "#dff3ff", blurb: "BLOWS A WIND IN THE DIRECTION IT WAS FACING." },
 };
+// Slots always appear in this order, whatever order a level lists its echoes in, so the numbers on the keys
+// never spell out the order you should record in.
+const KIND_ORDER = ["shade", "glow", "phase", "flip", "tide", "spring", "gust"];
 const PLATE_COLORS = { a: "#4fd1ff", b: "#ffb347", c: "#ff6fae", d: "#9cff6f" };
 
 // Settings the player can change (the UI loads and saves these).
@@ -125,7 +128,7 @@ function parseLevel(which) {
   const rows = g.rows();
   const L = {
     idx, def, name: def.name, chapter: def.chapter, dark: !!def.dark,
-    echoes: def.echoes || [], recMax: def.recMax || 10, swap: !!def.swap, hint: def.hint || "",
+    echoes: (def.echoes || []).slice().sort((a, b) => KIND_ORDER.indexOf(a) - KIND_ORDER.indexOf(b)), recMax: def.recMax || 10, swap: !!def.swap, hint: def.hint || "",
     rows, walls: [], doorTiles: [], plates: [], planks: [], crystals: [], spikes: [], thorns: [], lamps: [],
     oneways: [], gates: [], lanterns: [],
     spawn: { x: 40, y: 100 }, exit: null, doorOpen: {}, hasDoor: {}, hasLamp: {},

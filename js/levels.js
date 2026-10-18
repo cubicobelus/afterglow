@@ -95,7 +95,7 @@ def(0, "TWIN PLATES", {
 
 def(0, "LAMPLIGHT", {
   unlock: "glow", echoes: ["glow"], recMax: 10, dark: true,
-  hint: "THE DARK PLANKS ARE REAL ONLY WHERE LIGHT TOUCHES THEM. ECHO A GLOW ON THE ISLAND.",
+  hint: "FAINT PLANKS ARE SOLID ONLY IN LIGHT. WALK TO THE ISLAND AND RECORD: THE RING SHOWS WHERE YOUR ECHO WILL SHINE.",
 }, (g) => {
   g.base();
   g.set(2, 14, "@");
