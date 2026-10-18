@@ -174,7 +174,7 @@ def(1, "GLASS WALL", {
 
 def(1, "UNDER GLASS", {
   echoes: ["phase", "shade"], recMax: 10,
-  hint: "A PLATE SITS IN A VAULT UNDER GLASS. OPEN THE GLASS FIRST, THEN SEND IN A SHADE.",
+  hint: "THE PLATE IS UNDER GLASS. WHAT COULD STAND ON IT FOR YOU?",
 }, (g) => {
   g.base();
   g.set(2, 14, "@");
@@ -201,7 +201,7 @@ def(1, "UPDRAFT", {
 
 def(1, "CEILING PLATE", {
   echoes: ["flip", "shade"], recMax: 10,
-  hint: "THE PLATE HANGS FROM THE CEILING. A FLIP ZONE LETS YOU WALK UP THERE.",
+  hint: "THE PLATE IS OUT OF REACH. NOT EVERY ROAD IS ON THE FLOOR.",
 }, (g) => {
   g.base();
   g.set(2, 14, "@");
@@ -215,7 +215,7 @@ def(1, "CEILING PLATE", {
 
 def(1, "TWO KEYS", {
   echoes: ["phase", "glow"], recMax: 12, dark: true,
-  hint: "YOU CANNOT REACH THE PLATFORM WITHOUT THE PHASE. THE THORNS NEED THE GLOW.",
+  hint: "TWO OBSTACLES, TWO ECHOES. WHICH ONE FIRST?",
 }, (g) => {
   g.base();
   g.set(2, 14, "@");
@@ -230,7 +230,7 @@ def(1, "TWO KEYS", {
 
 def(1, "GHOST GLASS", {
   echoes: ["phase", "shade"], recMax: 10,
-  hint: "THE PLATE IS SEALED BEHIND GLASS AND SO IS THE WAY ON. YOU CAN RECORD THE PHASE AGAIN, AND AN ECHO DOES NOT CARE ABOUT GLASS.",
+  hint: "TWO WALLS OF GLASS AND ONE PHASE. AN ECHO IS ONLY A MEMORY.",
 }, (g) => {
   g.base();
   g.set(7, 14, "@");
@@ -245,7 +245,7 @@ def(1, "GHOST GLASS", {
 
 def(1, "CHANDELIER", {
   echoes: ["flip", "flip", "flip"], recMax: 12,
-  hint: "INSIDE A FLIP ZONE THE CEILING IS YOUR FLOOR. EACH NEW ZONE HAS TO BE RECORDED FROM INSIDE THE LAST.",
+  hint: "THE FLOOR IS DEATH, SO LOOK UP. EACH ZONE ONLY REACHES SO FAR.",
 }, (g) => {
   g.base();
   g.fill(1, 3, 7, 14, "#");
@@ -286,7 +286,7 @@ def(2, "FERRY", {
 
 def(2, "LIFT", {
   echoes: ["shade", "tide"], recMax: 14, dark: true,
-  hint: "THE STAIRS LIGHT UP ONLY WHILE PLATE ONE IS HELD. RIDE YOUR TIDE UP, AND LET THE SHADE GO TO THE OTHER PLATE.",
+  hint: "THE STAIRS ARE LIT ONLY WHILE A PLATE IS HELD. A TIDE IS A MOVING FLOOR.",
 }, (g) => {
   g.base();
   g.set(2, 14, "@");
@@ -318,7 +318,7 @@ def(2, "TRAMPOLINE", {
 
 def(2, "SKYHOOK", {
   echoes: ["spring"], recMax: 8,
-  hint: "FREEZE A SPRING IN MID AIR OVER THE GAP, LAND ON IT, AND HOLD JUMP.",
+  hint: "A SPRING CAN HANG IN THE AIR TOO.",
 }, (g) => {
   g.base();
   g.set(2, 14, "@");
@@ -330,7 +330,7 @@ def(2, "SKYHOOK", {
 
 def(2, "TWO STAGES", {
   echoes: ["spring", "tide"], recMax: 14,
-  hint: "THE SPRING MUST BE ON THE LEDGE. USE YOUR TIDE TO GET IT THERE.",
+  hint: "THE SPRING IS NO USE DOWN HERE. SOMETHING ELSE HAS TO GET UP THERE FIRST.",
 }, (g) => {
   g.base();
   g.set(2, 14, "@");
@@ -342,7 +342,7 @@ def(2, "TWO STAGES", {
 
 def(2, "FERRY LIGHT", {
   echoes: ["glow", "tide"], recMax: 14, dark: true,
-  hint: "LIGHT THE BRIDGE, SEND A TIDE ACROSS, THEN MOVE THE GLOW TO THE GATE. THE TIDE CARRIES YOU OVER THE DARK.",
+  hint: "THE LIGHT CANNOT BE IN TWO PLACES. THE TIDE STILL REMEMBERS THE WAY.",
 }, (g) => {
   g.base();
   g.set(2, 14, "@");
@@ -372,7 +372,7 @@ def(2, "SLUICE", {
 
 def(2, "STACKED SPRINGS", {
   echoes: ["spring", "spring", "glow"], recMax: 14, dark: true,
-  hint: "A HELD BOUNCE REACHES THE LOW LEDGE. A SECOND SPRING UP THERE REACHES THE TOP. THE GATE NEEDS A GLOW BESIDE IT.",
+  hint: "HOLD JUMP AS YOU LAND FOR A BIGGER BOUNCE. WHAT CAN A SPRING DO FROM UP THERE?",
 }, (g) => {
   g.base();
   g.set(2, 14, "@");
@@ -386,7 +386,7 @@ def(2, "STACKED SPRINGS", {
 
 def(2, "PUMP ROOM", {
   echoes: ["shade", "shade", "tide", "glow"], recMax: 24, dark: true,
-  hint: "A TIDE RIDES THE ROUTE YOU TOOK, AND ECHOES YOU NO LONGER NEED CAN BE RECORDED AGAIN.",
+  hint: "ONCE AN ECHO HAS DONE ITS JOB, DOES IT HAVE TO STAY?",
 }, (g) => {
   g.base();
   g.set(2, 14, "@");
@@ -414,7 +414,7 @@ def(3, "BREEZE", {
 
 def(3, "SAIL", {
   echoes: ["gust", "tide"], recMax: 14,
-  hint: "RECORD THE TIDE'S JUMP WITH THE WIND BEHIND YOU, AND IT REACHES FARTHER THAN YOU COULD ALONE.",
+  hint: "A TIDE REMEMBERS A JUMP. WHAT IF THE JUMP HAD HELP?",
 }, (g) => {
   g.base();
   g.set(2, 14, "@");
@@ -449,7 +449,7 @@ def(3, "SECOND WIND", {
 
 def(3, "TAXI", {
   echoes: ["shade", "tide"], recMax: 14, dark: true, swap: true,
-  hint: "THE BRIDGE LIGHTS UP ONLY WHILE PLATE ONE IS HELD. SEND A TIDE ACROSS, FREE THE SHADE, THEN SWAP TO WHEREVER THE TIDE IS.",
+  hint: "THE BRIDGE NEEDS A HELD PLATE. YOU CAN BE WHEREVER YOUR ECHO IS.",
 }, (g) => {
   g.base();
   g.set(2, 14, "@");
@@ -488,6 +488,7 @@ def(3, "CHORUS", {
   g.set(28, 14, "a");
   g.fill(23, 1, 23, 3, "#").fill(23, 4, 23, 7, "A");
   g.fill(2, 6, 2, 7, "X");
+  g.set(13, 5, "o");
   g.set(4, 12, "L").set(24, 12, "L").set(9, 4, "L").set(17, 4, "L");
 });
 
@@ -505,6 +506,7 @@ def(3, "THE BEACON", {
   g.fill(24, 10, 24, 14, "G");
   g.fill(28, 9, 30, 14, "#");
   g.fill(29, 7, 29, 8, "X");
+  g.set(10, 10, "o");
   g.set(3, 10, "L").set(12, 6, "L").set(19, 4, "L");
 });
 
@@ -526,23 +528,23 @@ const PAR = {
   "TWO KEYS": { t: 25, r: 2 },
   "GHOST GLASS": { t: 20, r: 3 },
   "CHANDELIER": { t: 30, r: 3 },
-  "HALL OF MIRRORS": { t: 40, r: 4 },
+  "HALL OF MIRRORS": { t: 60, r: 5 },
   "FERRY": { t: 25, r: 1 },
   "LIFT": { t: 30, r: 3 },
   "TRAMPOLINE": { t: 20, r: 1 },
   "SKYHOOK": { t: 20, r: 1 },
   "TWO STAGES": { t: 40, r: 3 },
   "FERRY LIGHT": { t: 45, r: 3 },
-  "SLUICE": { t: 60, r: 3 },
+  "SLUICE": { t: 30, r: 3 },
   "STACKED SPRINGS": { t: 40, r: 3 },
   "PUMP ROOM": { t: 70, r: 6 },
   "BREEZE": { t: 15, r: 1 },
   "LEAPFROG": { t: 25, r: 1 },
   "SECOND WIND": { t: 35, r: 3 },
   "TAXI": { t: 35, r: 3 },
-  "AFTERIMAGE": { t: 70, r: 4 },
-  "CHORUS": { t: 90, r: 5 },
-  "THE BEACON": { t: 130, r: 6 },
+  "AFTERIMAGE": { t: 45, r: 4 },
+  "CHORUS": { t: 100, r: 6 },
+  "THE BEACON": { t: 80, r: 6 },
   "SAIL": { t: 25, r: 2 },
 };
 for (const l of LEVELS) l.par = PAR[l.name];

@@ -26,12 +26,12 @@ const App = (() => {
       "GLASS WALL", "UNDER GLASS", "TRAPDOOR", "UPDRAFT", "CEILING PLATE", "HIGH PLATE", "TWO KEYS", "TWIN ECHOES", "LANTERN LIFT",
       "FERRY", "LIFT", "SLUICE", "TRAMPOLINE", "BOUNCE COURSE", "SKYHOOK", "TWO STAGES", "FERRY LIGHT", "HIGH WATER",
       "BREEZE", "LOW TUNNEL", "TAILWIND", "LEAPFROG", "SECOND WIND", "TAXI", "DELIVERY", "LANTERN WIND", "SAIL", "THE BEACON"];
-    const RENAMED = { "THE BEACON": "HALL OF MIRRORS" };
+    const REDESIGNED = { "THE BEACON": true, "SLUICE": true }; // same name, new puzzle: the old result no longer applies
     const where = {};
     LEVELS.forEach((l, i) => { where[l.name] = i; });
     const moved = { v: SAVE_VERSION, done: [], best: {}, stars: {}, lanterns: {}, seen: save.seen || {} };
     OLD_ORDER.forEach((name, oi) => {
-      const ni = where[RENAMED[name] || name];
+      const ni = REDESIGNED[name] ? undefined : where[name];
       if (ni === undefined) return;
       if (save.done && save.done[oi]) moved.done[ni] = true;
       if (save.best && save.best[oi] !== undefined) moved.best[ni] = save.best[oi];

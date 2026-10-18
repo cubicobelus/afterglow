@@ -901,6 +901,9 @@ SOLUTIONS["CHORUS"] = () => {
   Bot.walkTo(440);
   Bot.waitUntil(rest("gust"), 900, "the first upper gust to blow");
   runJumpLeft(428, 271);
+  Bot.walkTo(270);
+  Bot.jumpTo(270, 24); // the lantern floating over the upper island
+  Bot.expect(G.lanternsGot === 1, "the lantern over the upper island");
   Bot.waitUntil(rest("gust2"), 900, "the island gust to blow");
   Bot.dir(-1);
   for (let i = 0; i < 80 && Bot.px() > 248; i++) Bot.tick();
@@ -980,6 +983,9 @@ SOLUTIONS["THE BEACON"] = () => {
   Bot.walkTo(150);
   Bot.waitUntil(rest("glow"), 900, "the glow to light the planks");
   Bot.jumpTo(175, 24);
+  Bot.walkTo(210);
+  Bot.jumpTo(210, 24); // the lantern floating over the lit planks
+  Bot.expect(G.lanternsGot === 1, "the lantern over the planks");
   Bot.walkTo(250);
   Bot.jumpTo(330, 24);
   convoy();

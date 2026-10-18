@@ -632,9 +632,9 @@ const Render = (() => {
         const gone = 1 - Math.min(1, (pl.a ? pl.a[i] : 0) * 2);
         if (gone <= 0) continue;
         const sx = pl.x + i * 4;
-        ctx.fillStyle = rgba(pal.accent, 0.2 * gone);
+        ctx.fillStyle = rgba(pal.accent, 0.3 * gone);
         ctx.fillRect(sx, pl.y, 4, 6);
-        ctx.fillStyle = rgba(pal.accent, (0.65 + 0.2 * Math.sin(t * 0.06 + (pl.x + sx) * 0.08)) * gone);
+        ctx.fillStyle = rgba(pal.accent, (0.75 + 0.2 * Math.sin(t * 0.06 + (pl.x + sx) * 0.08)) * gone);
         ctx.fillRect(sx, pl.y, 3, 1);
         ctx.fillStyle = rgba(pal.accent, 0.35 * gone);
         ctx.fillRect(sx, pl.y + 5, 3, 1);

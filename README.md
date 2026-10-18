@@ -21,8 +21,9 @@ Each slot along the bottom of the screen holds one echo, and an echo's power swi
 Later levels give you several slots, sometimes two or three of the same kind. An echo does not care about walls or
 glass, so one you no longer need can be recorded again somewhere else.
 
-The game has 31 levels in four tiers, each with its own scenery. Every echo gets one or two easy levels, then the
-tiers mix them and climb to levels that need several echoes working at once. The last one uses seven.
+The game has 33 levels in four tiers, each with its own scenery. Every echo gets one or two easy levels, then the
+tiers mix them and climb to levels where the order matters, an echo has to be recorded again halfway through, and
+what you recorded earlier can carry you or lead you through doors.
 
 | Echo | What it does |
 |---|---|
