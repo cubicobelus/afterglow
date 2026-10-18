@@ -71,6 +71,7 @@
       SOLUTIONS[LEVELS[i].name]();
       Bot.run(2);
       if (!G.won) throw new Error("finished the script but did not reach the exit (at " + Math.round(G.p.x) + "," + Math.round(G.p.y) + ")");
+      if (G.L.lanterns.length && G.lanternsGot < G.L.lanterns.length) throw new Error("won, but the solution did not collect the lantern");
       res = { i, name, ok: true, secs: Math.round(G.time * 10) / 10, rec: G.recCount, info: "won, " + (Math.round(G.time * 10) / 10) + "s, " + G.recCount + " recordings, deaths " + G.deaths };
     } catch (e) {
       res = { i, name, ok: false, info: e.message };

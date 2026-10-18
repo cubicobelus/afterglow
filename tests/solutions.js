@@ -51,8 +51,10 @@ SOLUTIONS["STEPPING STONE"] = () => {
   const e = G.echoes.shade;
   Bot.jumpTo(e.x + PW / 2, 24);
   Bot.expect(G.p.stand === e, "standing on the echo");
+  Bot.jumpTo(310, 24); // hop up for the lantern above the gap
+  Bot.expect(G.p.stand === e, "back on the echo after the lantern hop");
   Bot.jumpTo(420, 24);
-  Bot.walkTo(560);
+  Bot.walkTo(570);
 };
 
 // Shared route: from spawn onto the platform in the thorn levels (L5, L6). Ends standing at the landing spot.
@@ -84,6 +86,7 @@ SOLUTIONS["LAMPLIGHT"] = () => {
 SOLUTIONS["THORN HALL"] = () => {
   Bot.record(0);
   toThornPlatform();
+  Bot.walkTo(390); // the lantern at the end of the platform
   Bot.walkTo(310);
   Bot.run(6);
   Bot.stop();
@@ -144,6 +147,13 @@ SOLUTIONS["UNDER GLASS"] = () => {
   Bot.stop();
   Bot.walkTo(270);
   Bot.waitUntil(() => G.L.doorOpen.a && echoDone("phase")() && echoDone("shade")(), 900, "door open");
+  // Drop into the vault for the lantern, then climb back out to the left through the open hatch.
+  Bot.dir(1);
+  for (let i = 0; i < 200 && !(G.p.onGround && G.p.y > 320 && Bot.px() > 362); i++) Bot.tick();
+  Bot.dir(0);
+  Bot.expect(G.lanternsGot === 1, "the lantern in the vault");
+  Bot.walkTo(330);
+  Bot.jumpTo(285, 24);
   Bot.walkTo(290);
   Bot.jumpTo(375, 24);
   Bot.walkTo(520);
@@ -389,6 +399,7 @@ SOLUTIONS["SUNKEN GATE"] = () => {
     Bot.jumpTo(118, 24); // ledge A
     Bot.jumpTo(182, 24); // ledge B
     Bot.jumpTo(242, 24); // ledge C
+    Bot.jumpTo(250, 24); // hop up for the lantern above it
     Bot.jumpTo(305, 24); // platform D
   };
   Bot.record(0);
@@ -584,6 +595,8 @@ SOLUTIONS["TRAMPOLINE"] = () => {
   Bot.waitUntil(restOf("spring"), 600, "the spring to settle");
   jumpToSpring(372, 1);
   Bot.expect(G.p.y < 130, "up on the ledge");
+  Bot.walkTo(470);
+  Bot.jumpTo(470, 24); // the lantern high over the ledge
   Bot.walkTo(570);
 };
 
@@ -711,5 +724,135 @@ SOLUTIONS["HIGH WATER"] = () => {
   Bot.waitUntil(restOf("spring"), 900, "the spring to settle");
   jumpToSpring(430, 1);
   Bot.expect(G.p.y < 150, "up on the wall");
+  Bot.walkTo(570);
+};
+
+// ---------------------------------------------------------------- tier 4: the beacon
+// Run up to xJump, then jump toward targetX (keeps the running speed into the jump).
+const runJump = (xJump, targetX) => {
+  Bot.dir(1);
+  for (let i = 0; i < 300 && Bot.px() < xJump; i++) {
+    Bot.tick();
+    if (G.dead) Bot.fail("died on the run-up");
+  }
+  Bot.jumpTo(targetX, 24);
+};
+const gustReady = () => G.echoes.gust && G.echoes.gust.restT > 30;
+// From the start, cross the 6 wide gap with the wind at its edge.
+const crossWithWind = (target) => {
+  Bot.walkTo(110);
+  Bot.waitUntil(gustReady, 600, "the gust to start blowing");
+  runJump(164, target);
+};
+
+SOLUTIONS["BREEZE"] = () => {
+  Bot.record(0);
+  Bot.walkTo(172);
+  Bot.run(6);
+  Bot.stop();
+  crossWithWind(335);
+  Bot.walkTo(570);
+};
+
+SOLUTIONS["LOW TUNNEL"] = () => {
+  Bot.record(0);
+  Bot.walkTo(190);
+  Bot.run(6);
+  Bot.stop();
+  Bot.walkTo(130);
+  Bot.waitUntil(gustReady, 600, "the gust to start blowing");
+  runJump(192, 310);
+  Bot.walkTo(570);
+};
+
+SOLUTIONS["TAILWIND"] = () => {
+  Bot.record(0);
+  Bot.walkTo(166);
+  Bot.run(6);
+  Bot.stop();
+  Bot.walkTo(100);
+  Bot.waitUntil(gustReady, 600, "the gust to start blowing");
+  runJump(166, 345);
+  Bot.walkTo(570);
+};
+
+SOLUTIONS["TAXI"] = () => {
+  // slots: 0 shade, 1 tide
+  Bot.record(0);
+  Bot.walkTo(90);
+  Bot.run(6);
+  Bot.stop();
+  Bot.record(1);
+  Bot.run(110);
+  Bot.walkTo(190);
+  Bot.waitUntil(() => G.lights.length > 0, 600, "the bridge lamps to light");
+  Bot.jumpTo(212, 24);
+  Bot.walkTo(540);
+  Bot.run(110);
+  Bot.stop();
+  Bot.record(0);
+  Bot.walkTo(150);
+  Bot.run(6);
+  Bot.stop();
+  Bot.select(1);
+  Bot.waitUntil(() => tideOf().x + PW / 2 > 520, 900, "the tide to reach the far side");
+  Bot.swap();
+  Bot.expect(Bot.px() > 500, "swapped to the far side");
+  Bot.waitUntil(() => G.L.doorOpen.b, 300, "door b to open");
+  Bot.walkTo(610);
+};
+
+SOLUTIONS["DELIVERY"] = () => {
+  // slots: 0 gust, 1 shade
+  Bot.record(0);
+  Bot.walkTo(172);
+  Bot.run(6);
+  Bot.stop();
+  Bot.record(1);
+  crossWithWind(335);
+  Bot.walkTo(370);
+  Bot.run(6);
+  Bot.stop();
+  crossWithWind(335);
+  Bot.waitUntil(() => G.L.doorOpen.a, 900, "the door to open");
+  Bot.walkTo(570);
+};
+
+SOLUTIONS["LANTERN WIND"] = () => {
+  // slots: 0 gust, 1 glow
+  Bot.record(0);
+  Bot.walkTo(172);
+  Bot.run(6);
+  Bot.stop();
+  Bot.record(1);
+  crossWithWind(335);
+  Bot.walkTo(390);
+  Bot.run(6);
+  Bot.stop();
+  crossWithWind(335);
+  Bot.walkTo(390);
+  Bot.waitUntil(() => G.L.gates.every((x) => x.open), 900, "the gate to open");
+  Bot.walkTo(570);
+};
+
+SOLUTIONS["SAIL"] = () => {
+  // slots: 0 gust, 1 tide
+  Bot.record(0);
+  Bot.walkTo(172);
+  Bot.run(6);
+  Bot.stop();
+  Bot.record(1);
+  Bot.run(110);
+  Bot.walkTo(172);
+  Bot.jumpKey(true);
+  Bot.dir(1);
+  for (let i = 0; i < 42; i++) Bot.tick();
+  Bot.jumpKey(false);
+  Bot.dir(0);
+  Bot.stop();
+  boardAtSpawn();
+  const end = tideOf().trace.length - 1;
+  Bot.waitUntil(() => G.t >= end - 6, 900, "the ride out over the pit");
+  Bot.jumpTo(410, 24);
   Bot.walkTo(570);
 };

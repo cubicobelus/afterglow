@@ -86,7 +86,7 @@ def(0, "STEPPING STONE", {
   g.base();
   g.set(2, 14, "@");
   g.pit(13, 17);
-  g.set(16, 9, "o");
+  g.set(15, 9, "o");
   g.fill(28, 13, 28, 14, "X");
   g.set(5, 8, "L").set(15, 5, "L").set(25, 8, "L");
 });
@@ -117,6 +117,7 @@ def(0, "THORN HALL", {
   g.fill(11, 12, 19, 12, "#");
   g.fill(12, 14, 18, 14, "t");
   g.fill(20, 1, 20, 12, "#");
+  g.set(19, 11, "o");
   g.fill(28, 13, 28, 14, "X");
   g.set(4, 11, "L").set(26, 11, "L");
 });
@@ -136,6 +137,7 @@ def(0, "SUNKEN GATE", {
   g.fill(20, 4, 20, 5, "G");
   g.fill(21, 6, 30, 14, "#");
   g.fill(28, 4, 28, 5, "X");
+  g.set(12, 3, "o");
   g.set(1, 10, "L").set(27, 3, "L");
 });
 
@@ -250,6 +252,7 @@ def(1, "HIGH PLATE", {
   g.set(2, 14, "@");
   g.fill(12, 9, 16, 14, "#");
   g.set(14, 8, "a");
+  g.set(16, 8, "o");
   g.fill(22, 1, 22, 8, "#");
   g.fill(22, 9, 22, 14, "A");
   g.fill(28, 13, 28, 14, "X");
@@ -353,6 +356,7 @@ def(2, "TRAMPOLINE", {
   g.set(2, 14, "@");
   g.fill(20, 7, 30, 14, "#");
   g.fill(28, 5, 28, 6, "X");
+  g.set(23, 4, "o");
   g.set(6, 9, "L").set(14, 6, "L");
 });
 
@@ -424,6 +428,45 @@ def(2, "HIGH WATER", {
 });
 
 // ================================================================ tier 4: the beacon
+// ---------------------------------------------------------------- gust
+def(3, "BREEZE", {
+  unlock: "gust", echoes: ["gust"], recMax: 8,
+  hint: "A GUST BLOWS THE WAY YOU FACED WHEN YOU STOPPED. STAND AT THE EDGE FACING THE GAP, THEN JUMP INTO THE WIND.",
+}, (g) => {
+  g.base();
+  g.set(2, 14, "@");
+  g.pit(9, 14);
+  g.set(13, 11, "o");
+  g.fill(28, 13, 28, 14, "X");
+  g.set(5, 8, "L").set(13, 5, "L").set(24, 8, "L");
+});
+
+def(3, "LOW TUNNEL", {
+  echoes: ["gust"], recMax: 8,
+  hint: "THE CEILING IS TOO LOW FOR A REAL JUMP. LET THE WIND CARRY YOU OVER THE SPIKES.",
+}, (g) => {
+  g.base();
+  g.set(2, 14, "@");
+  g.fill(5, 1, 22, 11, "#");
+  g.fill(10, 14, 12, 14, "^");
+  g.fill(28, 13, 28, 14, "X");
+  g.set(3, 9, "L").set(26, 9, "L");
+});
+
+def(3, "TAILWIND", {
+  echoes: ["gust"], recMax: 8,
+  hint: "A LONG DROP GIVES A JUMP MORE TIME. WITH THE WIND BEHIND YOU, YOU CAN CLEAR THE PIT.",
+}, (g) => {
+  g.base();
+  g.fill(1, 10, 8, 14, "#");
+  g.set(2, 9, "@");
+  g.pit(9, 15);
+  g.fill(9, 17, 15, 17, "^");
+  g.fill(28, 13, 28, 14, "X");
+  g.set(4, 5, "L").set(13, 8, "L").set(24, 8, "L");
+});
+
+// ---------------------------------------------------------------- swap
 def(3, "LEAPFROG", {
   unlock: "swap", echoes: ["glow"], recMax: 8, dark: true, swap: true,
   hint: "THE BRIDGE IS LONGER THAN ONE LIGHT. WALK TO THE EDGE OF THE LIGHT, THEN PRESS Q.",
@@ -448,6 +491,61 @@ def(3, "SECOND WIND", {
   g.set(5, 9, "L").set(22, 1, "L");
 });
 
+def(3, "TAXI", {
+  echoes: ["shade", "tide"], recMax: 14, dark: true, swap: true,
+  hint: "THE BRIDGE LIGHTS UP ONLY WHILE PLATE ONE IS HELD. SEND A TIDE ACROSS, FREE THE SHADE, THEN SWAP TO WHEREVER THE TIDE IS.",
+}, (g) => {
+  g.base();
+  g.set(2, 14, "@");
+  g.set(4, 14, "a");
+  g.set(7, 14, "b");
+  g.pit(10, 24);
+  g.fill(10, 14, 24, 14, "~");
+  g.set(12, 10, "P").set(19, 10, "P").set(23, 10, "P");
+  g.fill(28, 1, 28, 12, "#");
+  g.fill(28, 13, 28, 14, "B");
+  g.fill(30, 13, 30, 14, "X");
+});
+
+// ---------------------------------------------------------------- mix
+def(3, "DELIVERY", {
+  echoes: ["gust", "shade"], recMax: 12,
+  hint: "CROSS WITH THE WIND, THEN SEND A SHADE ACROSS TO THE PLATE THAT OPENS THE DOOR.",
+}, (g) => {
+  g.base();
+  g.set(2, 14, "@");
+  g.pit(9, 14);
+  g.set(18, 14, "a");
+  g.fill(23, 1, 23, 8, "#");
+  g.fill(23, 9, 23, 14, "A");
+  g.fill(28, 13, 28, 14, "X");
+  g.set(5, 8, "L").set(13, 5, "L").set(26, 8, "L");
+});
+
+def(3, "LANTERN WIND", {
+  echoes: ["gust", "glow"], recMax: 12, dark: true,
+  hint: "THE WIND GETS YOU ACROSS. THE GATE ON THE FAR SIDE NEEDS A GLOW NEAR IT.",
+}, (g) => {
+  g.base();
+  g.set(2, 14, "@");
+  g.pit(9, 14);
+  g.fill(22, 1, 22, 12, "#");
+  g.fill(22, 13, 22, 14, "G");
+  g.fill(28, 13, 28, 14, "X");
+  g.set(5, 11, "L").set(30, 8, "L");
+});
+
+def(3, "SAIL", {
+  echoes: ["gust", "tide"], recMax: 14,
+  hint: "RECORD THE TIDE'S JUMP WITH THE WIND BEHIND YOU, AND IT REACHES FARTHER THAN YOU COULD ALONE.",
+}, (g) => {
+  g.base();
+  g.set(2, 14, "@");
+  g.pit(9, 18);
+  g.fill(28, 13, 28, 14, "X");
+  g.set(5, 8, "L").set(14, 5, "L").set(25, 8, "L");
+});
+
 def(3, "THE BEACON", {
   echoes: ["phase", "glow", "shade", "flip"], recMax: 14, dark: true, swap: true,
   hint: "EVERYTHING YOU HAVE LEARNED. THE LAMP IS AT THE TOP.",
@@ -465,3 +563,46 @@ def(3, "THE BEACON", {
   g.fill(29, 7, 29, 8, "X");
   g.set(4, 11, "L").set(23, 11, "L");
 });
+
+// Par for the two bonus stars: finish under par.t seconds, and use no more than par.r recordings.
+// Set from the scripted solutions in tests/ with plenty of slack for a person.
+const PAR = {
+  "FIRST STEPS": { t: 25, r: 0 },
+  "THE PLATE": { t: 25, r: 1 },
+  "BOOST": { t: 25, r: 1 },
+  "STEPPING STONE": { t: 25, r: 1 },
+  "LAMPLIGHT": { t: 30, r: 1 },
+  "THORN HALL": { t: 30, r: 1 },
+  "SUNKEN GATE": { t: 30, r: 1 },
+  "RELAY": { t: 35, r: 2 },
+  "SWITCHBOARD": { t: 35, r: 2 },
+  "GLASS WALL": { t: 25, r: 1 },
+  "UNDER GLASS": { t: 40, r: 2 },
+  "TRAPDOOR": { t: 25, r: 1 },
+  "UPDRAFT": { t: 30, r: 1 },
+  "CEILING PLATE": { t: 35, r: 2 },
+  "HIGH PLATE": { t: 35, r: 2 },
+  "TWO KEYS": { t: 35, r: 2 },
+  "TWIN ECHOES": { t: 35, r: 2 },
+  "LANTERN LIFT": { t: 35, r: 2 },
+  "FERRY": { t: 35, r: 1 },
+  "LIFT": { t: 45, r: 3 },
+  "SLUICE": { t: 30, r: 1 },
+  "TRAMPOLINE": { t: 30, r: 1 },
+  "BOUNCE COURSE": { t: 30, r: 1 },
+  "SKYHOOK": { t: 25, r: 1 },
+  "TWO STAGES": { t: 55, r: 3 },
+  "FERRY LIGHT": { t: 65, r: 3 },
+  "HIGH WATER": { t: 45, r: 2 },
+  "BREEZE": { t: 25, r: 1 },
+  "LOW TUNNEL": { t: 25, r: 1 },
+  "TAILWIND": { t: 25, r: 1 },
+  "LEAPFROG": { t: 35, r: 1 },
+  "SECOND WIND": { t: 45, r: 3 },
+  "TAXI": { t: 45, r: 3 },
+  "DELIVERY": { t: 30, r: 2 },
+  "LANTERN WIND": { t: 30, r: 2 },
+  "SAIL": { t: 35, r: 2 },
+  "THE BEACON": { t: 60, r: 4 },
+};
+for (const l of LEVELS) l.par = PAR[l.name];

@@ -13,7 +13,7 @@ const RAMP = 24;
 const PED_W = 26, PED_H = 4; // spawn slab
 const STEP = 5;              // small ledges up to this tall are stepped onto without a jump
 const SPRING_V = 600, SPRING_V_HELD = 720; // bounce speeds (about 120 and 173 px high)
-const GUST_R = 72, GUST_ACC = 700, GUST_V = 120, WIND_DECAY = 300;
+const GUST_R = 72, GUST_ACC = 900, GUST_V = 170, GUST_GROUND = 90, WIND_DECAY = 300;
 
 const KINDS = {
   shade: { name: "SHADE", color: "#8fb4ff", blurb: "HOLDS PLATES AND IS SOLID TO STAND ON." },
@@ -466,7 +466,9 @@ function stepPlayer() {
     if (dx * dx + dy * dy <= w.r * w.r) windTarget += w.dir * GUST_V;
   }
   windTarget = Math.max(-GUST_V, Math.min(GUST_V, windTarget));
-  const wacc = windTarget !== 0 ? GUST_ACC : WIND_DECAY;
+  // On the ground the wind only helps or hinders while you move, and never beats your running speed.
+  if (p.onGround) windTarget = dir === 0 ? 0 : Math.max(-GUST_GROUND, Math.min(GUST_GROUND, windTarget));
+  const wacc = windTarget !== 0 ? GUST_ACC : (p.onGround ? GUST_ACC : WIND_DECAY);
   if (p.windV < windTarget) p.windV = Math.min(windTarget, p.windV + wacc * DT);
   else if (p.windV > windTarget) p.windV = Math.max(windTarget, p.windV - wacc * DT);
 
@@ -491,10 +493,16 @@ function stepPlayer() {
   if (along > MAXFALL) p.vy = MAXFALL * g;
   else if (along < -900) p.vy = -900 * g;
 
-  if (p.stand) { p.x += p.stand.dx; p.y += p.stand.dy; }
+  const prevStand = p.stand;
+  if (prevStand) { p.x += prevStand.dx; p.y += prevStand.dy; }
   p.stand = null;
 
   const solids = buildSolids(p, true, g);
+  // Resolve the echo you were standing on first, so overlapping echoes never steal the rider.
+  if (prevStand) {
+    const k = solids.findIndex((s) => s.src === prevStand);
+    if (k > 0) solids.unshift(solids.splice(k, 1)[0]);
+  }
 
   const evx = p.vx + p.windV;
   p.x += evx * DT;
@@ -528,7 +536,8 @@ function stepPlayer() {
         }
         if (g > 0) hitDown = true; else hitUp = true;
         p.vy = 0;
-        p.stand = s.src;
+        // Keep riding the echo you were already on if two overlap.
+        if (!p.stand || s.src === prevStand) p.stand = s.src;
       }
       continue;
     }
