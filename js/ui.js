@@ -876,15 +876,21 @@ const App = (() => {
   document.addEventListener("webkitfullscreenchange", onFullscreenChange);
 
   // ---------------------------------------------------------------- loop
-  let last = performance.now(), acc = 0;
+  let last = performance.now(), acc = 0, frameErrors = 0;
   function frame(now) {
     acc += Math.min(0.1, (now - last) / 1000);
     last = now;
-    while (acc >= DT) {
-      if (!window.__manual) update();
-      acc -= DT;
+    // A thrown error must not end the loop: before this, one bad frame froze the screen on a half-painted picture.
+    try {
+      while (acc >= DT) {
+        if (!window.__manual) update();
+        acc -= DT;
+      }
+      render();
+    } catch (e) {
+      acc = 0;
+      if (frameErrors++ < 5) console.error(e);
     }
-    render();
     requestAnimationFrame(frame);
   }
 

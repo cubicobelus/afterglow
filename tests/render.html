@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Render tests</title>
+<style>
+  body { font: 14px ui-monospace, Consolas, monospace; background: #111; color: #ddd; padding: 16px; }
+  .ok { color: #7fdc8a; } .bad { color: #ff7b72; }
+  canvas { display: none; }
+</style>
+</head>
+<body>
+<h1>Every level draws without errors while its solution plays</h1>
+<pre id="out">running...</pre>
+<canvas id="c" width="640" height="360"></canvas>
+<script src="../js/levels.js"></script>
+<script src="../js/font.js"></script>
+<script src="../js/engine.js"></script>
+<script src="../js/render.js"></script>
+<script src="bot.js"></script>
+<script src="solutions.js"></script>
+<script>
+  // A drawing error freezes the real game on a half-painted frame, so draw the world and the HUD while each
+  // scripted solution plays, then again at many clock values with every echo at rest (the spawn slab cycles
+  // through the echoes). Optional ?only=3,5 picks levels by index. Results are in window.RESULTS.
+  const only = (new URLSearchParams(location.search).get("only") || "").split(",").filter(Boolean).map(Number);
+  const ctx = document.getElementById("c").getContext("2d");
+  window.RESULTS = [];
+  let html = "";
+  const realTick = Game.tick;
+  for (let i = 0; i < LEVELS.length; i++) {
+    if (only.length && !only.includes(i)) continue;
+    const name = LEVELS[i].name;
+    let err = null, frames = 0, T = 0;
+    Game.tick = () => {
+      realTick();
+      T++;
+      if (T % 5 === 0 && !err) {
+        try { Render.world(ctx, T); Render.hud(ctx, T, "1-1"); frames++; } catch (e) { err = e; }
+      }
+    };
+    try {
+      Bot.load(i);
+      if (SOLUTIONS[name]) SOLUTIONS[name]();
+      Bot.run(2);
+    } catch (e) { /* a failing solution is reported by index.html, not here */ }
+    Game.tick = realTick;
+    if (!err) {
+      for (let k = 0; k < 60 && !err; k++) {
+        try { Render.world(ctx, k * 35); Render.hud(ctx, k * 35, "1-1"); frames++; } catch (e) { err = e; }
+      }
+    }
+    const ok = !err;
+    RESULTS.push({ name, ok, info: ok ? frames + " frames" : err.message });
+    html += '<span class="' + (ok ? "ok" : "bad") + '">' + (ok ? "PASS " : "FAIL ") + (i + 1) + " " + name + " - " + (ok ? frames + " frames" : err.message + " | " + String(err.stack).split("\n").slice(0, 3).join(" | ")) + "</span>\n";
+  }
+  document.getElementById("out").innerHTML = html;
+</script>
+</body>
+</html>

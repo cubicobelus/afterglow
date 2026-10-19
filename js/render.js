@@ -720,7 +720,8 @@ const Render = (() => {
   function drawPedestal(ctx, L, t) {
     const pal = CHAPTERS[L.chapter].pal, ped = L.ped, sp = L.spawn;
     const cx = Math.round(sp.x + PW / 2), fy = ped.y;
-    const kinds = Object.keys(G.echoes);
+    // Echo keys can be "shade2", so ask each echo for its kind.
+    const kinds = Object.values(G.echoes).map((e) => e.kind);
     // a plain gray slab
     ctx.fillStyle = "#4b515e";
     ctx.fillRect(ped.x, ped.y, ped.w, ped.h);
