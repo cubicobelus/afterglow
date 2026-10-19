@@ -10,7 +10,7 @@ const App = (() => {
   // ---------------------------------------------------------------- save
   const SAVE_KEY = "afterglow.save";
   const SETTINGS_KEY = "afterglow.settings";
-  const SAVE_VERSION = 2;
+  const SAVE_VERSION = 3;
   let save = { done: [], best: {}, stars: {}, lanterns: {}, seen: {} };
   let hadSave = false;
   try {
@@ -20,23 +20,38 @@ const App = (() => {
   function persist() {
     try { localStorage.setItem(SAVE_KEY, JSON.stringify(save)); } catch (e) { /* ignore */ }
   }
-  // Saves from the first release are keyed by the old level order. Carry them over by level name.
+  // Saves are keyed by level number, so when the level list changes the old result has to follow its level by name.
   if (hadSave && (!save.v || save.v < SAVE_VERSION)) {
-    const OLD_ORDER = ["FIRST STEPS", "THE PLATE", "BOOST", "STEPPING STONE", "LAMPLIGHT", "THORN HALL", "SUNKEN GATE", "RELAY", "SWITCHBOARD",
-      "GLASS WALL", "UNDER GLASS", "TRAPDOOR", "UPDRAFT", "CEILING PLATE", "HIGH PLATE", "TWO KEYS", "TWIN ECHOES", "LANTERN LIFT",
-      "FERRY", "LIFT", "SLUICE", "TRAMPOLINE", "BOUNCE COURSE", "SKYHOOK", "TWO STAGES", "FERRY LIGHT", "HIGH WATER",
-      "BREEZE", "LOW TUNNEL", "TAILWIND", "LEAPFROG", "SECOND WIND", "TAXI", "DELIVERY", "LANTERN WIND", "SAIL", "THE BEACON"];
-    const REDESIGNED = { "THE BEACON": true, "SLUICE": true }; // same name, new puzzle: the old result no longer applies
+    const ORDERS = {
+      1: ["FIRST STEPS", "THE PLATE", "BOOST", "STEPPING STONE", "LAMPLIGHT", "THORN HALL", "SUNKEN GATE", "RELAY", "SWITCHBOARD",
+        "GLASS WALL", "UNDER GLASS", "TRAPDOOR", "UPDRAFT", "CEILING PLATE", "HIGH PLATE", "TWO KEYS", "TWIN ECHOES", "LANTERN LIFT",
+        "FERRY", "LIFT", "SLUICE", "TRAMPOLINE", "BOUNCE COURSE", "SKYHOOK", "TWO STAGES", "FERRY LIGHT", "HIGH WATER",
+        "BREEZE", "LOW TUNNEL", "TAILWIND", "LEAPFROG", "SECOND WIND", "TAXI", "DELIVERY", "LANTERN WIND", "SAIL", "THE BEACON"],
+      2: ["FIRST STEPS", "THE PLATE", "STEPPING STONE", "TWIN PLATES", "LAMPLIGHT", "SUNKEN GATE", "RELAY", "SWITCHBOARD",
+        "GLASS WALL", "UNDER GLASS", "UPDRAFT", "CEILING PLATE", "TWO KEYS", "GHOST GLASS", "CHANDELIER", "HALL OF MIRRORS",
+        "FERRY", "LIFT", "TRAMPOLINE", "SKYHOOK", "TWO STAGES", "FERRY LIGHT", "SLUICE", "STACKED SPRINGS", "PUMP ROOM",
+        "BREEZE", "SAIL", "LEAPFROG", "SECOND WIND", "TAXI", "AFTERIMAGE", "CHORUS", "THE BEACON"],
+    };
+    // Same name but a different puzzle now: the old result no longer applies.
+    const REDESIGNED = {
+      1: { "THE BEACON": true, "SLUICE": true },
+      2: { "PUMP ROOM": true, "THE BEACON": true, "AFTERIMAGE": true },
+    };
+    // The level is the same but its lantern moved, so the old pickup no longer counts.
+    const LANTERN_MOVED = { "TRAMPOLINE": true };
+    const from = save.v || 1;
+    const order = ORDERS[from] || ORDERS[2];
+    const redesigned = REDESIGNED[from] || REDESIGNED[2];
     const where = {};
     LEVELS.forEach((l, i) => { where[l.name] = i; });
     const moved = { v: SAVE_VERSION, done: [], best: {}, stars: {}, lanterns: {}, seen: save.seen || {} };
-    OLD_ORDER.forEach((name, oi) => {
-      const ni = REDESIGNED[name] ? undefined : where[name];
+    order.forEach((name, oi) => {
+      const ni = redesigned[name] ? undefined : where[name];
       if (ni === undefined) return;
       if (save.done && save.done[oi]) moved.done[ni] = true;
       if (save.best && save.best[oi] !== undefined) moved.best[ni] = save.best[oi];
       if (save.stars && save.stars[oi]) moved.stars[ni] = save.stars[oi];
-      if (save.lanterns && save.lanterns[oi]) moved.lanterns[ni] = save.lanterns[oi];
+      if (save.lanterns && save.lanterns[oi] && !LANTERN_MOVED[name]) moved.lanterns[ni] = save.lanterns[oi];
     });
     save = moved;
     persist();

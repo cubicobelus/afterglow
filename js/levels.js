@@ -384,22 +384,35 @@ def(2, "STACKED SPRINGS", {
   g.set(3, 11, "L").set(11, 5, "L").set(19, 11, "L");
 });
 
-def(2, "PUMP ROOM", {
-  echoes: ["shade", "shade", "tide", "glow"], recMax: 24, dark: true,
-  hint: "ONCE AN ECHO HAS DONE ITS JOB, DOES IT HAVE TO STAY?",
+def(2, "SLINGSHOT", {
+  echoes: ["glow", "spring"], recMax: 24, dark: true,
+  hint: "ONE ECHO CAN BE THE FERRY AND THE LAUNCHER. THE LIGHT HAS TO BE IN TWO PLACES, SO IT CANNOT STAY IN THE FIRST.",
 }, (g) => {
   g.base();
   g.set(2, 14, "@");
-  g.set(8, 10, "=");
-  g.fill(9, 10, 30, 14, "#");
-  g.set(16, 9, "a").set(19, 9, "a");
-  g.fill(23, 1, 23, 6, "#").fill(23, 7, 23, 9, "A");
-  g.fill(26, 1, 26, 6, "#").fill(26, 7, 26, 9, "G");
-  g.fill(28, 8, 28, 9, "X");
-  g.set(4, 11, "L").set(11, 6, "L").set(17, 5, "L");
+  g.pit(5, 12).fill(5, 14, 12, 14, "~");
+  g.fill(24, 7, 30, 14, "#");
+  g.fill(27, 1, 27, 6, "G");
+  g.fill(29, 5, 29, 6, "X");
+  g.set(14, 5, "o");
+  g.set(2, 7, "L").set(13, 5, "L").set(20, 9, "L");
 });
 
-// ================================================================ tier 4: the beacon
+def(2, "PUMP ROOM", {
+  echoes: ["shade", "shade", "tide", "glow"], recMax: 24, dark: true,
+  hint: "ONCE AN ECHO HAS DONE ITS JOB, DOES IT HAVE TO STAY? A STEP DOES NOT HAVE TO TOUCH THE FLOOR.",
+}, (g) => {
+  g.base();
+  g.set(2, 14, "@");
+  g.set(8, 8, "=");
+  g.fill(9, 8, 30, 14, "#");
+  g.set(16, 7, "a").set(19, 7, "a");
+  g.fill(23, 1, 23, 4, "#").fill(23, 5, 23, 7, "A");
+  g.fill(26, 1, 26, 4, "#").fill(26, 5, 26, 7, "G");
+  g.fill(28, 6, 28, 7, "X");
+  g.set(4, 11, "L").set(11, 5, "L").set(17, 4, "L");
+});
+
 def(3, "BREEZE", {
   unlock: "gust", echoes: ["gust"], recMax: 8,
   hint: "A GUST BLOWS THE WAY YOU FACED WHEN YOU STOPPED. STAND AT THE EDGE FACING THE GAP, THEN JUMP INTO THE WIND.",
@@ -421,6 +434,18 @@ def(3, "SAIL", {
   g.pit(9, 18);
   g.fill(28, 13, 28, 14, "X");
   g.set(5, 8, "L").set(14, 5, "L").set(25, 8, "L");
+});
+
+def(3, "GALLOP", {
+  echoes: ["shade", "gust"], recMax: 24,
+  hint: "A GUST THAT CARRIES YOU CAN STILL BLOW WHEN IT STOPS. THE SHADE ONLY HAS TO BE A STEP WHILE YOU RECORD.",
+}, (g) => {
+  g.base();
+  g.set(2, 14, "@");
+  g.pit(5, 11).pit(17, 22);
+  g.set(25, 14, "a").fill(27, 1, 27, 8, "#").fill(27, 9, 27, 14, "A");
+  g.fill(29, 13, 29, 14, "X");
+  g.set(3, 9, "L").set(14, 9, "L").set(24, 9, "L");
 });
 
 def(3, "LEAPFROG", {
@@ -447,33 +472,32 @@ def(3, "SECOND WIND", {
   g.set(5, 9, "L").set(22, 1, "L");
 });
 
-def(3, "TAXI", {
-  echoes: ["shade", "tide"], recMax: 14, dark: true, swap: true,
-  hint: "THE BRIDGE NEEDS A HELD PLATE. YOU CAN BE WHEREVER YOUR ECHO IS.",
+def(3, "WAYPOINT", {
+  echoes: ["phase", "shade"], recMax: 24, swap: true,
+  hint: "A SWAP DOES NOT CARE ABOUT WALLS. AND A WALL IS ONLY IN THE WAY WHILE IT IS THERE.",
 }, (g) => {
   g.base();
   g.set(2, 14, "@");
-  g.set(4, 14, "a");
-  g.set(7, 14, "b");
-  g.pit(10, 24);
-  g.fill(10, 14, 24, 14, "~");
-  g.set(12, 10, "P").set(19, 10, "P").set(23, 10, "P");
-  g.fill(28, 1, 28, 12, "#");
-  g.fill(28, 13, 28, 14, "B");
-  g.fill(30, 13, 30, 14, "X");
+  g.fill(11, 8, 27, 8, "#");
+  g.fill(11, 9, 12, 14, "%");
+  g.fill(27, 9, 27, 14, "#");
+  g.fill(22, 9, 23, 14, "%");
+  g.fill(25, 13, 25, 14, "X");
+  g.set(5, 9, "L").set(16, 12, "L");
 });
 
 def(3, "AFTERIMAGE", {
-  echoes: ["glow", "phase", "shade"], recMax: 24, dark: true,
-  hint: "THE THORNS ARE ONLY SAFE WHILE LIT. WHAT YOU RECORDED CROSSING THEM STILL WALKS THERE.",
+  echoes: ["glow", "phase", "shade"], recMax: 28, dark: true,
+  hint: "THE THORNS ARE ONLY SAFE WHILE LIT. WHAT YOU RECORDED CROSSING THEM STILL WALKS THERE. NOTHING SAYS WHICH ECHO HAS TO CARRY YOU.",
 }, (g) => {
   g.base();
   g.set(2, 14, "@");
   g.fill(6, 14, 11, 14, "t");
   g.fill(14, 14, 19, 14, "t");
   g.fill(22, 1, 23, 14, "%");
-  g.fill(26, 1, 26, 8, "#").fill(26, 9, 26, 14, "G");
-  g.fill(29, 13, 29, 14, "X");
+  g.set(24, 14, "a").fill(26, 1, 26, 8, "#").fill(26, 9, 26, 14, "A");
+  g.fill(28, 1, 28, 8, "#").fill(28, 9, 28, 14, "G");
+  g.fill(30, 13, 30, 14, "X");
   g.set(8, 11, "L").set(17, 6, "L").set(5, 12, "L");
 });
 
@@ -484,7 +508,9 @@ def(3, "CHORUS", {
   g.base();
   g.set(2, 14, "@");
   g.pit(6, 11).pit(15, 20);
-  g.fill(1, 8, 5, 9, "#").fill(12, 8, 14, 9, "#").fill(21, 8, 26, 9, "#").fill(30, 8, 30, 9, "#");
+  // The slab is one piece, so the two floors are shut off from each other. The upper gaps are shallow spike beds.
+  g.fill(1, 8, 26, 9, "#").fill(30, 8, 30, 9, "#");
+  g.fill(6, 8, 11, 8, "^").fill(15, 8, 20, 8, "^");
   g.set(28, 14, "a");
   g.fill(23, 1, 23, 3, "#").fill(23, 4, 23, 7, "A");
   g.fill(2, 6, 2, 7, "X");
@@ -493,21 +519,20 @@ def(3, "CHORUS", {
 });
 
 def(3, "THE BEACON", {
-  echoes: ["phase", "glow", "tide", "shade", "flip"], recMax: 40, dark: true,
-  hint: "THE LAMP IS AT THE TOP. THE TIDE KNOWS THE WAY, BUT IT CANNOT OPEN WHAT ONLY LIGHT OR GLASS WILL OPEN.",
+  echoes: ["glow", "phase", "tide", "shade"], recMax: 40, dark: true,
+  hint: "WHAT YOU NEED TO RECORD IS NOT ALWAYS WHAT YOU NEED TO FINISH.",
 }, (g) => {
   g.base();
   g.set(2, 14, "@");
-  g.fill(5, 1, 6, 14, "%");
-  g.fill(8, 14, 14, 14, "~").pit(8, 14);
-  g.fill(8, 14, 14, 14, "~");
-  g.set(16, 14, "a").fill(18, 10, 18, 14, "A");
-  g.set(20, 14, "b").fill(22, 10, 22, 14, "B");
-  g.fill(24, 10, 24, 14, "G");
-  g.fill(28, 9, 30, 14, "#");
-  g.fill(29, 7, 29, 8, "X");
-  g.set(10, 10, "o");
-  g.set(3, 10, "L").set(12, 6, "L").set(19, 4, "L");
+  g.pit(5, 11).fill(5, 14, 11, 14, "~");
+  g.fill(13, 15, 15, 15, "%").fill(13, 16, 15, 16, ".").set(14, 16, "c");
+  g.set(16, 14, "a").fill(18, 1, 18, 8, "#").fill(18, 9, 18, 14, "A");
+  g.set(20, 14, "b").fill(22, 1, 22, 8, "#").fill(22, 9, 22, 14, "B");
+  g.fill(24, 1, 24, 8, "#").fill(24, 9, 24, 14, "G");
+  g.fill(26, 1, 26, 8, "#").fill(26, 9, 26, 14, "C");
+  g.fill(28, 1, 29, 14, "%");
+  g.fill(30, 13, 30, 14, "X");
+  g.set(3, 10, "L").set(9, 6, "L").set(14, 9, "L").set(17, 5, "L");
 });
 
 // Par for the two bonus stars: finish under par.t seconds, and use no more than par.r recordings.
@@ -537,14 +562,16 @@ const PAR = {
   "FERRY LIGHT": { t: 45, r: 3 },
   "SLUICE": { t: 30, r: 3 },
   "STACKED SPRINGS": { t: 40, r: 3 },
-  "PUMP ROOM": { t: 70, r: 6 },
+  "SLINGSHOT": { t: 55, r: 4 },
+  "PUMP ROOM": { t: 75, r: 6 },
   "BREEZE": { t: 15, r: 1 },
+  "GALLOP": { t: 35, r: 3 },
   "LEAPFROG": { t: 25, r: 1 },
   "SECOND WIND": { t: 35, r: 3 },
-  "TAXI": { t: 35, r: 3 },
-  "AFTERIMAGE": { t: 45, r: 4 },
+  "WAYPOINT": { t: 35, r: 3 },
+  "AFTERIMAGE": { t: 55, r: 4 },
   "CHORUS": { t: 100, r: 6 },
-  "THE BEACON": { t: 80, r: 6 },
+  "THE BEACON": { t: 90, r: 6 },
   "SAIL": { t: 25, r: 2 },
 };
 for (const l of LEVELS) l.par = PAR[l.name];
