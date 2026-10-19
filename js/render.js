@@ -965,9 +965,33 @@ const Render = (() => {
     ctx.fillRect(x - 3, y + 3, 6, 1);
   }
 
+  // Two arrows pointing opposite ways: the swap ability. (x, y) is the centre; 9 by 7 pixels.
+  function drawSwapIcon(ctx, x, y, color) {
+    ctx.fillStyle = color;
+    ctx.fillRect(x - 4, y - 2, 7, 1);
+    ctx.fillRect(x + 2, y - 3, 1, 3);
+    ctx.fillRect(x + 3, y - 2, 1, 1);
+    ctx.fillRect(x - 2, y + 2, 7, 1);
+    ctx.fillRect(x - 2, y + 1, 1, 3);
+    ctx.fillRect(x - 3, y + 2, 1, 1);
+  }
+
   function hud(ctx, T, num) {
     const L = G.L;
     Font.draw(ctx, num + "  " + L.name, 8, 6, { scale: 1, color: "#e8e2d0" });
+    if (L.swap) {
+      // swap is an ability some levels switch on, not an echo, so it gets its own chip away from the echo slots
+      const kq = keyName(Input.bind.swap[0]);
+      const label = "SWAP " + kq;
+      const w = 20 + label.length * 6;
+      ctx.fillStyle = "rgba(6,8,16,0.75)";
+      ctx.fillRect(8, 18, w, 13);
+      ctx.strokeStyle = "rgba(255,255,255,0.65)";
+      ctx.lineWidth = 1;
+      ctx.strokeRect(8.5, 18.5, w - 1, 12);
+      drawSwapIcon(ctx, 18, 24, "#ffffff");
+      Font.draw(ctx, label, 28, 21, { scale: 1, color: "#ffffff", shadow: null });
+    }
     if (L.echoes.length) {
       const n = L.echoes.length, bw = n > 5 ? 72 : 76, gap = n > 5 ? 3 : 6;
       const total = n * bw + (n - 1) * gap;
@@ -1017,5 +1041,5 @@ const Render = (() => {
     if (L.lanterns.length) drawLanternIcon(ctx, W - 14, 28, G.lanternsGot > 0);
   }
 
-  return { world, hud, bake, drawActor, drawFlame, glowAt, drawLanternIcon, slotIcon, EMBLEMS, PLAYER_LOOK, rgba, tint, mulberry, hash };
+  return { world, hud, bake, drawSwapIcon, drawActor, drawFlame, glowAt, drawLanternIcon, slotIcon, EMBLEMS, PLAYER_LOOK, rgba, tint, mulberry, hash };
 })();

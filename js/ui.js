@@ -125,7 +125,7 @@ const App = (() => {
   // ---------------------------------------------------------------- cards
   // Cards show once ever: a tier card on its first level, and an echo card on the level that unlocks it.
   const ABILITIES = {
-    swap: { name: "SWAP", color: "#ffffff", blurb: "PRESS " + "Q" + " TO TRADE PLACES WITH THE SELECTED ECHO. IT TAKES YOUR SPOT.", emblem: null },
+    swap: { name: "SWAP", color: "#ffffff", blurb: "PRESS Q TO TRADE PLACES WITH THE SELECTED ECHO. IT TAKES YOUR SPOT.", emblem: null },
   };
 
   function cardsFor(i) {
@@ -599,6 +599,7 @@ const App = (() => {
           ctx.beginPath(); ctx.arc(x + 22, y + 22, 3.5, Math.PI, 0); ctx.stroke();
         }
         if (lanternLevels[i]) Render.drawLanternIcon(ctx, x + tw - 9, y + th - 11, !!save.lanterns[i]);
+        if (LEVELS[i].swap) Render.drawSwapIcon(ctx, x + 9, y + th - 9, open ? "#ffffff" : "#4d5468");
         hits.push({ x, y, w: tw, h: th, level: i });
       });
     }
@@ -628,16 +629,20 @@ const App = (() => {
     } else {
       const info = c.kind === "swap" ? ABILITIES.swap : KINDS[c.kind];
       const color = info.color;
-      Font.draw(ctx, c.kind === "swap" ? "NEW ABILITY" : "NEW ECHO", W / 2, 60, { scale: 1, color: "#8d96ad", align: "center" });
+      Font.draw(ctx, c.kind === "swap" ? "NEW ABILITY, NOT AN ECHO" : "NEW ECHO", W / 2, 60, { scale: 1, color: "#8d96ad", align: "center" });
       const pat = Render.EMBLEMS[c.kind];
       if (pat) {
         ctx.fillStyle = color;
         for (let r = 0; r < 5; r++) for (let k = 0; k < 5; k++) if (pat[r][k] === "#") ctx.fillRect(W / 2 - 25 + k * 10, 84 + r * 10, 10, 10);
       } else {
-        Font.draw(ctx, "Q", W / 2, 90, { scale: 6, color, align: "center" });
+        ctx.save();
+        ctx.translate(W / 2, 108);
+        ctx.scale(6, 6);
+        Render.drawSwapIcon(ctx, 0, 0, color);
+        ctx.restore();
       }
       Font.draw(ctx, info.name, W / 2, 150, { scale: 4, color, align: "center" });
-      const blurb = c.kind === "swap" ? "PRESS " + keyName(Input.bind.swap[0]) + " TO TRADE PLACES WITH THE SELECTED ECHO. IT TAKES YOUR SPOT." : info.blurb;
+      const blurb = c.kind === "swap" ? "PRESS " + keyName(Input.bind.swap[0]) + " TO TRADE PLACES WITH THE SELECTED ECHO, OF ANY KIND. IT TAKES YOUR SPOT. ONLY SOME LEVELS SWITCH IT ON: THEY SHOW THE SWAP SIGN IN THE LEVEL SELECT AND NEXT TO THE LEVEL NAME." : info.blurb;
       Font.wrap(blurb, 420, 1).forEach((l, i) => Font.draw(ctx, l, W / 2, 200 + i * 12, { scale: 1, color: "#ffe9a8", align: "center" }));
     }
     if (A.cardT > 30 && Math.floor(A.T / 30) % 2 === 0) Font.draw(ctx, "PRESS ENTER", W / 2, 300, { scale: 1, color: "#9aa3bb", align: "center" });
@@ -652,6 +657,7 @@ const App = (() => {
       if (a > 0) {
         Font.draw(ctx, levelNum[A.idx], W / 2, 96, { scale: 2, color: "#9aa3bb", align: "center", alpha: a });
         Font.draw(ctx, LEVELS[A.idx].name, W / 2, 118, { scale: 4, color: "#ffe9a8", align: "center", alpha: a });
+        if (LEVELS[A.idx].swap) Font.draw(ctx, "SWAP ON: " + keyName(Input.bind.swap[0]) + " TRADES PLACES WITH THE SELECTED ECHO", W / 2, 150, { scale: 1, color: "#ffffff", align: "center", alpha: a });
       }
     }
     const L = G.L;
