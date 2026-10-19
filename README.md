@@ -35,7 +35,7 @@ what you recorded earlier can carry you or lead you through doors.
 | Spring | Bounces you high when you land on it. Hold jump for a bigger bounce. |
 | Gust | Blows a wind the way it was facing, which carries a jump much farther. |
 
-Late in the game you can also press **Q** to **swap** places with an echo.
+**Swap** is an ability, not an echo. Press **Q** to trade places with the picked echo, whatever kind it is. Only some levels switch it on, and those show a swap sign beside the level name and on the level select.
 
 Every level also scores up to three stars: finishing it, beating its par time, and using no more recordings than
 its par. A few levels hide a lantern worth finding.
@@ -48,7 +48,7 @@ its par. A few levels hide a lantern worth finding.
 | Jump | Space, Up or W |
 | Record, stop | E |
 | Pick an echo slot | 1 to 7 |
-| Swap places with the picked echo (late game) | Q |
+| Swap places with the picked echo (only on swap levels) | Q |
 | Restart the attempt | R |
 | Clear the picked echo | X |
 | Hint | H |
