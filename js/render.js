@@ -810,10 +810,11 @@ const Render = (() => {
       const d = p.face >= 0 ? 1 : -1;
       ctx.fillStyle = rgba(k.color, 0.55);
       for (let i = 0; i < 3; i++) {
+        // a chevron whose point leads: tall at the back, a single pixel at the front
         const ax = cx + d * (14 + i * 9 + ((t * 0.5) % 9)), ay = cy - 2;
-        ctx.fillRect(Math.round(ax), Math.round(ay), 1, 5);
+        ctx.fillRect(Math.round(ax - 2 * d), Math.round(ay), 1, 5);
         ctx.fillRect(Math.round(ax - d), Math.round(ay + 1), 1, 3);
-        ctx.fillRect(Math.round(ax - 2 * d), Math.round(ay + 2), 1, 1);
+        ctx.fillRect(Math.round(ax), Math.round(ay + 2), 1, 1);
       }
     }
     ctx.restore();
@@ -1000,6 +1001,10 @@ const Render = (() => {
         ctx.fillStyle = frac > 0.8 ? "#ff6b6b" : KINDS[G.rec.kind].color;
         ctx.fillRect(bx, 6, Math.round(bwid * frac), 5);
         Font.draw(ctx, "RECORDING  " + keyName(Input.bind.record[0]) + " TO STOP", W / 2, 15, { scale: 1, color: "#ffd0d0", align: "center" });
+      }
+      if (G.notice && G.notice.t > 0) {
+        const a = Math.min(1, G.notice.t / 30);
+        Font.draw(ctx, G.notice.text, W / 2, H - 54, { scale: 1, color: "#ffb0b0", align: "center", alpha: a });
       }
       const kn = (name) => keyName(Input.bind[name][0]);
       // The clear hint only appears once there is an echo to clear.

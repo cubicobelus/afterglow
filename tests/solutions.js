@@ -478,6 +478,22 @@ SOLUTIONS["LIFT"] = () => {
 };
 
 SOLUTIONS["TRAMPOLINE"] = () => {
+  // The lantern hangs top left. A held bounce straight up from a spring there reaches it; the spring is then
+  // recorded again at the foot of the ledge.
+  Bot.record("spring");
+  Bot.walkTo(70);
+  Bot.run(6);
+  Bot.stop();
+  Bot.walkTo(70);
+  Bot.waitUntil(restOf("spring"), 600, "the spring to settle");
+  Bot.jumpKey(true);
+  for (let i = 0; i < 160 && G.lanternsGot < 1; i++) {
+    Bot.dir(Math.abs(70 - Bot.px()) < 3 ? 0 : Math.sign(70 - Bot.px()));
+    Bot.tick();
+  }
+  Bot.jumpKey(false);
+  Bot.dir(0);
+  Bot.expect(G.lanternsGot === 1, "the lantern top left");
   Bot.record("spring");
   Bot.walkTo(372);
   Bot.run(6);
@@ -486,8 +502,6 @@ SOLUTIONS["TRAMPOLINE"] = () => {
   Bot.waitUntil(restOf("spring"), 600, "the spring to settle");
   jumpToSpring(372, 1);
   Bot.expect(G.p.y < 130, "up on the ledge");
-  Bot.walkTo(470);
-  Bot.jumpTo(470, 24); // the lantern high over the ledge
   Bot.walkTo(570);
 };
 

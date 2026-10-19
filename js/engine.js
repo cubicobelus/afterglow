@@ -102,7 +102,7 @@ const G = {
   L: null, t: 0, p: null, echoes: {}, rec: null, sel: 0,
   lights: [], flips: [], phases: [], winds: [],
   dead: false, deadT: 0, won: false, winT: 0,
-  deaths: 0, time: 0, recCount: 0, swapCd: 0, lanternsGot: 0,
+  deaths: 0, time: 0, recCount: 0, swapCd: 0, lanternsGot: 0, notice: null,
   particles: [], shake: 0, onWin: null,
 };
 
@@ -334,10 +334,25 @@ function startRec() {
   SFX("recStart");
 }
 
+// A tide that barely moves would just be a second shade, so it has to travel at least this far.
+const TIDE_MIN_TRAVEL = 40;
+function travelled(trace) {
+  let far = 0;
+  for (const s of trace) far = Math.max(far, Math.hypot(s.x - trace[0].x, s.y - trace[0].y));
+  return far;
+}
+
 function stopRec() {
   const r = G.rec;
   if (!r) return;
   G.rec = null;
+  if (r.kind === "tide" && r.trace.length >= MIN_REC && travelled(r.trace) < TIDE_MIN_TRAVEL) {
+    if (r.prev) G.echoes[r.key] = r.prev;
+    G.notice = { text: "A TIDE HAS TO TRAVEL", t: 150 };
+    SFX("nope");
+    restartAttempt();
+    return;
+  }
   if (r.trace.length >= MIN_REC) {
     G.echoes[r.key] = makeEcho(r.kind, r.trace, r.key);
     G.recCount++;
@@ -506,7 +521,13 @@ function stepPlayer() {
   else if (along < -900) p.vy = -900 * g;
 
   const prevStand = p.stand;
-  if (prevStand) { p.x += prevStand.dx; p.y += prevStand.dy; }
+  if (prevStand) {
+    p.x += prevStand.dx; p.y += prevStand.dy;
+    // An echo ignores walls but you do not: if the ride would push you into one (a jump into a low ceiling), let go
+    // instead of being shoved through it onto the far side.
+    const probe = buildSolids(p, false, g);
+    if (probe.some((o) => !o.ow && overlap(p, o))) { p.x -= prevStand.dx; p.y -= prevStand.dy; }
+  }
   p.stand = null;
 
   const solids = buildSolids(p, true, g);
@@ -644,6 +665,7 @@ function tick() {
   }
   G.time += DT;
   if (G.swapCd > 0) G.swapCd--;
+  if (G.notice && G.notice.t > 0) G.notice.t--;
   handleActions();
   if (G.dead) return;
   updateEchoes();
@@ -702,6 +724,7 @@ const Game = {
     G.won = false;
     G.winT = 0;
     G.swapCd = 0;
+    G.notice = null;
     G.particles.length = 0;
     G.shake = 0;
     restartAttempt();

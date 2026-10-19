@@ -194,3 +194,34 @@ mech("two gusts of opposite facing both blow", () => {
   ensure(G.winds.length === 2, "two winds active, got " + G.winds.length);
   ensure(G.winds.some((w) => w.dir === 1) && G.winds.some((w) => w.dir === -1), "one blows each way");
 });
+
+mech("riding an echo that jumps into a low ceiling does not carry you through it", () => {
+  Bot.load(tiny({ echoes: ["shade"], recMax: 8 }, (g) => { g.base(); g.fill(1, 1, 30, 11, "#"); g.set(2, 14, "@"); }));
+  Bot.record(0);
+  Bot.run(60); // wait at the start so it can be boarded
+  Bot.jumpKey(true);
+  Bot.run(8); // then jump into the ceiling
+  Bot.jumpKey(false);
+  Bot.run(30);
+  Bot.stop();
+  Bot.run(5);
+  Bot.jumpTo(Bot.px(), 6);
+  ensure(G.p.stand === G.echoes.shade, "boarded the shade");
+  let minY = 1e9;
+  for (let i = 0; i < 140; i++) { Bot.tick(); minY = Math.min(minY, G.p.y); }
+  ensure(!G.dead, "still alive");
+  ensure(minY >= 239, "the rider was pushed into or above the ceiling (top at " + Math.round(minY) + ")");
+});
+
+mech("a tide that stays put is refused, so it cannot stand in for a shade", () => {
+  Bot.load(tiny({ echoes: ["tide"], recMax: 8 }, (g) => { g.base(); g.set(2, 14, "@"); g.set(2, 13, "a"); }));
+  Bot.record(0);
+  Bot.run(60);
+  Bot.stop();
+  ensure(!G.echoes.tide, "a tide that never moved should not be kept");
+  Bot.record(0);
+  Bot.walkTo(150);
+  Bot.run(6);
+  Bot.stop();
+  ensure(G.echoes.tide, "a tide that travelled is kept");
+});
