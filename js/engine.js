@@ -548,6 +548,11 @@ function stepPlayer() {
         const up = { x: p.x, y: s.y - PH, w: PW, h: PH };
         if (!solids.some((o) => !o.ow && overlap(up, o))) { p.y = up.y; continue; }
       }
+      // A player already overlapping a wall by a pixel or two vertically (pressed into a ceiling, say) must be pushed out
+      // vertically. Pushing sideways would move them to the far end of the whole wall.
+      const xPen = evx > 0 ? p.x + PW - s.x : s.x + s.w - p.x;
+      const yPen = Math.min(p.y + PH - s.y, s.y + s.h - p.y);
+      if (yPen < xPen) continue;
       p.x = evx > 0 ? s.x - PW : s.x + s.w;
     }
   }

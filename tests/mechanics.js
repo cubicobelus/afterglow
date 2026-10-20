@@ -239,6 +239,16 @@ mech("an echo that presses a rider a pixel into a ceiling does not throw the rid
   ensure(G.p.y > 230 && G.p.y < 260, "the rider ended at y " + Math.round(G.p.y) + ", through the slab");
 });
 
+mech("a player pressed a pixel into a wide ceiling is pushed out downward, not thrown to its end", () => {
+  Bot.load(tiny({ echoes: [] }, (g) => { g.base(); g.fill(1, 1, 30, 11, "#"); g.set(2, 14, "@"); }));
+  G.p.x = 300; G.p.y = 239; G.p.vy = 0;
+  Bot.dir(-1);
+  Bot.run(4);
+  Bot.dir(0);
+  ensure(Math.abs(G.p.x - 300) < 12, "thrown sideways to x " + Math.round(G.p.x));
+  ensure(G.p.y >= 239 && G.p.y < 262, "ended at y " + Math.round(G.p.y));
+});
+
 mech("a tide that stays put is refused, so it cannot stand in for a shade", () => {
   Bot.load(tiny({ echoes: ["tide"], recMax: 8 }, (g) => { g.base(); g.set(2, 14, "@"); g.set(2, 13, "a"); }));
   Bot.record(0);
