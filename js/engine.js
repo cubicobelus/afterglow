@@ -574,7 +574,11 @@ function stepPlayer() {
       }
       continue;
     }
-    if (p.vy > 0 || (p.vy === 0 && g > 0)) { p.y = s.y - PH; hitDown = true; }
+    // Push out of the wall the short way. Choosing by velocity alone threw a rider that an echo had pressed a pixel
+    // into a ceiling up onto the far side of it, through the whole slab.
+    const upPush = p.y + PH - s.y, downPush = s.y + s.h - p.y;
+    const goUp = upPush < downPush || (upPush === downPush && (p.vy > 0 || (p.vy === 0 && g > 0)));
+    if (goUp) { p.y = s.y - PH; hitDown = true; }
     else { p.y = s.y + s.h; hitUp = true; }
     p.vy = 0;
   }

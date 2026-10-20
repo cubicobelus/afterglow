@@ -226,6 +226,19 @@ mech("the level clock waits for the first control input", () => {
   ensure(G.time > 0.4 && G.time < 0.6, "the clock should have run about half a second (" + G.time + ")");
 });
 
+mech("an echo that presses a rider a pixel into a ceiling does not throw the rider over it", () => {
+  // The slab is 220 px thick. An echo whose top is 15 px under it leaves the rider overlapping the slab by a pixel;
+  // that used to be resolved as landing on top of the slab.
+  Bot.load(tiny({ echoes: ["shade"], recMax: 8 }, (g) => { g.base(); g.fill(1, 1, 30, 11, "#"); g.set(2, 14, "@"); }));
+  const trace = [];
+  for (let i = 0; i < 400; i++) trace.push({ x: 100, y: 255, f: 1, s: 0, g: 1 });
+  G.echoes.shade = makeEcho("shade", trace, "shade");
+  G.p.x = 94; G.p.y = 239; G.p.vy = 0; G.p.stand = G.echoes.shade; G.p.onGround = true;
+  for (let i = 0; i < 60; i++) Bot.tick();
+  ensure(!G.dead, "died");
+  ensure(G.p.y > 230 && G.p.y < 260, "the rider ended at y " + Math.round(G.p.y) + ", through the slab");
+});
+
 mech("a tide that stays put is refused, so it cannot stand in for a shade", () => {
   Bot.load(tiny({ echoes: ["tide"], recMax: 8 }, (g) => { g.base(); g.set(2, 14, "@"); g.set(2, 13, "a"); }));
   Bot.record(0);
