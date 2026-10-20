@@ -6,6 +6,14 @@ const App = (() => {
   const ctx = canvas.getContext("2d");
   const params = new URLSearchParams(location.search);
   const UNLOCK_ALL = params.has("unlock");
+  // Temporary dev tools: the backtick key opens a small panel with an unlock-all switch (remembered between visits).
+  const DEV_KEY = "afterglow.dev";
+  const dev = { open: false, unlockAll: false, rect: null };
+  try { dev.unlockAll = localStorage.getItem(DEV_KEY) === "1"; } catch (e) { /* storage unavailable */ }
+  function setDevUnlock(on) {
+    dev.unlockAll = on;
+    try { localStorage.setItem(DEV_KEY, on ? "1" : "0"); } catch (e) { /* ignore */ }
+  }
 
   // ---------------------------------------------------------------- save
   const SAVE_KEY = "afterglow.save";
@@ -69,7 +77,7 @@ const App = (() => {
   }
   save.v = SAVE_VERSION;
   const isDone = (i) => !!save.done[i];
-  const isUnlocked = (i) => UNLOCK_ALL || i === 0 || isDone(i - 1) || isDone(i);
+  const isUnlocked = (i) => UNLOCK_ALL || dev.unlockAll || i === 0 || isDone(i - 1) || isDone(i);
   const firstOpen = () => {
     for (let i = 0; i < LEVELS.length; i++) if (!isDone(i)) return i;
     return 0;
@@ -342,6 +350,13 @@ const App = (() => {
   // ---------------------------------------------------------------- update
   function update() {
     A.T++;
+    if (Input.hit("Backquote")) { dev.open = !dev.open; Sfx.play("ui"); Input.clear(); }
+    if (dev.open) {
+      if (Input.hitAny(["Enter", "Space"])) { setDevUnlock(!dev.unlockAll); Sfx.play("ok"); }
+      if (Input.hit("Escape")) dev.open = false;
+      Input.clear();
+      return;
+    }
     if (A.fadeTarget === 1 && A.fade < 1) A.fade = Math.min(1, A.fade + 0.07);
     else if (A.fadeTarget === 1 && A.fade >= 1) {
       const cb = A.fadeCb;
@@ -767,6 +782,24 @@ const App = (() => {
       case "complete": drawComplete(A.hits); break;
       case "ending": drawEnding(); break;
     }
+    if (dev.unlockAll && !dev.open) Font.draw(ctx, "DEV: ALL LEVELS UNLOCKED", W - 8, H - 12, { scale: 1, color: "rgba(159,227,160,0.55)", align: "right", shadow: null });
+    if (dev.open) {
+      ctx.fillStyle = "rgba(4,5,12,0.82)";
+      ctx.fillRect(0, 0, W, H);
+      const bw = 320, bh = 100, bx = Math.round((W - bw) / 2), by = Math.round((H - bh) / 2);
+      ctx.fillStyle = "rgba(18,22,44,0.97)";
+      ctx.fillRect(bx, by, bw, bh);
+      ctx.strokeStyle = "#ffe9a8";
+      ctx.lineWidth = 1;
+      ctx.strokeRect(bx + 0.5, by + 0.5, bw - 1, bh - 1);
+      Font.draw(ctx, "DEV TOOLS", W / 2, by + 10, { scale: 2, color: "#ffe9a8", align: "center" });
+      const ty = by + 46;
+      ctx.fillStyle = dev.unlockAll ? "rgba(90,200,120,0.28)" : "rgba(255,255,255,0.08)";
+      ctx.fillRect(bx + 20, ty - 5, bw - 40, 19);
+      Font.draw(ctx, "UNLOCK ALL LEVELS   " + (dev.unlockAll ? "ON" : "OFF"), W / 2, ty, { scale: 1, color: dev.unlockAll ? "#9fe3a0" : "#e8e2d0", align: "center" });
+      Font.draw(ctx, "ENTER OR CLICK TOGGLES   ` OR ESC CLOSES", W / 2, by + bh - 18, { scale: 1, color: "rgba(200,210,235,0.6)", align: "center", shadow: null });
+      dev.rect = { x: bx + 20, y: ty - 5, w: bw - 40, h: 19 };
+    }
     if (A.toast && A.T - A.toast.t < 240) {
       const a = Math.min(1, (240 - (A.T - A.toast.t)) / 40);
       const w = Font.width(A.toast.text, 1) + 20;
@@ -800,6 +833,11 @@ const App = (() => {
   canvas.addEventListener("mousedown", (e) => {
     Sfx.resume();
     const p = toCanvas(e);
+    if (dev.open) {
+      const r = dev.rect;
+      if (r && p.x >= r.x && p.x < r.x + r.w && p.y >= r.y && p.y < r.y + r.h) { setDevUnlock(!dev.unlockAll); Sfx.play("ok"); }
+      return;
+    }
     for (const h of A.hits) {
       if (p.x >= h.x && p.x < h.x + h.w && p.y >= h.y && p.y < h.y + h.h) {
         if (A.fadeTarget === 1 || A.rebind) return;
@@ -931,5 +969,5 @@ const App = (() => {
   A.fade = 0;
   requestAnimationFrame(frame);
 
-  return { state: A, startLevel, update, render, save, isUnlocked, levelNum };
+  return { state: A, dev, startLevel, update, render, save, isUnlocked, levelNum };
 })();
