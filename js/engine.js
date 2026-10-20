@@ -102,7 +102,7 @@ const G = {
   L: null, t: 0, p: null, echoes: {}, rec: null, sel: 0,
   lights: [], flips: [], phases: [], winds: [],
   dead: false, deadT: 0, won: false, winT: 0,
-  deaths: 0, time: 0, recCount: 0, swapCd: 0, lanternsGot: 0, notice: null,
+  deaths: 0, time: 0, timing: false, recCount: 0, swapCd: 0, lanternsGot: 0, notice: null,
   particles: [], shake: 0, onWin: null,
 };
 
@@ -653,6 +653,15 @@ function handleActions() {
   if (L.swap && Input.hitBind("swap")) doSwap();
 }
 
+// The level clock waits for the first real input: moving, a fresh press of a control key, or picking a slot.
+// A key still held from the menu does not count.
+function controlInput() {
+  if (Input.left() || Input.right()) return true;
+  for (const n of ["jump", "record", "swap", "restart", "clear"]) if (Input.bind[n].some((c) => Input.pressed[c])) return true;
+  for (let i = 1; i <= 9; i++) if (Input.pressed["Digit" + i] || Input.pressed["Numpad" + i]) return true;
+  return false;
+}
+
 function tick() {
   const L = G.L;
   if (!L) return;
@@ -663,7 +672,8 @@ function tick() {
     updateParticles();
     return;
   }
-  G.time += DT;
+  if (!G.timing && controlInput()) G.timing = true;
+  if (G.timing) G.time += DT;
   if (G.swapCd > 0) G.swapCd--;
   if (G.notice && G.notice.t > 0) G.notice.t--;
   handleActions();
@@ -719,6 +729,7 @@ const Game = {
     G.sel = 0;
     G.deaths = 0;
     G.time = 0;
+    G.timing = false;
     G.recCount = 0;
     G.lanternsGot = 0;
     G.won = false;

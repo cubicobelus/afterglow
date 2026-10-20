@@ -213,6 +213,19 @@ mech("riding an echo that jumps into a low ceiling does not carry you through it
   ensure(minY >= 239, "the rider was pushed into or above the ceiling (top at " + Math.round(minY) + ")");
 });
 
+mech("the level clock waits for the first control input", () => {
+  Bot.load(tiny({ echoes: [] }, (g) => { g.base(); g.set(2, 14, "@"); }));
+  Bot.run(60);
+  ensure(G.time === 0, "the clock ran before any input (" + G.time + ")");
+  Bot.press("Enter"); // a menu key is not a control
+  Bot.run(10);
+  ensure(G.time === 0, "a menu key started the clock");
+  Bot.dir(1);
+  Bot.run(30);
+  Bot.dir(0);
+  ensure(G.time > 0.4 && G.time < 0.6, "the clock should have run about half a second (" + G.time + ")");
+});
+
 mech("a tide that stays put is refused, so it cannot stand in for a shade", () => {
   Bot.load(tiny({ echoes: ["tide"], recMax: 8 }, (g) => { g.base(); g.set(2, 14, "@"); g.set(2, 13, "a"); }));
   Bot.record(0);
