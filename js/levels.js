@@ -174,19 +174,20 @@ def(0, "RELAY", {
 });
 
 def(0, "SWITCHBOARD", {
-  echoes: ["shade", "glow"], recMax: 12, dark: true,
-  hint: "THE LAMP OVER THE BRIDGE BURNS ONLY WHILE ITS PLATE IS HELD. THE ISLAND NEEDS A GLOW.",
+  echoes: ["shade", "shade", "glow"], recMax: 14, dark: true,
+  hint: "THE LAMP OVER THE BRIDGE BURNS ONLY WHILE ITS PLATE IS HELD, AND THE PLATE IS UP ON THE LEDGE. THE ISLAND NEEDS A GLOW.",
 }, (g) => {
   g.base();
-  g.set(2, 14, "@");
-  g.set(6, 14, "a");
+  g.set(1, 14, "@");
+  g.fill(5, 11, 7, 14, "#");
+  g.set(6, 10, "a");
   g.pit(10, 25);
   g.fill(10, 14, 15, 14, "~");
   g.fill(16, 14, 19, 17, "#");
   g.fill(20, 14, 25, 14, "~");
   g.set(12, 10, "P");
   g.fill(28, 13, 28, 14, "X");
-  g.set(29, 8, "L");
+  g.set(2, 8, "L").set(29, 8, "L");
 });
 
 // ================================================================ tier 2: the gallery
