@@ -97,6 +97,32 @@ def(0, "TWIN PLATES", {
   g.set(5, 9, "L").set(13, 6, "L").set(25, 9, "L");
 });
 
+def(0, "STEP UP", {
+  echoes: ["shade", "shade"], recMax: 10,
+  hint: "THE LEDGE IS TOO HIGH TO JUMP. A FROZEN JUMP IS A STEP, AND AN ECHO CAN HOLD THE PLATE UP THERE.",
+}, (g) => {
+  g.base();
+  g.set(2, 14, "@");
+  g.fill(10, 11, 14, 14, "#");
+  g.set(12, 10, "a");
+  g.fill(18, 1, 18, 8, "#").fill(18, 9, 18, 14, "A");
+  g.fill(28, 13, 28, 14, "X");
+  g.set(5, 9, "L").set(16, 8, "L").set(24, 9, "L");
+});
+
+def(0, "STAIRCASE", {
+  echoes: ["shade", "shade", "shade"], recMax: 12,
+  hint: "ONE STEP IN THE AIR IS NOT ENOUGH FOR THIS LEDGE. BUILD THE STAIRS FROM YOUR OWN JUMPS, THEN LEAVE SOMEONE ON THE PLATE.",
+}, (g) => {
+  g.base();
+  g.set(2, 14, "@");
+  g.fill(10, 7, 14, 14, "#");
+  g.set(12, 6, "a");
+  g.fill(18, 1, 18, 8, "#").fill(18, 9, 18, 14, "A");
+  g.fill(28, 13, 28, 14, "X");
+  g.set(5, 9, "L").set(16, 7, "L").set(24, 9, "L");
+});
+
 def(0, "LAMPLIGHT", {
   unlock: "glow", echoes: ["glow"], recMax: 10, dark: true,
   hint: "FAINT PLANKS ARE SOLID ONLY IN LIGHT. WALK TO THE ISLAND AND RECORD: THE RING SHOWS WHERE YOUR ECHO WILL SHINE.",
@@ -110,6 +136,17 @@ def(0, "LAMPLIGHT", {
   g.set(10, 12, "L");
   g.fill(28, 13, 28, 14, "X");
   g.set(29, 10, "L");
+});
+
+def(0, "LIGHT STEP", {
+  echoes: ["glow"], recMax: 10, dark: true,
+  hint: "A LIGHT ON THE GROUND REACHES ONLY SO FAR. A LIGHT FROZEN IN MID-AIR OVER THE MIDDLE REACHES FARTHER.",
+}, (g) => {
+  g.base();
+  g.set(2, 14, "@");
+  g.pit(7, 18).fill(7, 14, 18, 14, "~");
+  g.fill(28, 13, 28, 14, "X");
+  g.set(3, 9, "L").set(27, 9, "L");
 });
 
 def(0, "SUNKEN GATE", {
@@ -259,6 +296,20 @@ def(1, "THREE PANES", {
   g.fill(14, 1, 14, 14, "%");
   g.fill(28, 13, 28, 14, "X");
   g.set(4, 9, "L").set(12, 9, "L").set(22, 9, "L");
+});
+
+def(1, "FOUR PANES", {
+  echoes: ["phase", "phase", "phase"], recMax: 20,
+  hint: "FOUR WALLS AND THREE PHASES. ONE CIRCLE HOLDS TWO WALLS OPEN, AND THE FIRST PHASE CAN BE USED AGAIN.",
+}, (g) => {
+  g.base();
+  g.set(2, 14, "@");
+  g.fill(6, 1, 6, 14, "%");
+  g.fill(10, 1, 10, 14, "%");
+  g.fill(14, 1, 14, 14, "%");
+  g.fill(18, 1, 18, 14, "%");
+  g.fill(28, 13, 28, 14, "X");
+  g.set(4, 9, "L").set(12, 9, "L").set(16, 9, "L").set(24, 9, "L");
 });
 
 def(1, "CHANDELIER", {
@@ -511,6 +562,31 @@ def(3, "UPSIDE DOWN", {
   g.set(4, 12, "L").set(14, 12, "L").set(28, 12, "L");
 });
 
+def(3, "WATCHTOWER", {
+  echoes: ["spring", "shade"], recMax: 20, swap: true,
+  hint: "TWO PLATES HANG IN THE AIR, ONE STRAIGHT UP AND ONE A STEP TO THE RIGHT. THE SPRING STILL HAS TO THROW YOU TO REACH THE SECOND.",
+}, (g) => {
+  g.base();
+  g.set(2, 14, "@");
+  g.set(11, 5, "1").set(14, 5, "1");
+  g.fill(19, 1, 19, 8, "#").fill(19, 9, 19, 14, "A");
+  g.fill(28, 13, 28, 14, "X");
+  g.set(6, 9, "L").set(17, 9, "L").set(24, 9, "L");
+});
+
+def(3, "GLASS CEILING", {
+  echoes: ["flip", "phase"], recMax: 30, swap: true,
+  hint: "A WALL OF GLASS STANDS ACROSS THE CEILING ROAD. YOUR SWAPS ARE KEPT IN WHAT YOU RECORD, SO AN ECHO CAN BE LEFT WHERE YOU WILL NEED IT.",
+}, (g) => {
+  g.base();
+  g.set(2, 14, "@");
+  g.fill(1, 1, 30, 11, "#");
+  g.fill(5, 14, 24, 14, "^");
+  g.fill(14, 12, 14, 14, "%");
+  g.fill(29, 13, 29, 14, "X");
+  g.set(4, 12, "L").set(26, 12, "L");
+});
+
 def(3, "TWO BANKS", {
   echoes: ["spring", "shade"], recMax: 20, swap: true,
   hint: "THE DOOR WANTS BOTH PLATES: ONE ON THE BLOCK, ONE IN THE AIR. THE SPRING THAT THROWS YOU UP CAN BE THE ONE YOU LEAVE UP THERE.",
@@ -552,15 +628,26 @@ def(4, "BREEZE", {
   g.set(5, 8, "L").set(13, 5, "L").set(24, 8, "L");
 });
 
-def(4, "SAIL", {
-  echoes: ["gust", "tide"], recMax: 14,
-  hint: "A TIDE REMEMBERS A JUMP. WHAT IF THE JUMP HAD HELP?",
+def(4, "STONE AND SAIL", {
+  echoes: ["gust"], recMax: 10,
+  hint: "A GUST BLOWS THE WAY IT FACED, AND A GUST FROZEN IN MID-AIR IS A STEP AS WELL.",
 }, (g) => {
   g.base();
   g.set(2, 14, "@");
-  g.pit(9, 18);
+  g.pit(7, 16);
   g.fill(28, 13, 28, 14, "X");
-  g.set(5, 8, "L").set(14, 5, "L").set(25, 8, "L");
+  g.set(4, 8, "L").set(13, 5, "L").set(25, 8, "L");
+});
+
+def(4, "SAIL", {
+  echoes: ["gust", "gust"], recMax: 14,
+  hint: "A GUST FROZEN IN MID-AIR IS A STEP WITH A WIND OF ITS OWN. ONE IS NOT ENOUGH FOR THIS PIT.",
+}, (g) => {
+  g.base();
+  g.set(2, 14, "@");
+  g.pit(9, 22);
+  g.fill(28, 13, 28, 14, "X");
+  g.set(5, 8, "L").set(15, 5, "L").set(26, 8, "L");
 });
 
 def(4, "GALLOP", {
@@ -573,6 +660,47 @@ def(4, "GALLOP", {
   g.set(25, 14, "a").fill(27, 1, 27, 8, "#").fill(27, 9, 27, 14, "A");
   g.fill(29, 13, 29, 14, "X");
   g.set(3, 9, "L").set(14, 9, "L").set(24, 9, "L");
+});
+
+def(4, "CLOCKWORK", {
+  echoes: ["shade", "tide", "tide"], recMax: 24,
+  hint: "A TIDE HOLDS A PLATE ONLY WHILE IT STANDS THERE, BUT IT COMES BACK AROUND. THE FIRST DOOR NEEDS SOMETHING THAT NEVER LEAVES.",
+}, (g) => {
+  g.base();
+  g.set(2, 14, "@");
+  g.set(5, 14, "a").fill(8, 1, 8, 8, "#").fill(8, 9, 8, 14, "A");
+  g.set(11, 14, "b").fill(14, 1, 14, 8, "#").fill(14, 9, 14, 14, "B");
+  g.set(17, 14, "c").fill(20, 1, 20, 8, "#").fill(20, 9, 20, 14, "C");
+  g.fill(28, 13, 28, 14, "X");
+  g.set(4, 9, "L").set(10, 8, "L").set(16, 8, "L").set(24, 9, "L");
+});
+
+def(4, "UP AND OVER", {
+  echoes: ["spring", "shade"], recMax: 20,
+  hint: "ONE SPRING, TWO CLIMBS, AND THEY ARE NOT IN THE SAME PLACE. WHAT YOU SEND UP THE FIRST CLIMB CAN STAY THERE.",
+}, (g) => {
+  g.base();
+  g.set(2, 14, "@");
+  g.fill(1, 7, 5, 7, "#");
+  g.set(3, 6, "a");
+  g.fill(12, 1, 12, 8, "#").fill(12, 9, 12, 14, "A");
+  g.fill(17, 8, 30, 14, "#");
+  g.fill(28, 6, 28, 7, "X");
+  g.set(8, 9, "L").set(15, 5, "L").set(24, 5, "L");
+});
+
+def(4, "TWO UPDRAFTS", {
+  echoes: ["flip", "shade"], recMax: 20,
+  hint: "ONE ZONE, TWO LEDGES. THE FIRST LEDGE HAS THE PLATE AND THE SECOND HAS THE EXIT. WHAT YOU SEND UP THE FIRST CAN STAY THERE.",
+}, (g) => {
+  g.base();
+  g.set(12, 14, "@");
+  g.fill(1, 9, 4, 14, "#");
+  g.set(2, 8, "a");
+  g.fill(13, 1, 13, 8, "#").fill(13, 9, 13, 14, "A");
+  g.fill(20, 9, 30, 14, "#");
+  g.fill(28, 7, 28, 8, "X");
+  g.set(8, 6, "L").set(16, 6, "L").set(24, 6, "L");
 });
 
 def(4, "AFTERIMAGE", {
@@ -650,5 +778,15 @@ const PAR = {
   "UPSIDE DOWN": { t: 22, r: 1 },
   "NIGHT TRAIN": { t: 50, r: 2 },
   "THREE PANES": { t: 32, r: 3 },
+  "STEP UP": { t: 30, r: 2 },
+  "FOUR PANES": { t: 50, r: 4 },
+  "WATCHTOWER": { t: 25, r: 2 },
+  "GLASS CEILING": { t: 35, r: 2 },
+  "CLOCKWORK": { t: 40, r: 3 },
+  "UP AND OVER": { t: 40, r: 3 },
+  "TWO UPDRAFTS": { t: 35, r: 3 },
+  "STAIRCASE": { t: 45, r: 3 },
+  "STONE AND SAIL": { t: 15, r: 1 },
+  "LIGHT STEP": { t: 20, r: 1 },
 };
 for (const l of LEVELS) l.par = PAR[l.name];

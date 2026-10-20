@@ -10,7 +10,7 @@ const App = (() => {
   // ---------------------------------------------------------------- save
   const SAVE_KEY = "afterglow.save";
   const SETTINGS_KEY = "afterglow.settings";
-  const SAVE_VERSION = 4;
+  const SAVE_VERSION = 5;
   let save = { done: [], best: {}, stars: {}, lanterns: {}, seen: {} };
   let hadSave = false;
   try {
@@ -35,12 +35,18 @@ const App = (() => {
         "GLASS WALL", "UNDER GLASS", "UPDRAFT", "CEILING PLATE", "TWO KEYS", "GHOST GLASS", "CHANDELIER", "HALL OF MIRRORS",
         "FERRY", "LIFT", "TRAMPOLINE", "SKYHOOK", "TWO STAGES", "FERRY LIGHT", "SLUICE", "STACKED SPRINGS", "SLINGSHOT", "PUMP ROOM",
         "BREEZE", "SAIL", "GALLOP", "LEAPFROG", "SECOND WIND", "WAYPOINT", "AFTERIMAGE", "CHORUS", "THE BEACON"],
+      4: ["FIRST STEPS", "THE PLATE", "STEPPING STONE", "TWIN PLATES", "LAMPLIGHT", "SUNKEN GATE", "RELAY", "SWITCHBOARD",
+        "GLASS WALL", "UNDER GLASS", "UPDRAFT", "CEILING PLATE", "TWO KEYS", "GHOST GLASS", "THREE PANES", "CHANDELIER", "HALL OF MIRRORS",
+        "FERRY", "LIFT", "TRAMPOLINE", "SKYHOOK", "TWO STAGES", "FERRY LIGHT", "SLUICE", "STACKED SPRINGS", "SLINGSHOT", "PUMP ROOM",
+        "LEAPFROG", "SECOND WIND", "STAY BEHIND", "APEX", "WAYPOINT", "UPSIDE DOWN", "TWO BANKS", "NIGHT TRAIN",
+        "BREEZE", "SAIL", "GALLOP", "AFTERIMAGE", "CHORUS", "THE BEACON"],
     };
     // Same name but a different puzzle now: the old result no longer applies.
     const REDESIGNED = {
-      1: { "THE BEACON": true, "SLUICE": true },
-      2: { "PUMP ROOM": true, "THE BEACON": true, "AFTERIMAGE": true },
-      3: {},
+      1: { "THE BEACON": true, "SLUICE": true, "SAIL": true },
+      2: { "PUMP ROOM": true, "THE BEACON": true, "AFTERIMAGE": true, "SAIL": true },
+      3: { "SAIL": true },
+      4: { "SAIL": true },
     };
     // The level is the same but its lantern moved, so the old pickup no longer counts.
     const LANTERN_MOVED = { "TRAMPOLINE": true };
@@ -577,7 +583,7 @@ const App = (() => {
   function drawSelect(hits) {
     drawPlainBg();
     Font.draw(ctx, "LEVELS", W / 2, 10, { scale: 3, color: "#ffe9a8", align: "center" });
-    const tw = 44, th = 46, x0 = 150, gap = 3;
+    const tw = 40, th = 46, x0 = 150, gap = 3;
     for (let t = 0; t < CHAPTERS.length; t++) {
       const y = 42 + t * 54;
       const pal = CHAPTERS[t].pal;
@@ -598,10 +604,10 @@ const App = (() => {
         if (open) drawStarPips(x + 5, y + 20, i, 9, 3);
         if (!open) {
           ctx.fillStyle = "#4d5468";
-          ctx.fillRect(x + 17, y + 22, 10, 8);
+          ctx.fillRect(x + 15, y + 22, 10, 8);
           ctx.strokeStyle = "#4d5468";
           ctx.lineWidth = 1;
-          ctx.beginPath(); ctx.arc(x + 22, y + 22, 3.5, Math.PI, 0); ctx.stroke();
+          ctx.beginPath(); ctx.arc(x + 20, y + 22, 3.5, Math.PI, 0); ctx.stroke();
         }
         if (lanternLevels[i]) Render.drawLanternIcon(ctx, x + tw - 9, y + th - 11, !!save.lanterns[i]);
         if (LEVELS[i].swap) Render.drawSwapIcon(ctx, x + 9, y + th - 9, open ? "#ffffff" : "#4d5468");
