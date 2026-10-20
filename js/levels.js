@@ -245,21 +245,6 @@ def(1, "CEILING PLATE", {
   g.set(5, 9, "L").set(26, 9, "L");
 });
 
-def(1, "TWO KEYS", {
-  echoes: ["phase", "glow"], recMax: 12, dark: true,
-  hint: "TWO OBSTACLES, TWO ECHOES. WHICH ONE FIRST?",
-}, (g) => {
-  g.base();
-  g.set(2, 14, "@");
-  g.fill(10, 1, 11, 14, "%");
-  g.fill(12, 14, 13, 14, "#");
-  g.fill(15, 12, 23, 12, "#");
-  g.fill(16, 14, 22, 14, "t");
-  g.fill(24, 1, 24, 12, "#");
-  g.fill(28, 13, 28, 14, "X");
-  g.set(5, 11, "L").set(27, 11, "L");
-});
-
 def(1, "GHOST GLASS", {
   echoes: ["phase", "shade"], recMax: 10,
   hint: "TWO WALLS OF GLASS AND ONE PHASE. AN ECHO IS ONLY A MEMORY.",
@@ -288,19 +273,6 @@ def(1, "THREE PANES", {
   g.set(4, 9, "L").set(12, 9, "L").set(22, 9, "L");
 });
 
-def(1, "CHANDELIER", {
-  echoes: ["flip", "flip", "flip"], recMax: 12,
-  hint: "THE FLOOR IS DEATH, SO LOOK UP. EACH ZONE ONLY REACHES SO FAR.",
-}, (g) => {
-  g.base();
-  g.fill(1, 3, 7, 14, "#");
-  g.set(2, 2, "@");
-  g.fill(8, 14, 16, 14, "^");
-  g.fill(17, 3, 30, 14, "#");
-  g.fill(27, 1, 27, 2, "X");
-  g.set(12, 7, "L");
-});
-
 def(1, "HALL OF MIRRORS", {
   echoes: ["phase", "glow", "shade", "flip"], recMax: 24,
   hint: "NOT EVERY BUTTON IS PRESSED THE SAME WAY. AND NOT EVERY ECHO HAS TO STAY WHERE YOU FIRST PUT IT.",
@@ -327,26 +299,6 @@ def(2, "FERRY", {
   g.pit(9, 15);
   g.fill(28, 13, 28, 14, "X");
   g.set(5, 8, "L").set(12, 5, "L").set(25, 8, "L");
-});
-
-def(2, "LIFT", {
-  echoes: ["shade", "tide"], recMax: 14, dark: true,
-  hint: "THE STAIRS ARE LIT ONLY WHILE A PLATE IS HELD. A TIDE IS A MOVING FLOOR.",
-}, (g) => {
-  g.base();
-  g.set(2, 14, "@");
-  g.set(5, 14, "a");
-  g.set(8, 14, "b");
-  g.fill(12, 12, 13, 12, "~");
-  g.fill(15, 9, 16, 9, "~");
-  g.fill(18, 6, 19, 6, "~");
-  g.fill(21, 6, 24, 6, "#");
-  g.fill(25, 1, 25, 14, "#");
-  g.fill(25, 4, 25, 5, "B");
-  g.fill(26, 6, 30, 14, "#");
-  g.fill(29, 4, 29, 5, "X");
-  g.set(14, 11, "P").set(18, 8, "P");
-  g.set(27, 3, "L");
 });
 
 def(2, "TRAMPOLINE", {
@@ -416,6 +368,20 @@ def(2, "SLUICE", {
   g.set(4, 9, "L").set(13, 6, "L").set(25, 9, "L");
 });
 
+def(2, "STAGECOACH", {
+  echoes: ["shade", "spring"], recMax: 24,
+  hint: "A SPRING THAT CARRIES YOU CAN STILL THROW YOU WHEN IT STOPS. WHAT YOU NEEDED TO MAKE IT IS NOT NEEDED AFTER.",
+}, (g) => {
+  g.base();
+  g.set(2, 14, "@");
+  g.fill(6, 14, 12, 14, "^");
+  g.fill(20, 8, 30, 14, "#");
+  g.set(22, 7, "a");
+  g.fill(26, 1, 26, 3, "#").fill(26, 4, 26, 7, "A");
+  g.fill(29, 6, 29, 7, "X");
+  g.set(4, 9, "L").set(16, 9, "L").set(23, 4, "L");
+});
+
 def(2, "SLINGSHOT", {
   echoes: ["glow", "spring"], recMax: 24, dark: true,
   hint: "ONE ECHO CAN BE THE FERRY AND THE LAUNCHER. THE LIGHT HAS TO BE IN TWO PLACES, SO IT CANNOT STAY IN THE FIRST.",
@@ -431,7 +397,7 @@ def(2, "SLINGSHOT", {
 });
 
 def(2, "PUMP ROOM", {
-  echoes: ["shade", "shade", "tide", "glow"], recMax: 24, dark: true,
+  echoes: ["shade", "tide", "glow"], recMax: 28, dark: true,
   hint: "ONCE AN ECHO HAS DONE ITS JOB, DOES IT HAVE TO STAY? A STEP DOES NOT HAVE TO TOUCH THE FLOOR.",
 }, (g) => {
   g.base();
@@ -457,18 +423,6 @@ def(3, "LEAPFROG", {
   g.fill(6, 14, 25, 14, "~");
   g.fill(28, 13, 28, 14, "X");
   g.set(27, 10, "L");
-});
-
-def(3, "SECOND WIND", {
-  echoes: ["shade", "flip"], recMax: 14, swap: true,
-  hint: "SWAP WORKS WHILE RECORDING TOO. USE ONE ECHO TO PLACE ANOTHER.",
-}, (g) => {
-  g.base();
-  g.set(2, 14, "@");
-  g.fill(12, 9, 17, 14, "#");
-  g.fill(19, 3, 30, 14, "#");
-  g.fill(27, 1, 27, 2, "X");
-  g.set(5, 9, "L").set(22, 1, "L");
 });
 
 def(3, "STAY BEHIND", {
@@ -587,17 +541,18 @@ def(4, "GALLOP", {
   g.set(3, 9, "L").set(14, 9, "L").set(24, 9, "L");
 });
 
-def(4, "CLOCKWORK", {
-  echoes: ["shade", "tide", "tide"], recMax: 24,
-  hint: "A TIDE HOLDS A PLATE ONLY WHILE IT STANDS THERE, BUT IT COMES BACK AROUND. THE FIRST DOOR NEEDS SOMETHING THAT NEVER LEAVES.",
+def(4, "WEATHERVANE", {
+  echoes: ["gust", "shade"], recMax: 20,
+  hint: "A GUST BLOWS THE WAY IT FACED WHEN YOU STOPPED. THE DOOR IS ON ONE SIDE AND ITS PLATE IS ON THE OTHER, AND ONE GUST CANNOT FACE BOTH WAYS.",
 }, (g) => {
   g.base();
-  g.set(2, 14, "@");
-  g.set(5, 14, "a").fill(8, 1, 8, 8, "#").fill(8, 9, 8, 14, "A");
-  g.set(11, 14, "b").fill(14, 1, 14, 8, "#").fill(14, 9, 14, 14, "B");
-  g.set(17, 14, "c").fill(20, 1, 20, 8, "#").fill(20, 9, 20, 14, "C");
-  g.fill(28, 13, 28, 14, "X");
-  g.set(4, 9, "L").set(10, 8, "L").set(16, 8, "L").set(24, 9, "L");
+  g.set(16, 14, "@");
+  g.pit(7, 13);
+  g.pit(20, 26);
+  g.set(28, 14, "a");
+  g.fill(3, 1, 3, 8, "#").fill(3, 9, 3, 14, "A");
+  g.fill(1, 13, 1, 14, "X");
+  g.set(5, 9, "L").set(16, 8, "L").set(26, 9, "L");
 });
 
 def(4, "UP AND OVER", {
@@ -656,28 +611,24 @@ const PAR = {
   "LAMPLIGHT": { t: 20, r: 1 },
   "SUNKEN GATE": { t: 20, r: 1 },
   "RELAY": { t: 25, r: 2 },
-  "SWITCHBOARD": { t: 25, r: 2 },
+  "SWITCHBOARD": { t: 55, r: 3 },
   "GLASS WALL": { t: 20, r: 1 },
   "UNDER GLASS": { t: 30, r: 2 },
   "UPDRAFT": { t: 20, r: 1 },
   "CEILING PLATE": { t: 25, r: 2 },
-  "TWO KEYS": { t: 25, r: 2 },
   "GHOST GLASS": { t: 20, r: 3 },
-  "CHANDELIER": { t: 30, r: 3 },
   "HALL OF MIRRORS": { t: 60, r: 5 },
   "FERRY": { t: 25, r: 1 },
-  "LIFT": { t: 30, r: 3 },
   "TRAMPOLINE": { t: 20, r: 1 },
   "SKYHOOK": { t: 20, r: 1 },
   "TWO STAGES": { t: 40, r: 3 },
   "FERRY LIGHT": { t: 45, r: 3 },
   "SLUICE": { t: 30, r: 3 },
   "SLINGSHOT": { t: 55, r: 4 },
-  "PUMP ROOM": { t: 75, r: 6 },
+  "PUMP ROOM": { t: 65, r: 5 },
   "BREEZE": { t: 15, r: 1 },
   "GALLOP": { t: 35, r: 3 },
   "LEAPFROG": { t: 25, r: 1 },
-  "SECOND WIND": { t: 35, r: 3 },
   "WAYPOINT": { t: 35, r: 3 },
   "AFTERIMAGE": { t: 55, r: 4 },
   "CHORUS": { t: 100, r: 6 },
@@ -689,8 +640,9 @@ const PAR = {
   "THREE PANES": { t: 32, r: 3 },
   "STEP UP": { t: 30, r: 2 },
   "GLASS CEILING": { t: 35, r: 2 },
-  "CLOCKWORK": { t: 40, r: 3 },
   "UP AND OVER": { t: 40, r: 3 },
   "STAIRCASE": { t: 45, r: 3 },
+  "STAGECOACH": { t: 35, r: 3 },
+  "WEATHERVANE": { t: 20, r: 3 },
 };
 for (const l of LEVELS) l.par = PAR[l.name];

@@ -171,30 +171,6 @@ SOLUTIONS["UNDER GLASS"] = () => {
 };
 
 // 9 TWO KEYS
-SOLUTIONS["TWO KEYS"] = () => {
-  const throughWall = () => {
-    Bot.walkTo(190);
-    Bot.waitUntil(echoDone("phase"), 600, "phase echo to settle");
-    Bot.walkTo(224);
-    Bot.jumpTo(262, 24); // onto the step
-  };
-  Bot.record("phase");
-  Bot.walkTo(190);
-  Bot.run(6);
-  Bot.stop();
-  Bot.record("glow");
-  throughWall();
-  Bot.jumpTo(310, 24); // onto the platform
-  Bot.walkTo(390);
-  Bot.run(6);
-  Bot.stop();
-  throughWall();
-  Bot.walkTo(296); // off the step and into the corridor
-  Bot.waitUntil(() => G.L.thorns.every((t) => t.lit), 900, "thorns to wither");
-  Bot.walkTo(500);
-  Bot.walkTo(570);
-};
-
 // 10 UPDRAFT
 SOLUTIONS["UPDRAFT"] = () => {
   Bot.record("flip");
@@ -269,44 +245,6 @@ SOLUTIONS["LEAPFROG"] = () => {
 
 // 14 SECOND WIND: ride zone 1 to place a shade on the ledge, then swap to it while recording the flip,
 // so the flip ends up on the ledge. Finally swap up and ride zone 2 to the exit.
-SOLUTIONS["SECOND WIND"] = () => {
-  const flipRest = () => G.echoes.flip && G.echoes.flip.restT > 30;
-  const shadeRest = () => G.echoes.shade && G.echoes.shade.restT > 30;
-  // slot 0 = shade, slot 1 = flip
-  Bot.record("flip");
-  Bot.walkTo(215);
-  Bot.run(6);
-  Bot.stop();
-  Bot.record("shade");
-  Bot.walkTo(130);
-  Bot.waitUntil(flipRest, 900, "flip zone to open");
-  Bot.dir(1);
-  for (let i = 0; i < 300 && !(G.p.onGround && Bot.px() > 250 && G.p.y < 170); i++) Bot.tick();
-  Bot.dir(0);
-  Bot.expect(G.p.onGround && G.p.y < 170, "landed on ledge A");
-  Bot.walkTo(335);
-  Bot.run(6);
-  Bot.stop();
-  // Record the flip again; the old one vanishes, so use the shade to get up to the ledge.
-  Bot.record("flip");
-  Bot.select("shade");
-  Bot.waitUntil(shadeRest, 900, "shade to reach the ledge");
-  Bot.swap();
-  Bot.expect(G.p.y < 170 && G.p.x > 240, "swapped onto ledge A");
-  Bot.run(10);
-  Bot.stop();
-  // Final run.
-  Bot.select("shade");
-  Bot.waitUntil(() => shadeRest() && flipRest(), 900, "echoes to settle");
-  Bot.swap();
-  Bot.expect(G.p.y < 170, "swapped onto ledge A (final)");
-  Bot.dir(1);
-  for (let i = 0; i < 300 && !(G.p.onGround && Bot.px() > 400 && G.p.y < 50); i++) Bot.tick();
-  Bot.dir(0);
-  Bot.expect(G.p.onGround && G.p.y < 50, "landed on the top ledge");
-  Bot.walkTo(550);
-};
-
 // HALL OF MIRRORS
 SOLUTIONS["HALL OF MIRRORS"] = () => {
   // slots: shade, glow, phase, flip.
@@ -494,31 +432,6 @@ const jumpToSpring = (sx, dirAfter) => {
   Bot.expect(bounced, "the spring bounced the player");
 };
 const restOf = (k) => () => G.echoes[k] && G.echoes[k].restT > 20;
-
-SOLUTIONS["LIFT"] = () => {
-  // slots: shade, tide
-  Bot.record("shade");
-  Bot.walkTo(110);
-  Bot.run(6);
-  Bot.stop();
-  Bot.record("tide");
-  Bot.run(110);
-  Bot.walkTo(222);
-  Bot.jumpTo(262, 24);
-  Bot.jumpTo(322, 24);
-  Bot.jumpTo(382, 24);
-  Bot.jumpTo(442, 24);
-  Bot.walkTo(462);
-  Bot.run(110);
-  Bot.stop();
-  Bot.record("shade");
-  Bot.walkTo(170);
-  Bot.run(6);
-  Bot.stop();
-  boardAtSpawn();
-  Bot.waitUntil(() => G.p.y < 112 && Bot.px() > 430, 1500, "the ride to the top");
-  Bot.walkTo(590);
-};
 
 SOLUTIONS["TRAMPOLINE"] = () => {
   // The lantern hangs top left. A held bounce straight up from a spring there reaches it; the spring is then
@@ -719,41 +632,6 @@ SOLUTIONS["SAIL"] = () => {
   Bot.jumpTo(500, 24);
   Bot.expect(G.p.onGround && Bot.px() > 465, "across the pit");
   Bot.walkTo(570);
-};
-
-SOLUTIONS["CHANDELIER"] = () => {
-  // slots: flip, flip2, flip3. Each zone is recorded from inside the one before it, up on the ceiling.
-  const rest = (k) => () => G.echoes[k] && G.echoes[k].restT > 30;
-  const toCeiling = () => {
-    Bot.walkTo(100);
-    Bot.waitUntil(rest("flip"), 900, "the first zone to open");
-    Bot.waitUntil(() => G.p.g === -1 && G.p.onGround, 120, "to be on the ceiling");
-  };
-  Bot.record("flip");
-  Bot.walkTo(135);
-  Bot.run(6);
-  Bot.stop();
-  Bot.record("flip2");
-  toCeiling();
-  Bot.walkTo(190);
-  Bot.run(6);
-  Bot.stop();
-  Bot.record("flip3");
-  toCeiling();
-  Bot.walkTo(190);
-  Bot.waitUntil(rest("flip2"), 900, "the second zone to open");
-  Bot.walkTo(250);
-  Bot.run(6);
-  Bot.stop();
-  toCeiling();
-  Bot.walkTo(190);
-  Bot.waitUntil(rest("flip2") && rest("flip3"), 900, "the other zones to open");
-  Bot.walkTo(250);
-  Bot.dir(1);
-  for (let i = 0; i < 300 && !(G.p.g === 1 && G.p.onGround && Bot.px() > 345); i++) Bot.tick();
-  Bot.dir(0);
-  Bot.expect(G.p.g === 1 && G.p.onGround && G.p.y < 60, "dropped onto the far platform");
-  Bot.walkTo(560);
 };
 
 SOLUTIONS["SLUICE"] = () => {
@@ -1068,9 +946,10 @@ SOLUTIONS["SLINGSHOT"] = () => {
 };
 
 SOLUTIONS["PUMP ROOM"] = () => {
-  // slots: shade, shade2 (the second one hangs in mid air, a hover step above the first), tide (the lift), glow (the gate).
-  // The ledge is too high for anything but that hover stair. Once the tide knows the way up, both shades are
-  // recorded again onto the two plates.
+  // slots: shade, tide (the lift, and the holder of the second plate), glow (the second step, then the gate).
+  // The ledge is too high for anything but a two-step stair: the shade stands on the floor and the glow hangs in mid air above it.
+  // Once the tide knows the way up and ends by waiting on the second plate, the shade is recorded again onto the first plate and the
+  // glow moves to the gate.
   const rest = (k) => () => G.echoes[k] && G.echoes[k].restT > 30;
   const ride = () => {
     boardAtSpawn();
@@ -1080,30 +959,31 @@ SOLUTIONS["PUMP ROOM"] = () => {
   Bot.walkTo(170);
   Bot.run(6);
   Bot.stop();
-  Bot.record("shade2");
+  Bot.record("glow");
   Bot.walkTo(150);
-  Bot.waitUntil(rest("shade"), 600, "the first shade to settle");
+  Bot.waitUntil(rest("shade"), 600, "the first step to settle");
   Bot.jumpTo(170, 24);
-  Bot.expect(G.p.stand === G.echoes.shade, "standing on the first shade");
+  Bot.expect(G.p.stand === G.echoes.shade, "standing on the first step");
   Bot.jumpKey(true);
   for (let i = 0; i < 60; i++) {
     Bot.tick();
     if (G.p.vy < -150 && G.p.y <= 226 && G.p.y >= 212) break;
   }
   Bot.jumpKey(false);
-  Bot.stop(); // frozen in mid air about 64 px above the first shade
+  Bot.stop(); // frozen in mid air about 64 px above the first step
   Bot.record("tide");
   Bot.run(60); // the tide waits at the spawn so you can board it there
   Bot.walkTo(150);
-  Bot.waitUntil(() => rest("shade")() && rest("shade2")(), 600, "the stair to settle");
+  Bot.waitUntil(() => rest("shade")() && rest("glow")(), 600, "the stair to settle");
   Bot.jumpTo(170, 6); // a short hop: a higher arc would pass the hover step and be caught by it when ridden later
-  Bot.expect(G.p.stand === G.echoes.shade, "standing on the first shade");
+  Bot.expect(G.p.stand === G.echoes.shade, "standing on the first step");
   Bot.jumpTo(170, 24);
-  Bot.expect(G.p.stand === G.echoes.shade2, "standing on the hover step");
+  Bot.expect(G.p.stand === G.echoes.glow, "standing on the hover step");
   Bot.jumpTo(172, 24);
   Bot.expect(G.p.y + PH < 170, "up on the ledge");
-  Bot.walkTo(290);
-  Bot.run(6);
+  Bot.walkTo(390);
+  Bot.expect(G.L.plates[1].pressed, "second plate pressed");
+  Bot.run(420); // a long wait: the tide holds the plate for as long as you did
   Bot.stop();
   Bot.record("shade");
   ride();
@@ -1111,22 +991,16 @@ SOLUTIONS["PUMP ROOM"] = () => {
   Bot.expect(G.L.plates[0].pressed, "first plate pressed");
   Bot.run(6);
   Bot.stop();
-  Bot.record("shade2");
-  ride();
-  Bot.walkTo(390);
-  Bot.expect(G.L.plates[1].pressed, "second plate pressed");
-  Bot.run(6);
-  Bot.stop();
   Bot.record("glow");
   ride();
   Bot.walkTo(400);
-  Bot.waitUntil(() => G.L.doorOpen.a, 900, "the door to open");
+  Bot.waitUntil(() => G.L.doorOpen.a, 1200, "the door to open");
   Bot.walkTo(500);
   Bot.run(6);
   Bot.stop();
   ride();
   Bot.walkTo(400);
-  Bot.waitUntil(() => G.L.doorOpen.a, 900, "the door to open");
+  Bot.waitUntil(() => G.L.doorOpen.a, 1200, "the door to open");
   Bot.walkTo(500);
   Bot.waitUntil(() => G.L.gates.every((x) => x.open), 900, "the gate to open");
   Bot.walkTo(570);
@@ -1351,38 +1225,6 @@ SOLUTIONS["GLASS CEILING"] = () => {
   Bot.walkTo(590);
 };
 
-SOLUTIONS["CLOCKWORK"] = () => {
-  // slots: shade, tide, tide2. Each door answers to the plate before it. The shade holds the first plate for good. The first tide
-  // waits on the second plate and the second tide on the third; you slip through each door while its tide is standing there.
-  const rest = (k) => () => G.echoes[k] && G.echoes[k].restT > 30;
-  // the shade holds the first plate
-  Bot.record("shade");
-  Bot.walkTo(110);
-  Bot.run(6);
-  Bot.stop();
-  // the first tide waits on the second plate
-  Bot.record("tide");
-  Bot.waitUntil(rest("shade"), 600, "the first door to open");
-  Bot.walkTo(230);
-  Bot.run(260);
-  Bot.stop();
-  // the second tide waits on the third plate; the first door is held open, the second while the first tide stands there
-  Bot.record("tide2");
-  Bot.waitUntil(rest("shade"), 600, "the first door to open");
-  Bot.walkTo(290);
-  Bot.waitUntil(() => G.L.doorOpen.b, 2500, "the first tide to open the second door");
-  Bot.walkTo(350);
-  Bot.run(260);
-  Bot.stop();
-  // the real run
-  Bot.waitUntil(rest("shade"), 600, "the first door to open");
-  Bot.walkTo(290);
-  Bot.waitUntil(() => G.L.doorOpen.b, 2500, "the first tide to open the second door");
-  Bot.walkTo(390);
-  Bot.waitUntil(() => G.L.doorOpen.c, 2500, "the second tide to open the third door");
-  Bot.walkTo(570);
-};
-
 SOLUTIONS["UP AND OVER"] = () => {
   // slots: shade, spring. The plate is on a ledge high on the left; the exit is up a block on the right. The spring is recorded
   // under the ledge so a shade can go up and stand on the plate (opening the door), then recorded again at the foot of the block.
@@ -1481,5 +1323,86 @@ SOLUTIONS["STAIRCASE"] = () => {
   Bot.walkTo(335);
   Bot.waitUntil(() => G.L.doorOpen.a, 300, "the door to open");
   Bot.walkTo(570);
+};
+
+SOLUTIONS["STAGECOACH"] = () => {
+  // slots: shade, spring. A bed of spikes lies between you and the block. A shade hung in mid-jump over the bed is the step the spring
+  // is recorded from; the spring ends at the foot of the block, so it carries you over the spikes and then throws you up the block.
+  // The shade is then recorded again, riding the spring up, to stand on the plate that opens the door at the top.
+  const ride = () => {
+    Bot.jumpTo(Bot.px(), 12);
+    Bot.expect(G.p.stand === G.echoes.spring, "standing on the spring");
+    Bot.waitUntil(() => G.echoes.spring.restT > 10, 3000, "the ride over the spikes");
+  };
+  Bot.record("shade");
+  Bot.walkTo(110);
+  Bot.jumpKey(true);
+  Bot.dir(1);
+  let found = false;
+  for (let i = 0; i < 90; i++) {
+    Bot.tick();
+    const h = 300 - Bot.feet();
+    if (i > 8 && G.p.vy > 0 && h <= 44 && h >= 28) { found = true; break; }
+  }
+  Bot.expect(found, "a hover window over the spikes");
+  Bot.jumpKey(false);
+  Bot.dir(0);
+  Bot.stop();
+  Bot.record("spring");
+  Bot.run(90);
+  Bot.waitUntil(() => !G.echoes.shade.moving, 300, "the step to settle");
+  Bot.walkTo(110);
+  Bot.jumpTo(G.echoes.shade.x + PW / 2, 24);
+  Bot.expect(G.p.stand === G.echoes.shade, "standing on the step");
+  Bot.jumpTo(310, 24);
+  Bot.expect(G.p.onGround && Bot.px() > 264, "across the spikes");
+  Bot.walkTo(350);
+  Bot.run(6);
+  Bot.stop();
+  Bot.record("shade");
+  ride();
+  jumpToSpring(350, 1);
+  Bot.expect(G.p.y < 160 && Bot.px() > 402, "up on the block");
+  Bot.walkTo(450);
+  Bot.run(6);
+  Bot.stop();
+  ride();
+  jumpToSpring(350, 1);
+  Bot.expect(G.p.y < 160 && Bot.px() > 402, "up on the block again");
+  Bot.walkTo(500);
+  Bot.waitUntil(() => G.L.doorOpen.a, 300, "the door to open");
+  Bot.walkTo(592);
+};
+
+SOLUTIONS["WEATHERVANE"] = () => {
+  // slots: shade, gust. You start on a platform between two pits. The exit is across the left pit behind a door, and the plate that opens
+  // it is across the right pit. A gust facing right gets a shade over to the plate; the gust is then recorded again facing left, so it
+  // blows you over to the door.
+  const rest = (k) => () => G.echoes[k] && G.echoes[k].restT > 30;
+  const jumpAcross = (dir, from, target) => {
+    Bot.dir(dir);
+    for (let i = 0; i < 300 && (dir > 0 ? Bot.px() < from : Bot.px() > from); i++) { Bot.tick(); if (G.dead) Bot.fail("died on the run-up"); }
+    Bot.jumpTo(target, 24);
+  };
+  Bot.record("gust");
+  Bot.walkTo(392);
+  Bot.run(6);
+  Bot.stop();
+  Bot.record("shade");
+  Bot.waitUntil(rest("gust"), 900, "the wind to blow");
+  jumpAcross(1, 380, 570);
+  Bot.expect(G.p.onGround && Bot.px() > 545, "across the right pit");
+  Bot.walkTo(570);
+  Bot.run(6);
+  Bot.stop();
+  Bot.record("gust");
+  Bot.walkTo(290);
+  Bot.run(6);
+  Bot.stop();
+  Bot.waitUntil(() => rest("gust")() && rest("shade")(), 900, "the wind and the shade");
+  jumpAcross(-1, 296, 100);
+  Bot.expect(G.p.onGround && Bot.px() < 142, "across the left pit");
+  Bot.waitUntil(() => G.L.doorOpen.a, 300, "the door to open");
+  Bot.walkTo(30);
 };
 
