@@ -475,6 +475,12 @@ function stepPlayer() {
     burst(cx, cy, 10, "#4fe3c1", 70, 0.5, 2, 0);
   }
 
+  // Crystal that has just formed again around the player crushes them. Pushing them out instead would slide them
+  // through the wall (out of the bottom of it, into the floor).
+  for (const s of buildSolids(p, false, g)) {
+    if (s.crystal && overlap({ x: p.x + 1, y: p.y + 1, w: PW - 2, h: PH - 2 }, s)) { kill(); return; }
+  }
+
   const dir = (Input.right() ? 1 : 0) - (Input.left() ? 1 : 0);
   const jumpHeld = Input.jump();
   const jumpPressed = Input.hitBind("jump");
@@ -536,6 +542,9 @@ function stepPlayer() {
     const k = solids.findIndex((s) => s.src === prevStand);
     if (k > 0) solids.unshift(solids.splice(k, 1)[0]);
   }
+  // Walls have the last word. Echoes that carry or land you go first, so two echoes at the same height under a
+  // ceiling cannot leave you embedded in it (or pop you up through it).
+  solids.sort((a, b) => (b.ow ? 1 : 0) - (a.ow ? 1 : 0));
 
   const evx = p.vx + p.windV;
   p.x += evx * DT;

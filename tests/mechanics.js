@@ -249,6 +249,35 @@ mech("a player pressed a pixel into a wide ceiling is pushed out downward, not t
   ensure(G.p.y >= 239 && G.p.y < 262, "ended at y " + Math.round(G.p.y));
 });
 
+mech("swapping into a phase hole while the zone moves away crushes you in the wall that closes", () => {
+  Bot.load(tiny({ echoes: ["phase"], recMax: 8, swap: true }, (g) => { g.base(); g.set(2, 14, "@"); g.fill(10, 1, 12, 14, "%"); }));
+  Bot.record(0);
+  Bot.walkTo(190);
+  Bot.run(6);
+  Bot.stop();
+  Bot.waitUntil(() => G.echoes.phase.restT > 40, 900, "the phase to open the wall");
+  Bot.walkTo(230);
+  ensure(!G.dead && Bot.px() > 215, "stood in the hole");
+  Bot.swap(); // the phase is now frozen inside the wall, you are back outside
+  Bot.run(20);
+  ensure(!G.dead, "died too early");
+  Bot.walkTo(80);
+  Bot.swap(); // you land in the hole, the zone moves to where you stood
+  Bot.run(3);
+  ensure(G.dead, "the wall closed around the player and should have crushed them");
+});
+
+mech("two echoes at the same height under a ceiling do not embed or lift the rider through it", () => {
+  Bot.load(tiny({ echoes: ["shade", "glow"], recMax: 8 }, (g) => { g.base(); g.fill(1, 1, 30, 11, "#"); g.set(2, 14, "@"); }));
+  const mk = (y) => { const tr = []; for (let i = 0; i < 400; i++) tr.push({ x: 100, y, f: 1, s: 0, g: 1 }); return tr; };
+  G.echoes.shade = makeEcho("shade", mk(250), "shade");
+  G.echoes.glow = makeEcho("glow", mk(250), "glow");
+  G.p.x = 94; G.p.y = 234; G.p.vy = 0; G.p.stand = G.echoes.shade; G.p.onGround = true;
+  let minY = 1e9;
+  for (let i = 0; i < 60; i++) { Bot.tick(); minY = Math.min(minY, G.p.y); }
+  ensure(minY >= 239.5, "the rider was embedded in or lifted through the slab (top at " + minY.toFixed(1) + ")");
+});
+
 mech("a tide that stays put is refused, so it cannot stand in for a shade", () => {
   Bot.load(tiny({ echoes: ["tide"], recMax: 8 }, (g) => { g.base(); g.set(2, 14, "@"); g.set(2, 13, "a"); }));
   Bot.record(0);

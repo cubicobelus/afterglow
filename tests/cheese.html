@@ -87,11 +87,21 @@
     return { won: res === "won", rec: used, log };
   }
 
+  if (P.get("dbg")) {
+    const orig = stepPlayer;
+    window.stepPlayer = function () {
+      const y0 = G.p.y, st0 = G.p.stand && G.p.stand.key, vy0 = G.p.vy;
+      orig();
+      if (window.DBG && G.p.y < 215 && G.p.y > 150) window.DBG.push("t" + G.t + " y " + y0.toFixed(1) + " -> " + G.p.y.toFixed(1) + " vy " + vy0.toFixed(0) + "->" + G.p.vy.toFixed(0) + " stand " + st0 + "->" + (G.p.stand && G.p.stand.key) + " ground " + G.p.onGround);
+    };
+    window.DBG = [];
+  }
   let html = "";
   for (let idx = 0; idx < LEVELS.length; idx++) {
     if (only.length && !only.includes(idx)) continue;
     if (one !== null) {
       const t = trial(idx, Number(one), true);
+      if (window.DBG) html += window.DBG.join(String.fromCharCode(10)) + String.fromCharCode(10);
       html += idx + " " + LEVELS[idx].name + " trial " + one + ": " + (t.won ? "WON" : "no") + "\n" + t.log.join("\n") + "\n";
       continue;
     }
