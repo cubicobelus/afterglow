@@ -335,15 +335,16 @@ SOLUTIONS["SUNKEN GATE"] = () => {
 };
 
 SOLUTIONS["SWITCHBOARD"] = () => {
-  // slots: shade, shade2, glow. The plate that lights the bridge lamp is up on a ledge: the first shade hangs in mid-jump as a step,
-  // the second climbs it and stands on the plate, and the glow goes on the island.
+  // slots: shade, glow. The plate that lights the bridge lamp is up on a ledge. The glow hangs in mid jump beside the block as a step,
+  // the shade climbs it and stands on the plate. After that the step is not needed: the shade jumps up the block on every attempt and
+  // you ride it, so it is the lift as well as the holder, and the glow is recorded again on the island.
   const rest = (k) => () => G.echoes[k] && G.echoes[k].restT > 30;
-  const climb = () => {
-    Bot.walkTo(55);
-    Bot.jumpTo(G.echoes.shade.x + PW / 2, 24);
-    Bot.expect(G.p.stand === G.echoes.shade, "standing on the step");
-    Bot.jumpTo(130, 24);
-    Bot.expect(G.p.onGround && G.p.y < 210, "up on the ledge");
+  const ride = () => {
+    Bot.run(5);
+    Bot.jumpTo(Bot.px(), 12);
+    Bot.expect(G.p.stand === G.echoes.shade, "standing on the shade");
+    Bot.waitUntil(rest("shade"), 900, "the shade to settle on the plate");
+    Bot.expect(G.p.y < 215, "up on the ledge");
   };
   const toIsland = () => {
     Bot.walkTo(188);
@@ -351,7 +352,7 @@ SOLUTIONS["SWITCHBOARD"] = () => {
     Bot.jumpTo(212, 24);
     Bot.walkTo(392);
   };
-  Bot.record("shade");
+  Bot.record("glow");
   Bot.walkTo(76);
   Bot.jumpKey(true);
   Bot.dir(1);
@@ -365,20 +366,23 @@ SOLUTIONS["SWITCHBOARD"] = () => {
   Bot.jumpKey(false);
   Bot.dir(0);
   Bot.stop();
-  Bot.record("shade2");
-  Bot.waitUntil(() => !G.echoes.shade.moving, 600, "the step to settle");
-  climb();
+  Bot.record("shade");
+  Bot.waitUntil(() => !G.echoes.glow.moving, 600, "the step to settle");
+  Bot.run(40); // wait at the spawn: later you board it there
+  Bot.walkTo(55);
+  Bot.jumpTo(G.echoes.glow.x + PW / 2, 24);
+  Bot.expect(G.p.stand === G.echoes.glow, "standing on the step");
+  Bot.jumpTo(130, 24);
+  Bot.expect(G.p.onGround && G.p.y < 210, "up on the ledge");
   Bot.walkTo(130);
   Bot.run(6);
   Bot.stop();
-  Bot.record("glow");
-  Bot.waitUntil(() => rest("shade")() && rest("shade2")(), 900, "the shade to hold the plate");
-  climb();
+  Bot.record("glow"); // the step goes: the shade carries you instead
+  ride();
   toIsland();
   Bot.run(6);
   Bot.stop();
-  Bot.waitUntil(() => rest("shade")() && rest("shade2")() && rest("glow")(), 900, "the echoes to settle");
-  climb();
+  ride();
   toIsland();
   Bot.walkTo(494);
   Bot.jumpTo(545, 24);

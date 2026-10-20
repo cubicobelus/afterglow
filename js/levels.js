@@ -174,7 +174,7 @@ def(0, "RELAY", {
 });
 
 def(0, "SWITCHBOARD", {
-  echoes: ["shade", "shade", "glow"], recMax: 14, dark: true,
+  echoes: ["shade", "glow"], recMax: 14, dark: true,
   hint: "THE LAMP OVER THE BRIDGE BURNS ONLY WHILE ITS PLATE IS HELD, AND THE PLATE IS UP ON THE LEDGE. THE ISLAND NEEDS A GLOW.",
 }, (g) => {
   g.base();
@@ -611,7 +611,7 @@ const PAR = {
   "LAMPLIGHT": { t: 20, r: 1 },
   "SUNKEN GATE": { t: 20, r: 1 },
   "RELAY": { t: 25, r: 2 },
-  "SWITCHBOARD": { t: 55, r: 3 },
+  "SWITCHBOARD": { t: 40, r: 3 },
   "GLASS WALL": { t: 20, r: 1 },
   "UNDER GLASS": { t: 30, r: 2 },
   "UPDRAFT": { t: 20, r: 1 },
