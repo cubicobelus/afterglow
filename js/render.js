@@ -680,6 +680,16 @@ const Render = (() => {
         ctx.fillRect(th.cx + 3, th.cy - 9, 1, 1);
       }
     }
+    // crystal stays faintly visible too, so a hatch or wall in the dark still reads as something
+    for (const c of L.crystals) {
+      if (inPhase({ x: c.x + 8, y: c.y + 8, w: 4, h: 4 })) continue;
+      ctx.strokeStyle = rgba(pal.accent, 0.3);
+      ctx.lineWidth = 1;
+      ctx.strokeRect(c.x + 1.5, c.y + 1.5, TILE - 3, TILE - 3);
+      ctx.fillStyle = rgba(pal.accent, 0.16);
+      ctx.fillRect(c.x + 3, c.y + 3, 2, 2);
+      ctx.fillRect(c.x + 8, c.y + 7, 2, 2);
+    }
     for (const pl of L.plates) glowAt(ctx, pl.x + pl.w / 2, pl.y + 3, 11, PLATE_COLORS[pl.id], 0.32);
     for (const d of L.doorTiles) {
       ctx.fillStyle = rgba(PLATE_COLORS[d.id], L.doorOpen[d.id] ? 0.8 : 0.45);

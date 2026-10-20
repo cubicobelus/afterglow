@@ -1005,9 +1005,10 @@ SOLUTIONS["GHOST GLASS"] = () => {
 
 SOLUTIONS["THE BEACON"] = () => {
   // slots: shade, glow, phase, tide.
-  // The glow lights the planks and the phase opens the vault hatch only so that a tide and a shade can be recorded.
-  // After that the glow goes to the plate that also lights the gate, the phase goes to the last wall, the shade
-  // stays in the vault and the tide carries you over the planks and opens the first door by waiting on its plate.
+  // A pocket under the floor left of the start holds a plate, shut by a crystal hatch. The phase opens the hatch so a
+  // shade can drop in and stand on the plate. The glow lights the bridge so a tide can cross it and wait on the first
+  // plate. After that the glow goes to the second plate (it also lights the gate), the phase goes to the last wall
+  // (the hatch closes on the shade, which stays on its plate) and the tide carries you over the dark planks.
   const rest = (k) => () => G.echoes[k] && G.echoes[k].restT > 30;
   const crossOnFoot = () => {
     Bot.walkTo(92);
@@ -1017,6 +1018,8 @@ SOLUTIONS["THE BEACON"] = () => {
     Bot.jumpTo(262, 24);
   };
   const rideTide = () => {
+    // the shade waits at the start for the hatch and then leaves; board the tide once it has gone
+    Bot.waitUntil(() => G.t >= 100, 400, "the shade to leave the start");
     Bot.jumpTo(Bot.px(), 12);
     Bot.expect(G.p.stand === G.echoes.tide, "standing on the tide");
     Bot.waitUntil(() => Bot.px() > 318 && G.p.onGround && G.p.y > 255, 3000, "the ride over the planks");
@@ -1026,31 +1029,31 @@ SOLUTIONS["THE BEACON"] = () => {
     Bot.waitUntil(() => G.L.doorOpen.a, 2000, "the tide to open the first door");
     Bot.walkTo(410, 4);
   };
+  const open = () => G.L.doorOpen.b && G.L.doorOpen.c && G.L.gates.filter((x) => x.ty >= 13).every((x) => x.open);
+  // the phase over the hatch
+  Bot.record("phase");
+  Bot.walkTo(35);
+  Bot.run(6);
+  Bot.stop();
+  // the shade drops into the pocket and stands on its plate
+  Bot.record("shade");
+  Bot.waitUntil(rest("phase"), 900, "the hatch to give way");
+  Bot.walkTo(35);
+  Bot.waitUntil(() => G.p.onGround && G.p.y > 315, 200, "to drop into the pocket");
+  Bot.expect(G.L.plates.find((q) => q.id === "c").pressed, "the pocket plate pressed");
+  Bot.run(6);
+  Bot.stop();
+  // the glow lights the planks
   Bot.record("glow");
   Bot.walkTo(92);
   Bot.run(6);
   Bot.stop();
   // the tide: wait at the start so it can be boarded, cross the lit planks, wait on the first plate
   Bot.record("tide");
-  Bot.run(90);
+  Bot.run(170);
   crossOnFoot();
   Bot.walkTo(330);
   Bot.run(90);
-  Bot.stop();
-  // the phase over the vault hatch
-  Bot.record("phase");
-  crossOnFoot();
-  Bot.walkTo(290);
-  Bot.run(6);
-  Bot.stop();
-  // the shade drops into the vault and stands on its plate
-  Bot.record("shade");
-  crossOnFoot();
-  Bot.walkTo(290);
-  Bot.waitUntil(rest("phase"), 900, "the hatch to give way");
-  Bot.waitUntil(() => G.p.onGround && G.p.y > 320, 200, "to drop into the vault");
-  Bot.expect(G.L.plates.find((q) => q.id === "c").pressed, "the vault plate pressed");
-  Bot.run(6);
   Bot.stop();
   // the glow moves onto the second plate (it also lights the gate); the tide carries you over the dark planks
   Bot.record("glow");
@@ -1058,18 +1061,18 @@ SOLUTIONS["THE BEACON"] = () => {
   convoy();
   Bot.run(6);
   Bot.stop();
-  // the phase moves to the last wall
+  // the phase moves to the last wall; the hatch closes on the shade
   Bot.record("phase");
   rideTide();
   convoy();
-  Bot.waitUntil(() => G.L.doorOpen.b && G.L.doorOpen.c && G.L.gates.filter((x) => x.ty >= 13).every((x) => x.open), 900, "the doors and the gate to open");
+  Bot.waitUntil(open, 900, "the doors and the gate to open");
   Bot.walkTo(548);
   Bot.run(6);
   Bot.stop();
   // the climb out
   rideTide();
   convoy();
-  Bot.waitUntil(() => G.L.doorOpen.b && G.L.doorOpen.c && G.L.gates.filter((x) => x.ty >= 13).every((x) => x.open), 900, "the doors and the gate to open");
+  Bot.waitUntil(open, 900, "the doors and the gate to open");
   Bot.walkTo(548);
   Bot.waitUntil(rest("phase"), 900, "the last wall to give way");
   Bot.walkTo(612);

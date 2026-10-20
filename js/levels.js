@@ -609,19 +609,19 @@ def(4, "CHORUS", {
 
 def(4, "THE BEACON", {
   echoes: ["glow", "phase", "tide", "shade"], recMax: 40, dark: true,
-  hint: "WHAT YOU NEED TO RECORD IS NOT ALWAYS WHAT YOU NEED TO FINISH.",
+  hint: "WHAT YOU NEED TO RECORD IS NOT ALWAYS WHAT YOU NEED TO FINISH. THE FLOOR LEFT OF THE START HIDES A PLATE.",
 }, (g) => {
   g.base();
-  g.set(2, 14, "@");
+  g.set(3, 14, "@");
   g.pit(5, 11).fill(5, 14, 11, 14, "~");
-  g.fill(13, 15, 15, 15, "%").fill(13, 16, 15, 16, ".").set(14, 16, "c");
+  g.fill(1, 15, 2, 15, "%").set(1, 16, "c").set(2, 16, ".");
   g.set(16, 14, "a").fill(18, 1, 18, 8, "#").fill(18, 9, 18, 14, "A");
   g.set(20, 14, "b").fill(22, 1, 22, 8, "#").fill(22, 9, 22, 14, "B");
   g.fill(24, 1, 24, 8, "#").fill(24, 9, 24, 14, "G");
   g.fill(26, 1, 26, 8, "#").fill(26, 9, 26, 14, "C");
   g.fill(28, 1, 29, 14, "%");
   g.fill(30, 13, 30, 14, "X");
-  g.set(3, 10, "L").set(9, 6, "L").set(14, 9, "L").set(17, 5, "L");
+  g.set(2, 9, "L").set(9, 6, "L").set(14, 9, "L").set(17, 5, "L");
 });
 
 // Par for the two bonus stars: finish under par.t seconds, and use no more than par.r recordings.
