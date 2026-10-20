@@ -21,7 +21,7 @@ Each slot along the bottom of the screen holds one echo, and an echo's power swi
 Later levels give you several slots, sometimes two or three of the same kind. An echo does not care about walls or
 glass, so one you no longer need can be recorded again somewhere else.
 
-The game has 35 levels in four tiers, each with its own scenery. Every echo gets one or two easy levels, then the
+The game has 41 levels in five tiers, each with its own scenery. Every echo gets one or two easy levels, then the
 tiers mix them and climb to levels where the order matters, an echo has to be recorded again halfway through, and
 what you recorded earlier can carry you or lead you through doors.
 
@@ -35,7 +35,7 @@ what you recorded earlier can carry you or lead you through doors.
 | Spring | Bounces you high when you land on it. Hold jump for a bigger bounce. |
 | Gust | Blows a wind the way it was facing, which carries a jump much farther. |
 
-**Swap** is an ability, not an echo. Press **Q** to trade places with the picked echo, whatever kind it is. Only some levels switch it on, and those show a swap sign beside the level name and on the level select.
+**Swap** is an ability, not an echo. Press **Q** to trade places with the picked echo, whatever kind it is: you appear where it was, and it stays where you were. It is switched on in every level of the fourth tier, The Mirror, and nowhere else. Those levels show a swap sign beside the level name and on the level select. A small clock beside the level name starts with your first move.
 
 Every level also scores up to three stars: finishing it, beating its par time, and using no more recordings than
 its par. A few levels hide a lantern worth finding.
@@ -48,7 +48,7 @@ its par. A few levels hide a lantern worth finding.
 | Jump | Space, Up or W |
 | Record, stop | E |
 | Pick an echo slot | 1 to 7 |
-| Swap places with the picked echo (only on swap levels) | Q |
+| Swap places with the picked echo (The Mirror) | Q |
 | Restart the attempt | R |
 | Clear the picked echo | X |
 | Hint | H |
@@ -64,6 +64,8 @@ reset button that erases all saved times, stars, lanterns and settings.
 level, and a scripted solution for every level that must reach the exit (and pick up the level's lantern, if it
 has one). `tests/shortcuts.html` makes sure no level can be won by a bot that only runs right and jumps. Open them
 from a local web server. Adding or changing a level means writing or re-running its solution in `tests/solutions.js`.
+
+`tests/cheese.html` is a cheese hunt: a random player records a few random echoes and plays a random final run, and the page lists any level it manages to win (open it with `?only=3,5&secs=10`, and `?trial=SEED&only=3` replays one trial). A win in fewer recordings than the level's par is a candidate shortcut to look at.
 
 `demos/` holds the three small mechanic demos the game grew out of.
 

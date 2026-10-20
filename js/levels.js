@@ -248,6 +248,19 @@ def(1, "GHOST GLASS", {
   g.set(9, 8, "L").set(16, 8, "L").set(24, 8, "L").set(1, 9, "L");
 });
 
+def(1, "THREE PANES", {
+  echoes: ["phase", "phase"], recMax: 16,
+  hint: "THREE WALLS AND TWO PHASES. ONE CIRCLE IS WIDE ENOUGH FOR TWO WALLS IF YOU STAND BETWEEN THEM.",
+}, (g) => {
+  g.base();
+  g.set(2, 14, "@");
+  g.fill(6, 1, 6, 14, "%");
+  g.fill(10, 1, 10, 14, "%");
+  g.fill(14, 1, 14, 14, "%");
+  g.fill(28, 13, 28, 14, "X");
+  g.set(4, 9, "L").set(12, 9, "L").set(22, 9, "L");
+});
+
 def(1, "CHANDELIER", {
   echoes: ["flip", "flip", "flip"], recMax: 12,
   hint: "THE FLOOR IS DEATH, SO LOOK UP. EACH ZONE ONLY REACHES SO FAR.",
@@ -459,16 +472,15 @@ def(3, "STAY BEHIND", {
 });
 
 def(3, "APEX", {
-  echoes: ["spring", "shade"], recMax: 16, swap: true,
-  hint: "THE DOOR UP ON THE BLOCK ANSWERS TO A PLATE THAT HANGS WHERE ONLY A BOUNCE REACHES. SWAP DOES NOT NEED SOLID GROUND.",
+  echoes: ["spring"], recMax: 12, swap: true,
+  hint: "THE DOOR ANSWERS TO A PLATE THAT HANGS WHERE ONLY A BOUNCE REACHES, AND NOTHING CAN STAND THERE. SWAP DOES NOT NEED SOLID GROUND.",
 }, (g) => {
   g.base();
   g.set(2, 14, "@");
   g.set(11, 5, "1");
-  g.fill(15, 8, 30, 14, "#");
-  g.fill(22, 1, 22, 3, "#").fill(22, 4, 22, 7, "A");
-  g.fill(28, 6, 28, 7, "X");
-  g.set(6, 9, "L").set(18, 5, "L").set(26, 5, "L");
+  g.fill(16, 1, 16, 8, "#").fill(16, 9, 16, 14, "A");
+  g.fill(28, 13, 28, 14, "X");
+  g.set(6, 9, "L").set(20, 9, "L").set(25, 9, "L");
 });
 
 def(3, "WAYPOINT", {
@@ -485,6 +497,20 @@ def(3, "WAYPOINT", {
   g.set(5, 9, "L").set(16, 12, "L");
 });
 
+def(3, "UPSIDE DOWN", {
+  echoes: ["flip"], recMax: 10, swap: true,
+  hint: "THE FLOOR IS DEATH ALL THE WAY ACROSS AND ONE ZONE ONLY REACHES SO FAR. WHEREVER YOU SWAP FROM, THE ZONE GOES THERE, AND THE DOOR WANTS SOMETHING LEFT ON ITS PLATE.",
+}, (g) => {
+  g.base();
+  g.set(2, 14, "@");
+  g.fill(1, 1, 30, 11, "#");
+  g.fill(5, 14, 24, 14, "^");
+  g.set(22, 12, "1");
+  g.fill(26, 12, 26, 14, "A");
+  g.fill(29, 13, 29, 14, "X");
+  g.set(4, 12, "L").set(14, 12, "L").set(28, 12, "L");
+});
+
 def(3, "TWO BANKS", {
   echoes: ["spring", "shade"], recMax: 20, swap: true,
   hint: "THE DOOR WANTS BOTH PLATES: ONE ON THE BLOCK, ONE IN THE AIR. THE SPRING THAT THROWS YOU UP CAN BE THE ONE YOU LEAVE UP THERE.",
@@ -497,6 +523,20 @@ def(3, "TWO BANKS", {
   g.set(10, 7, "a");
   g.set(18, 5, "1");
   g.set(3, 9, "L").set(22, 9, "L");
+});
+
+def(3, "NIGHT TRAIN", {
+  echoes: ["glow", "spring"], recMax: 40, dark: true, swap: true,
+  hint: "A RECORDING KEEPS EVERYTHING YOU DID, SWAPS TOO. SOMETHING HAS TO BE WAITING ON THE FAR BANK BEFORE YOU GET THERE FOR REAL.",
+}, (g) => {
+  g.base();
+  g.set(2, 14, "@");
+  g.pit(6, 21);
+  g.fill(6, 14, 21, 14, "~");
+  g.fill(22, 1, 22, 8, "#").fill(22, 9, 22, 14, "G");
+  g.fill(27, 8, 30, 14, "#");
+  g.fill(29, 6, 29, 7, "X");
+  g.set(28, 5, "L");
 });
 
 // ================================================================ tier 5: the beacon
@@ -622,8 +662,11 @@ const PAR = {
   "CHORUS": { t: 100, r: 6 },
   "THE BEACON": { t: 90, r: 6 },
   "SAIL": { t: 25, r: 2 },
-  "STAY BEHIND": { t: 25, r: 1 },
-  "APEX": { t: 18, r: 2 },
-  "TWO BANKS": { t: 35, r: 3 },
+  "STAY BEHIND": { t: 20, r: 1 },
+  "APEX": { t: 20, r: 1 },
+  "TWO BANKS": { t: 28, r: 2 },
+  "UPSIDE DOWN": { t: 22, r: 1 },
+  "NIGHT TRAIN": { t: 50, r: 2 },
+  "THREE PANES": { t: 32, r: 3 },
 };
 for (const l of LEVELS) l.par = PAR[l.name];

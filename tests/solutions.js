@@ -1218,20 +1218,14 @@ SOLUTIONS["STAY BEHIND"] = () => {
 };
 
 SOLUTIONS["APEX"] = () => {
-  // slots: spring, shade. The door on the block answers to a plate that hangs at the top of a held bounce. At the top
-  // of the bounce you swap with the shade: it appears up there and stays (frozen) on the plate, and you land where it
-  // was recorded. Then the spring, still there, throws you up onto the block.
+  // One spring. It throws you up to the hanging plate; at the top of the bounce you swap with it, so the spring is left
+  // up there holding the plate and you land back where it stood, with the door open.
   Bot.record("spring");
   Bot.walkTo(230);
   Bot.run(6);
   Bot.stop();
-  Bot.record("shade");
-  Bot.walkTo(262);
-  Bot.run(6);
-  Bot.stop();
-  Bot.waitUntil(() => restOf("spring")() && restOf("shade")(), 1200, "the echoes to settle");
+  Bot.waitUntil(restOf("spring"), 900, "the spring to settle");
   Bot.walkTo(190);
-  Bot.select("shade");
   const plate = G.L.plates[0];
   Bot.jumpKey(true);
   let bounced = false, swapped = false;
@@ -1245,12 +1239,8 @@ SOLUTIONS["APEX"] = () => {
   }
   Bot.jumpKey(false);
   Bot.expect(swapped, "reached the plate at the top of the bounce");
-  Bot.expect(G.L.doorOpen.a || true, "swapped");
   Bot.run(20);
-  Bot.expect(G.L.doorOpen.a, "the shade holds the hanging plate");
-  Bot.walkTo(190);
-  jumpToSpring(230, 1);
-  Bot.expect(G.p.onGround && G.p.y < 160 && Bot.px() > 302, "up on the block");
+  Bot.expect(G.L.doorOpen.a, "the spring holds the hanging plate");
   Bot.walkTo(570);
 };
 
@@ -1290,4 +1280,99 @@ SOLUTIONS["TWO BANKS"] = () => {
   Bot.expect(G.p.onGround || G.p.y > 250, "back on the floor");
   Bot.waitUntil(() => G.L.doorOpen.a, 300, "the door to open");
   Bot.walkTo(610);
+};
+
+SOLUTIONS["UPSIDE DOWN"] = () => {
+  // One flip. It starts at the foot of the corridor; you fall up to the ceiling inside its zone and walk along it.
+  // At the edge of the zone you swap: you go back to the echo, and the echo (with its zone) is left where you stood.
+  const flipRest = () => G.echoes.flip && G.echoes.flip.restT > 30;
+  const onCeiling = () => G.p.g === -1 && G.p.onGround;
+  Bot.record("flip");
+  Bot.walkTo(70);
+  Bot.run(6);
+  Bot.stop();
+  Bot.waitUntil(flipRest, 600, "the zone to open");
+  Bot.walkTo(90);
+  Bot.waitUntil(onCeiling, 400, "to fall up to the ceiling");
+  const stops = [118, 182, 246, 310, 374, 440]; // the last swap is made under the plate, so the echo is left holding it
+  for (const x of stops) {
+    Bot.dir(1);
+    for (let i = 0; i < 400 && Bot.px() < x; i++) { Bot.tick(); if (G.dead) Bot.fail("died on the ceiling walk at " + Math.round(Bot.px())); }
+    Bot.dir(0);
+    Bot.run(6);
+    Bot.swap();
+    Bot.waitUntil(onCeiling, 300, "back on the ceiling after the swap at " + x);
+  }
+  Bot.expect(G.L.plates[0].pressed, "the echo holds the ceiling plate");
+  Bot.dir(1);
+  for (let i = 0; i < 600 && !(G.p.g === 1 && G.p.onGround && Bot.px() > 505); i++) { Bot.tick(); if (G.dead) Bot.fail("died on the last stretch at " + Math.round(Bot.px())); }
+  Bot.dir(0);
+  Bot.expect(G.p.onGround && Bot.px() > 505, "down on the far platform");
+  Bot.waitUntil(() => G.L.doorOpen.a, 120, "the door to open");
+  Bot.walkTo(590);
+};
+
+SOLUTIONS["NIGHT TRAIN"] = () => {
+  // slots: glow, spring. The planks are only solid in the glow's light, and one glow does not reach across, so you
+  // hop it forward with swap. The spring is recorded during such a crossing, so it ends up waiting at the foot of the
+  // block on the far bank; the real crossing then ends with a bounce.
+  const rest = (k) => () => G.echoes[k] && G.echoes[k].restT > 30;
+  const crossBridge = () => {
+    Bot.waitUntil(rest("glow"), 900, "the glow to settle");
+    Bot.walkTo(110);
+    Bot.jumpTo(150, 24);
+    Bot.walkTo(200);
+    Bot.swap();
+    Bot.run(20);
+    Bot.walkTo(110);
+    Bot.jumpTo(150, 24);
+    Bot.walkTo(300);
+    Bot.swap();
+    Bot.run(20);
+    Bot.walkTo(395);
+    Bot.swap();
+    Bot.run(20);
+    Bot.walkTo(470);
+    Bot.expect(G.p.onGround && Bot.px() > 440, "across the bridge and through the gate");
+  };
+  Bot.record("glow");
+  Bot.walkTo(100);
+  Bot.run(6);
+  Bot.stop();
+  Bot.record("spring");
+  Bot.select("glow");
+  crossBridge();
+  Bot.walkTo(490);
+  Bot.run(6);
+  Bot.stop();
+  Bot.select("glow");
+  Bot.waitUntil(() => rest("spring")() && rest("glow")(), 4000, "both echoes to settle");
+  crossBridge();
+  Bot.waitUntil(rest("spring"), 600, "the spring to be ready");
+  Bot.walkTo(445);
+  jumpToSpring(490, 1);
+  Bot.expect(G.p.y < 160 && Bot.px() > 542, "up on the block");
+  Bot.walkTo(590);
+};
+
+SOLUTIONS["THREE PANES"] = () => {
+  // slots: phase, phase2. The first phase opens the first wall. The second stands between the first two walls, near
+  // enough to both for its circle to hold them open. The first is then recorded again between walls two and three.
+  const rest = (k) => () => G.echoes[k] && G.echoes[k].restT > 30;
+  Bot.record("phase");
+  Bot.walkTo(100);
+  Bot.run(6);
+  Bot.stop();
+  Bot.record("phase2");
+  Bot.waitUntil(rest("phase"), 900, "the first wall to give way");
+  Bot.walkTo(170);
+  Bot.run(6);
+  Bot.stop();
+  Bot.record("phase");
+  Bot.waitUntil(rest("phase2"), 900, "the first two walls to give way");
+  Bot.walkTo(250);
+  Bot.run(6);
+  Bot.stop();
+  Bot.waitUntil(() => rest("phase")() && rest("phase2")(), 900, "all three walls to give way");
+  Bot.walkTo(590);
 };
