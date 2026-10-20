@@ -18,7 +18,7 @@ const App = (() => {
   // ---------------------------------------------------------------- save
   const SAVE_KEY = "afterglow.save";
   const SETTINGS_KEY = "afterglow.settings";
-  const SAVE_VERSION = 5;
+  const SAVE_VERSION = 6;
   let save = { done: [], best: {}, stars: {}, lanterns: {}, seen: {} };
   let hadSave = false;
   try {
@@ -48,16 +48,22 @@ const App = (() => {
         "FERRY", "LIFT", "TRAMPOLINE", "SKYHOOK", "TWO STAGES", "FERRY LIGHT", "SLUICE", "STACKED SPRINGS", "SLINGSHOT", "PUMP ROOM",
         "LEAPFROG", "SECOND WIND", "STAY BEHIND", "APEX", "WAYPOINT", "UPSIDE DOWN", "TWO BANKS", "NIGHT TRAIN",
         "BREEZE", "SAIL", "GALLOP", "AFTERIMAGE", "CHORUS", "THE BEACON"],
+      5: ["FIRST STEPS", "THE PLATE", "STEPPING STONE", "TWIN PLATES", "STEP UP", "STAIRCASE", "LAMPLIGHT", "LIGHT STEP", "SUNKEN GATE", "RELAY", "SWITCHBOARD",
+        "GLASS WALL", "UNDER GLASS", "UPDRAFT", "CEILING PLATE", "TWO KEYS", "GHOST GLASS", "THREE PANES", "FOUR PANES", "CHANDELIER", "HALL OF MIRRORS",
+        "FERRY", "LIFT", "TRAMPOLINE", "SKYHOOK", "TWO STAGES", "FERRY LIGHT", "SLUICE", "STACKED SPRINGS", "SLINGSHOT", "PUMP ROOM",
+        "LEAPFROG", "SECOND WIND", "STAY BEHIND", "APEX", "WAYPOINT", "UPSIDE DOWN", "WATCHTOWER", "GLASS CEILING", "TWO BANKS", "NIGHT TRAIN",
+        "BREEZE", "STONE AND SAIL", "SAIL", "GALLOP", "CLOCKWORK", "UP AND OVER", "TWO UPDRAFTS", "AFTERIMAGE", "CHORUS"],
     };
     // Same name but a different puzzle now: the old result no longer applies.
     const REDESIGNED = {
-      1: { "THE BEACON": true, "SLUICE": true, "SAIL": true },
-      2: { "PUMP ROOM": true, "THE BEACON": true, "AFTERIMAGE": true, "SAIL": true },
-      3: { "SAIL": true },
-      4: { "SAIL": true },
+      1: { "THE BEACON": true, "SLUICE": true, "SAIL": true, "SWITCHBOARD": true },
+      2: { "PUMP ROOM": true, "THE BEACON": true, "AFTERIMAGE": true, "SAIL": true, "SWITCHBOARD": true },
+      3: { "SAIL": true, "SWITCHBOARD": true },
+      4: { "SAIL": true, "SWITCHBOARD": true },
+      5: { "SWITCHBOARD": true },
     };
     // The level is the same but its lantern moved, so the old pickup no longer counts.
-    const LANTERN_MOVED = { "TRAMPOLINE": true };
+    const LANTERN_MOVED = { "TRAMPOLINE": true, "SUNKEN GATE": true };
     const from = save.v || 1;
     const order = ORDERS[from] || ORDERS[2];
     const redesigned = REDESIGNED[from] || REDESIGNED[2];
@@ -94,6 +100,8 @@ const App = (() => {
       if (typeof s.sfx === "number") Settings.sfx = Math.max(0, Math.min(1, s.sfx));
       if (typeof s.shake === "boolean") Settings.shake = s.shake;
       if (s.keys) for (const k in DEFAULT_BIND) if (Array.isArray(s.keys[k]) && s.keys[k].length) Input.bind[k] = s.keys[k].slice(0, 3);
+      // Saved settings from before click and K were added: an untouched record key picks up the new defaults.
+      if (s.keys && Array.isArray(s.keys.record) && s.keys.record.length === 1 && s.keys.record[0] === "KeyE") Input.bind.record = DEFAULT_BIND.record.slice();
     }
   } catch (e) { /* ignore */ }
   applySettings();
@@ -855,6 +863,8 @@ const App = (() => {
         return;
       }
     }
+    // A click records and stops too, for keyboards that cannot register W, D and E together.
+    if (A.state === "play" && e.button === 0) Input.pressed.Mouse0 = true;
     if (A.state === "chapter" && A.cardT > 30) nextCard();
     if (A.state === "ending" && A.endT > 60) goTitle();
   });

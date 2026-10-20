@@ -226,6 +226,20 @@ mech("the level clock waits for the first control input", () => {
   ensure(G.time > 0.4 && G.time < 0.6, "the clock should have run about half a second (" + G.time + ")");
 });
 
+mech("a click or K starts and stops a recording while you run, for keyboards that cannot take W, D and E together", () => {
+  Bot.load(tiny({ echoes: ["shade"] }, (g) => { g.base(); g.set(2, 14, "@"); }));
+  Bot.dir(1);
+  Bot.press("Mouse0");
+  Bot.tick();
+  ensure(G.rec, "a click did not start the recording");
+  Bot.run(10);
+  Bot.press("KeyK");
+  Bot.tick();
+  ensure(!G.rec, "K did not stop the recording");
+  Bot.dir(0);
+  ensure(Input.bind.record.includes("Mouse0"), "click is not a default record binding");
+});
+
 mech("an echo that presses a rider a pixel into a ceiling does not throw the rider over it", () => {
   // The slab is 220 px thick. An echo whose top is 15 px under it leaves the rider overlapping the slab by a pixel;
   // that used to be resolved as landing on top of the slab.

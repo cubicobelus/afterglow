@@ -37,7 +37,7 @@ const DEFAULT_BIND = {
   left: ["ArrowLeft", "KeyA"],
   right: ["ArrowRight", "KeyD"],
   jump: ["Space", "ArrowUp", "KeyW"],
-  record: ["KeyE"],
+  record: ["KeyE", "KeyK", "Mouse0"],
   swap: ["KeyQ", "ShiftLeft", "ShiftRight"],
   restart: ["KeyR"],
   clear: ["KeyX"],
@@ -78,7 +78,7 @@ const SFX = (name, arg) => { if (typeof Sfx !== "undefined") Sfx.play(name, arg)
 // Short readable name for a key code, for hints and the key settings.
 function keyName(code) {
   if (!code) return "NONE";
-  const map = { Space: "SPACE", ArrowLeft: "LEFT", ArrowRight: "RIGHT", ArrowUp: "UP", ArrowDown: "DOWN", ShiftLeft: "SHIFT", ShiftRight: "SHIFT", Escape: "ESC", Enter: "ENTER", Backspace: "BKSP", Tab: "TAB", ControlLeft: "CTRL", ControlRight: "CTRL", AltLeft: "ALT", AltRight: "ALT" };
+  const map = { Mouse0: "CLICK", Space: "SPACE", ArrowLeft: "LEFT", ArrowRight: "RIGHT", ArrowUp: "UP", ArrowDown: "DOWN", ShiftLeft: "SHIFT", ShiftRight: "SHIFT", Escape: "ESC", Enter: "ENTER", Backspace: "BKSP", Tab: "TAB", ControlLeft: "CTRL", ControlRight: "CTRL", AltLeft: "ALT", AltRight: "ALT" };
   if (map[code]) return map[code];
   if (code.startsWith("Key")) return code.slice(3);
   if (code.startsWith("Digit")) return code.slice(5);

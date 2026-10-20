@@ -1061,7 +1061,7 @@ const Render = (() => {
         ctx.fillRect(bx - 1, 5, bwid + 2, 7);
         ctx.fillStyle = frac > 0.8 ? "#ff6b6b" : KINDS[G.rec.kind].color;
         ctx.fillRect(bx, 6, Math.round(bwid * frac), 5);
-        Font.draw(ctx, "RECORDING  " + keyName(Input.bind.record[0]) + " TO STOP", W / 2, 15, { scale: 1, color: "#ffd0d0", align: "center" });
+        Font.draw(ctx, "RECORDING  " + keyName(Input.bind.record[0]) + (Input.bind.record.includes("Mouse0") ? " OR CLICK" : "") + " TO STOP", W / 2, 15, { scale: 1, color: "#ffd0d0", align: "center" });
       }
       if (G.notice && G.notice.t > 0) {
         const a = Math.min(1, G.notice.t / 30);
