@@ -138,17 +138,6 @@ def(0, "LAMPLIGHT", {
   g.set(29, 10, "L");
 });
 
-def(0, "LIGHT STEP", {
-  echoes: ["glow"], recMax: 10, dark: true,
-  hint: "A LIGHT ON THE GROUND REACHES ONLY SO FAR. A LIGHT FROZEN IN MID-AIR OVER THE MIDDLE REACHES FARTHER.",
-}, (g) => {
-  g.base();
-  g.set(2, 14, "@");
-  g.pit(7, 18).fill(7, 14, 18, 14, "~");
-  g.fill(28, 13, 28, 14, "X");
-  g.set(3, 9, "L").set(27, 9, "L");
-});
-
 def(0, "SUNKEN GATE", {
   echoes: ["glow"], recMax: 10, dark: true,
   hint: "A LIGHT GATE OPENS WHILE LIGHT FALLS ON IT. CLIMB THE LEDGES AND LEAVE A GLOW NEAR THE GATE.",
@@ -164,7 +153,7 @@ def(0, "SUNKEN GATE", {
   g.fill(20, 4, 20, 5, "G");
   g.fill(21, 6, 30, 14, "#");
   g.fill(28, 4, 28, 5, "X");
-  g.set(12, 3, "o");
+  g.set(7, 3, "o");
   g.set(1, 10, "L").set(27, 3, "L");
 });
 
@@ -298,20 +287,6 @@ def(1, "THREE PANES", {
   g.set(4, 9, "L").set(12, 9, "L").set(22, 9, "L");
 });
 
-def(1, "FOUR PANES", {
-  echoes: ["phase", "phase", "phase"], recMax: 20,
-  hint: "FOUR WALLS AND THREE PHASES. ONE CIRCLE HOLDS TWO WALLS OPEN, AND THE FIRST PHASE CAN BE USED AGAIN.",
-}, (g) => {
-  g.base();
-  g.set(2, 14, "@");
-  g.fill(6, 1, 6, 14, "%");
-  g.fill(10, 1, 10, 14, "%");
-  g.fill(14, 1, 14, 14, "%");
-  g.fill(18, 1, 18, 14, "%");
-  g.fill(28, 13, 28, 14, "X");
-  g.set(4, 9, "L").set(12, 9, "L").set(16, 9, "L").set(24, 9, "L");
-});
-
 def(1, "CHANDELIER", {
   echoes: ["flip", "flip", "flip"], recMax: 12,
   hint: "THE FLOOR IS DEATH, SO LOOK UP. EACH ZONE ONLY REACHES SO FAR.",
@@ -440,20 +415,6 @@ def(2, "SLUICE", {
   g.set(4, 9, "L").set(13, 6, "L").set(25, 9, "L");
 });
 
-def(2, "STACKED SPRINGS", {
-  echoes: ["spring", "spring", "glow"], recMax: 14, dark: true,
-  hint: "HOLD JUMP AS YOU LAND FOR A BIGGER BOUNCE. WHAT CAN A SPRING DO FROM UP THERE?",
-}, (g) => {
-  g.base();
-  g.set(2, 14, "@");
-  g.fill(9, 7, 13, 14, "#");
-  g.fill(10, 3, 30, 3, "=");
-  g.fill(25, 1, 25, 2, "G");
-  g.fill(28, 1, 28, 2, "X");
-  g.set(5, 5, "o");
-  g.set(3, 11, "L").set(11, 5, "L").set(19, 11, "L");
-});
-
 def(2, "SLINGSHOT", {
   echoes: ["glow", "spring"], recMax: 24, dark: true,
   hint: "ONE ECHO CAN BE THE FERRY AND THE LAUNCHER. THE LIGHT HAS TO BE IN TWO PLACES, SO IT CANNOT STAY IN THE FIRST.",
@@ -562,18 +523,6 @@ def(3, "UPSIDE DOWN", {
   g.set(4, 12, "L").set(14, 12, "L").set(28, 12, "L");
 });
 
-def(3, "WATCHTOWER", {
-  echoes: ["spring", "shade"], recMax: 20, swap: true,
-  hint: "TWO PLATES HANG IN THE AIR, ONE STRAIGHT UP AND ONE A STEP TO THE RIGHT. THE SPRING STILL HAS TO THROW YOU TO REACH THE SECOND.",
-}, (g) => {
-  g.base();
-  g.set(2, 14, "@");
-  g.set(11, 5, "1").set(14, 5, "1");
-  g.fill(19, 1, 19, 8, "#").fill(19, 9, 19, 14, "A");
-  g.fill(28, 13, 28, 14, "X");
-  g.set(6, 9, "L").set(17, 9, "L").set(24, 9, "L");
-});
-
 def(3, "GLASS CEILING", {
   echoes: ["flip", "phase"], recMax: 30, swap: true,
   hint: "A WALL OF GLASS STANDS ACROSS THE CEILING ROAD. YOUR SWAPS ARE KEPT IN WHAT YOU RECORD, SO AN ECHO CAN BE LEFT WHERE YOU WILL NEED IT.",
@@ -585,20 +534,6 @@ def(3, "GLASS CEILING", {
   g.fill(14, 12, 14, 14, "%");
   g.fill(29, 13, 29, 14, "X");
   g.set(4, 12, "L").set(26, 12, "L");
-});
-
-def(3, "TWO BANKS", {
-  echoes: ["spring", "shade"], recMax: 20, swap: true,
-  hint: "THE DOOR WANTS BOTH PLATES: ONE ON THE BLOCK, ONE IN THE AIR. THE SPRING THAT THROWS YOU UP CAN BE THE ONE YOU LEAVE UP THERE.",
-}, (g) => {
-  g.base();
-  g.set(26, 14, "@");
-  g.fill(28, 1, 28, 8, "#").fill(28, 9, 28, 14, "A");
-  g.fill(30, 13, 30, 14, "X");
-  g.fill(6, 8, 14, 14, "#");
-  g.set(10, 7, "a");
-  g.set(18, 5, "1");
-  g.set(3, 9, "L").set(22, 9, "L");
 });
 
 def(3, "NIGHT TRAIN", {
@@ -626,17 +561,6 @@ def(4, "BREEZE", {
   g.set(13, 11, "o");
   g.fill(28, 13, 28, 14, "X");
   g.set(5, 8, "L").set(13, 5, "L").set(24, 8, "L");
-});
-
-def(4, "STONE AND SAIL", {
-  echoes: ["gust"], recMax: 10,
-  hint: "A GUST BLOWS THE WAY IT FACED, AND A GUST FROZEN IN MID-AIR IS A STEP AS WELL.",
-}, (g) => {
-  g.base();
-  g.set(2, 14, "@");
-  g.pit(7, 16);
-  g.fill(28, 13, 28, 14, "X");
-  g.set(4, 8, "L").set(13, 5, "L").set(25, 8, "L");
 });
 
 def(4, "SAIL", {
@@ -687,20 +611,6 @@ def(4, "UP AND OVER", {
   g.fill(17, 8, 30, 14, "#");
   g.fill(28, 6, 28, 7, "X");
   g.set(8, 9, "L").set(15, 5, "L").set(24, 5, "L");
-});
-
-def(4, "TWO UPDRAFTS", {
-  echoes: ["flip", "shade"], recMax: 20,
-  hint: "ONE ZONE, TWO LEDGES. THE FIRST LEDGE HAS THE PLATE AND THE SECOND HAS THE EXIT. WHAT YOU SEND UP THE FIRST CAN STAY THERE.",
-}, (g) => {
-  g.base();
-  g.set(12, 14, "@");
-  g.fill(1, 9, 4, 14, "#");
-  g.set(2, 8, "a");
-  g.fill(13, 1, 13, 8, "#").fill(13, 9, 13, 14, "A");
-  g.fill(20, 9, 30, 14, "#");
-  g.fill(28, 7, 28, 8, "X");
-  g.set(8, 6, "L").set(16, 6, "L").set(24, 6, "L");
 });
 
 def(4, "AFTERIMAGE", {
@@ -761,7 +671,6 @@ const PAR = {
   "TWO STAGES": { t: 40, r: 3 },
   "FERRY LIGHT": { t: 45, r: 3 },
   "SLUICE": { t: 30, r: 3 },
-  "STACKED SPRINGS": { t: 40, r: 3 },
   "SLINGSHOT": { t: 55, r: 4 },
   "PUMP ROOM": { t: 75, r: 6 },
   "BREEZE": { t: 15, r: 1 },
@@ -774,19 +683,13 @@ const PAR = {
   "SAIL": { t: 25, r: 2 },
   "STAY BEHIND": { t: 20, r: 1 },
   "APEX": { t: 20, r: 1 },
-  "TWO BANKS": { t: 28, r: 2 },
   "UPSIDE DOWN": { t: 22, r: 1 },
   "NIGHT TRAIN": { t: 50, r: 2 },
   "THREE PANES": { t: 32, r: 3 },
   "STEP UP": { t: 30, r: 2 },
-  "FOUR PANES": { t: 50, r: 4 },
-  "WATCHTOWER": { t: 25, r: 2 },
   "GLASS CEILING": { t: 35, r: 2 },
   "CLOCKWORK": { t: 40, r: 3 },
   "UP AND OVER": { t: 40, r: 3 },
-  "TWO UPDRAFTS": { t: 35, r: 3 },
   "STAIRCASE": { t: 45, r: 3 },
-  "STONE AND SAIL": { t: 15, r: 1 },
-  "LIGHT STEP": { t: 20, r: 1 },
 };
 for (const l of LEVELS) l.par = PAR[l.name];
