@@ -10,7 +10,7 @@ const App = (() => {
   // ---------------------------------------------------------------- save
   const SAVE_KEY = "afterglow.save";
   const SETTINGS_KEY = "afterglow.settings";
-  const SAVE_VERSION = 3;
+  const SAVE_VERSION = 4;
   let save = { done: [], best: {}, stars: {}, lanterns: {}, seen: {} };
   let hadSave = false;
   try {
@@ -31,11 +31,16 @@ const App = (() => {
         "GLASS WALL", "UNDER GLASS", "UPDRAFT", "CEILING PLATE", "TWO KEYS", "GHOST GLASS", "CHANDELIER", "HALL OF MIRRORS",
         "FERRY", "LIFT", "TRAMPOLINE", "SKYHOOK", "TWO STAGES", "FERRY LIGHT", "SLUICE", "STACKED SPRINGS", "PUMP ROOM",
         "BREEZE", "SAIL", "LEAPFROG", "SECOND WIND", "TAXI", "AFTERIMAGE", "CHORUS", "THE BEACON"],
+      3: ["FIRST STEPS", "THE PLATE", "STEPPING STONE", "TWIN PLATES", "LAMPLIGHT", "SUNKEN GATE", "RELAY", "SWITCHBOARD",
+        "GLASS WALL", "UNDER GLASS", "UPDRAFT", "CEILING PLATE", "TWO KEYS", "GHOST GLASS", "CHANDELIER", "HALL OF MIRRORS",
+        "FERRY", "LIFT", "TRAMPOLINE", "SKYHOOK", "TWO STAGES", "FERRY LIGHT", "SLUICE", "STACKED SPRINGS", "SLINGSHOT", "PUMP ROOM",
+        "BREEZE", "SAIL", "GALLOP", "LEAPFROG", "SECOND WIND", "WAYPOINT", "AFTERIMAGE", "CHORUS", "THE BEACON"],
     };
     // Same name but a different puzzle now: the old result no longer applies.
     const REDESIGNED = {
       1: { "THE BEACON": true, "SLUICE": true },
       2: { "PUMP ROOM": true, "THE BEACON": true, "AFTERIMAGE": true },
+      3: {},
     };
     // The level is the same but its lantern moved, so the old pickup no longer counts.
     const LANTERN_MOVED = { "TRAMPOLINE": true };
@@ -572,14 +577,14 @@ const App = (() => {
   function drawSelect(hits) {
     drawPlainBg();
     Font.draw(ctx, "LEVELS", W / 2, 10, { scale: 3, color: "#ffe9a8", align: "center" });
-    const tw = 44, th = 52, x0 = 150, gap = 3;
+    const tw = 44, th = 46, x0 = 150, gap = 3;
     for (let t = 0; t < CHAPTERS.length; t++) {
-      const y = 46 + t * 62;
+      const y = 42 + t * 54;
       const pal = CHAPTERS[t].pal;
       Font.draw(ctx, CHAPTERS[t].name, 12, y + 4, { scale: 1, color: pal.accent });
       tierKinds[t].forEach((kind, k) => {
         if (Render.EMBLEMS[kind]) Render.slotIcon(ctx, 18 + k * 18, y + 26, kind, 0, true);
-        else { Font.draw(ctx, "Q", 14 + k * 18, y + 21, { scale: 1, color: "#ffffff" }); }
+        else Render.drawSwapIcon(ctx, 22 + k * 18, y + 26, "#ffffff");
       });
       tierLevels[t].forEach((i, n) => {
         const x = x0 + n * (tw + gap);

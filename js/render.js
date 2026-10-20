@@ -117,6 +117,11 @@ const Render = (() => {
       x.fillRect(px + 4, py + 4, 1, 1);
       x.fillRect(px + 5, py + 5, 1, 1);
     }
+    if (theme === "mirror" && hash(c * 5, r * 3) > 0.72) {
+      // a glint across the glass
+      x.fillStyle = "rgba(255,255,255,0.22)";
+      for (let i = 0; i < 6; i++) x.fillRect(px + 4 + i * 2, py + 14 - i * 2, 2, 1);
+    }
   }
 
   function drawSpike(x, sp) {
@@ -245,6 +250,32 @@ const Render = (() => {
         const sx = rng() * W, sy = H - rng() * 90, sh = 10 + rng() * 28;
         x.fillStyle = rgba(pal.accent, 0.12 + rng() * 0.1);
         x.beginPath(); x.moveTo(sx, sy); x.lineTo(sx + 6, sy - sh); x.lineTo(sx + 12, sy); x.closePath(); x.fill();
+      }
+    } else if (th.theme === "mirror") {
+      // tall panes of glass with glints, a faint centre line, and a floor that shines
+      for (let i = 0; i < 6; i++) {
+        const fx = 12 + i * 106 + Math.floor(rng() * 14), fy = 22 + Math.floor(rng() * 18), fw = 56, fh = 188;
+        x.fillStyle = "rgba(255,255,255,0.035)";
+        x.fillRect(fx, fy, fw, fh);
+        x.strokeStyle = rgba(pal.wallHi, 0.34);
+        x.lineWidth = 3;
+        x.strokeRect(fx, fy, fw, fh);
+        x.strokeStyle = "rgba(255,255,255,0.1)";
+        x.lineWidth = 6;
+        x.beginPath(); x.moveTo(fx + 8, fy + fh - 12); x.lineTo(fx + fw - 18, fy + 12); x.stroke();
+        x.lineWidth = 2;
+        x.beginPath(); x.moveTo(fx + 24, fy + fh - 12); x.lineTo(fx + fw - 4, fy + 40); x.stroke();
+      }
+      x.fillStyle = rgba(pal.accent, 0.1);
+      for (let yy = 0; yy < H; yy += 8) x.fillRect(W / 2 - 1, yy, 2, 4);
+      const fl = x.createLinearGradient(0, H - 110, 0, H);
+      fl.addColorStop(0, rgba(pal.accent, 0));
+      fl.addColorStop(1, rgba(pal.accent, 0.14));
+      x.fillStyle = fl;
+      x.fillRect(0, H - 110, W, 110);
+      for (let i = 0; i < 40; i++) {
+        x.fillStyle = rgba(pal.accent, 0.12 + rng() * 0.12);
+        x.fillRect(Math.floor(rng() * W), Math.floor(rng() * H), 1, 1);
       }
     } else {
       for (let i = 0; i < 110; i++) {

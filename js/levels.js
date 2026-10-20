@@ -23,6 +23,10 @@ const CHAPTERS = [
     pal: { bg1: "#06182a", bg2: "#0d4a5c", wall: "#3f5f70", wallHi: "#79a5b4", wallLo: "#243d4b", mortar: "#12212c", accent: "#7fe0e6" },
   },
   {
+    name: "THE MIRROR", line: "STEP THROUGH. SOMETHING TAKES YOUR PLACE.", theme: "mirror", mood: 3,
+    pal: { bg1: "#210f1d", bg2: "#5a2a48", wall: "#74506c", wallHi: "#c08fb6", wallLo: "#412639", mortar: "#2a1426", accent: "#ff9fc8" },
+  },
+  {
     name: "THE BEACON", line: "RELIGHT THE LAMP.", theme: "beacon", mood: 4,
     pal: { bg1: "#080c2a", bg2: "#243b70", wall: "#4b5b83", wallHi: "#7488b8", wallLo: "#2b3656", mortar: "#1d2740", accent: "#fff0b0" },
   },
@@ -413,41 +417,8 @@ def(2, "PUMP ROOM", {
   g.set(4, 11, "L").set(11, 5, "L").set(17, 4, "L");
 });
 
-def(3, "BREEZE", {
-  unlock: "gust", echoes: ["gust"], recMax: 8,
-  hint: "A GUST BLOWS THE WAY YOU FACED WHEN YOU STOPPED. STAND AT THE EDGE FACING THE GAP, THEN JUMP INTO THE WIND.",
-}, (g) => {
-  g.base();
-  g.set(2, 14, "@");
-  g.pit(9, 14);
-  g.set(13, 11, "o");
-  g.fill(28, 13, 28, 14, "X");
-  g.set(5, 8, "L").set(13, 5, "L").set(24, 8, "L");
-});
-
-def(3, "SAIL", {
-  echoes: ["gust", "tide"], recMax: 14,
-  hint: "A TIDE REMEMBERS A JUMP. WHAT IF THE JUMP HAD HELP?",
-}, (g) => {
-  g.base();
-  g.set(2, 14, "@");
-  g.pit(9, 18);
-  g.fill(28, 13, 28, 14, "X");
-  g.set(5, 8, "L").set(14, 5, "L").set(25, 8, "L");
-});
-
-def(3, "GALLOP", {
-  echoes: ["shade", "gust"], recMax: 24,
-  hint: "A GUST THAT CARRIES YOU CAN STILL BLOW WHEN IT STOPS. THE SHADE ONLY HAS TO BE A STEP WHILE YOU RECORD.",
-}, (g) => {
-  g.base();
-  g.set(2, 14, "@");
-  g.pit(5, 11).pit(17, 22);
-  g.set(25, 14, "a").fill(27, 1, 27, 8, "#").fill(27, 9, 27, 14, "A");
-  g.fill(29, 13, 29, 14, "X");
-  g.set(3, 9, "L").set(14, 9, "L").set(24, 9, "L");
-});
-
+// ================================================================ tier 4: the mirror
+// Swap (Q) is on in every level of this tier and nowhere else.
 def(3, "LEAPFROG", {
   unlock: "swap", echoes: ["glow"], recMax: 8, dark: true, swap: true,
   hint: "THE BRIDGE IS LONGER THAN ONE LIGHT. WALK TO THE EDGE OF THE LIGHT, THEN PRESS Q.",
@@ -486,7 +457,43 @@ def(3, "WAYPOINT", {
   g.set(5, 9, "L").set(16, 12, "L");
 });
 
-def(3, "AFTERIMAGE", {
+// ================================================================ tier 5: the beacon
+def(4, "BREEZE", {
+  unlock: "gust", echoes: ["gust"], recMax: 8,
+  hint: "A GUST BLOWS THE WAY YOU FACED WHEN YOU STOPPED. STAND AT THE EDGE FACING THE GAP, THEN JUMP INTO THE WIND.",
+}, (g) => {
+  g.base();
+  g.set(2, 14, "@");
+  g.pit(9, 14);
+  g.set(13, 11, "o");
+  g.fill(28, 13, 28, 14, "X");
+  g.set(5, 8, "L").set(13, 5, "L").set(24, 8, "L");
+});
+
+def(4, "SAIL", {
+  echoes: ["gust", "tide"], recMax: 14,
+  hint: "A TIDE REMEMBERS A JUMP. WHAT IF THE JUMP HAD HELP?",
+}, (g) => {
+  g.base();
+  g.set(2, 14, "@");
+  g.pit(9, 18);
+  g.fill(28, 13, 28, 14, "X");
+  g.set(5, 8, "L").set(14, 5, "L").set(25, 8, "L");
+});
+
+def(4, "GALLOP", {
+  echoes: ["shade", "gust"], recMax: 24,
+  hint: "A GUST THAT CARRIES YOU CAN STILL BLOW WHEN IT STOPS. THE SHADE ONLY HAS TO BE A STEP WHILE YOU RECORD.",
+}, (g) => {
+  g.base();
+  g.set(2, 14, "@");
+  g.pit(5, 11).pit(17, 22);
+  g.set(25, 14, "a").fill(27, 1, 27, 8, "#").fill(27, 9, 27, 14, "A");
+  g.fill(29, 13, 29, 14, "X");
+  g.set(3, 9, "L").set(14, 9, "L").set(24, 9, "L");
+});
+
+def(4, "AFTERIMAGE", {
   echoes: ["glow", "phase", "shade"], recMax: 28, dark: true,
   hint: "THE THORNS ARE ONLY SAFE WHILE LIT. WHAT YOU RECORDED CROSSING THEM STILL WALKS THERE. NOTHING SAYS WHICH ECHO HAS TO CARRY YOU.",
 }, (g) => {
@@ -501,7 +508,7 @@ def(3, "AFTERIMAGE", {
   g.set(8, 11, "L").set(17, 6, "L").set(5, 12, "L");
 });
 
-def(3, "CHORUS", {
+def(4, "CHORUS", {
   echoes: ["gust", "gust", "spring", "shade"], recMax: 30,
   hint: "THE DOOR UP HERE ANSWERS TO A PLATE DOWN BELOW. WIND ONLY HAS TO BE THERE WHEN YOU RECORD, IF SOMETHING ELSE CAN CARRY YOU.",
 }, (g) => {
@@ -518,7 +525,7 @@ def(3, "CHORUS", {
   g.set(4, 12, "L").set(24, 12, "L").set(9, 4, "L").set(17, 4, "L");
 });
 
-def(3, "THE BEACON", {
+def(4, "THE BEACON", {
   echoes: ["glow", "phase", "tide", "shade"], recMax: 40, dark: true,
   hint: "WHAT YOU NEED TO RECORD IS NOT ALWAYS WHAT YOU NEED TO FINISH.",
 }, (g) => {
