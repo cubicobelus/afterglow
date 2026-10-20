@@ -1198,3 +1198,96 @@ SOLUTIONS["PUMP ROOM"] = () => {
   Bot.walkTo(570);
 };
 
+SOLUTIONS["STAY BEHIND"] = () => {
+  // One spring. It carries you up onto the block; on the plate you swap with it, so you are back down here and the
+  // spring stays on the plate, holding the door open.
+  Bot.record("spring");
+  Bot.walkTo(270);
+  Bot.run(6);
+  Bot.stop();
+  Bot.waitUntil(restOf("spring"), 900, "the spring to settle");
+  Bot.walkTo(230);
+  jumpToSpring(270, 1);
+  Bot.expect(G.p.onGround && G.p.y < 160 && Bot.px() > 342, "up on the block");
+  Bot.walkTo(430);
+  Bot.expect(G.L.plates[0].pressed, "standing on the plate");
+  Bot.swap();
+  Bot.expect(Bot.px() < 300 && G.p.y > 250, "back down at the spring's place");
+  Bot.waitUntil(() => G.L.doorOpen.a, 300, "the door to open");
+  Bot.walkTo(30);
+};
+
+SOLUTIONS["APEX"] = () => {
+  // slots: spring, shade. The door on the block answers to a plate that hangs at the top of a held bounce. At the top
+  // of the bounce you swap with the shade: it appears up there and stays (frozen) on the plate, and you land where it
+  // was recorded. Then the spring, still there, throws you up onto the block.
+  Bot.record("spring");
+  Bot.walkTo(230);
+  Bot.run(6);
+  Bot.stop();
+  Bot.record("shade");
+  Bot.walkTo(262);
+  Bot.run(6);
+  Bot.stop();
+  Bot.waitUntil(() => restOf("spring")() && restOf("shade")(), 1200, "the echoes to settle");
+  Bot.walkTo(190);
+  Bot.select("shade");
+  const plate = G.L.plates[0];
+  Bot.jumpKey(true);
+  let bounced = false, swapped = false;
+  for (let i = 0; i < 260 && !swapped; i++) {
+    const dx = 230 - Bot.px();
+    Bot.dir(bounced ? 0 : Math.abs(dx) < 3 ? 0 : Math.sign(dx));
+    Bot.tick();
+    if (G.dead) Bot.fail("died on the way up");
+    if (G.p.vy < -520) bounced = true;
+    if (bounced && overlap(G.p, plate)) { Bot.jumpKey(false); Bot.swap(); swapped = true; }
+  }
+  Bot.jumpKey(false);
+  Bot.expect(swapped, "reached the plate at the top of the bounce");
+  Bot.expect(G.L.doorOpen.a || true, "swapped");
+  Bot.run(20);
+  Bot.expect(G.L.doorOpen.a, "the shade holds the hanging plate");
+  Bot.walkTo(190);
+  jumpToSpring(230, 1);
+  Bot.expect(G.p.onGround && G.p.y < 160 && Bot.px() > 302, "up on the block");
+  Bot.walkTo(570);
+};
+
+SOLUTIONS["TWO BANKS"] = () => {
+  // slots: shade, spring. The door answers to a plate on the block and a plate hanging in the air.
+  // The spring is recorded first. The shade is then recorded riding it up onto the block, so it holds that plate.
+  // Last, you bounce on the spring and swap with it at the top of the bounce: the spring stays up there on the
+  // hanging plate and you land back on the floor, with the door open.
+  Bot.record("spring");
+  Bot.walkTo(370);
+  Bot.run(6);
+  Bot.stop();
+  Bot.waitUntil(restOf("spring"), 900, "the spring to settle");
+  Bot.record("shade");
+  Bot.walkTo(410);
+  jumpToSpring(370, -1);
+  Bot.expect(G.p.onGround && G.p.y < 160 && Bot.px() < 298, "up on the block");
+  Bot.walkTo(210);
+  Bot.run(6);
+  Bot.stop();
+  Bot.waitUntil(() => restOf("spring")() && restOf("shade")(), 1500, "the echoes to settle");
+  Bot.walkTo(410);
+  Bot.select("spring");
+  const hang = G.L.plates.find((q) => q.ceil);
+  Bot.jumpKey(true);
+  let bounced = false, swapped = false;
+  for (let i = 0; i < 260 && !swapped; i++) {
+    const dx = 370 - Bot.px();
+    Bot.dir(bounced ? 0 : Math.abs(dx) < 3 ? 0 : Math.sign(dx));
+    Bot.tick();
+    if (G.dead) Bot.fail("died on the way up");
+    if (G.p.vy < -520) bounced = true;
+    if (bounced && overlap(G.p, hang)) { Bot.jumpKey(false); Bot.swap(); swapped = true; }
+  }
+  Bot.jumpKey(false);
+  Bot.expect(swapped, "reached the hanging plate at the top of the bounce");
+  Bot.expect(G.p.onGround || G.p.y > 250, "back on the floor");
+  Bot.waitUntil(() => G.L.doorOpen.a, 300, "the door to open");
+  Bot.walkTo(610);
+};

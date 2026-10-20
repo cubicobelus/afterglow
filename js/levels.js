@@ -443,6 +443,32 @@ def(3, "SECOND WIND", {
   g.set(5, 9, "L").set(22, 1, "L");
 });
 
+def(3, "STAY BEHIND", {
+  echoes: ["spring"], recMax: 14, swap: true,
+  hint: "THE PLATE IS UP ON THE BLOCK AND THE DOOR IS DOWN HERE. WHAT YOU SWAP WITH TAKES YOUR PLACE, AND STAYS THERE.",
+}, (g) => {
+  g.base();
+  g.set(5, 14, "@");
+  g.fill(3, 1, 3, 8, "#").fill(3, 9, 3, 14, "A");
+  g.fill(1, 13, 1, 14, "X");
+  g.fill(17, 8, 25, 14, "#");
+  g.set(21, 7, "a");
+  g.set(8, 9, "L").set(28, 9, "L");
+});
+
+def(3, "APEX", {
+  echoes: ["spring", "shade"], recMax: 16, swap: true,
+  hint: "THE DOOR UP ON THE BLOCK ANSWERS TO A PLATE THAT HANGS WHERE ONLY A BOUNCE REACHES. SWAP DOES NOT NEED SOLID GROUND.",
+}, (g) => {
+  g.base();
+  g.set(2, 14, "@");
+  g.set(11, 5, "1");
+  g.fill(15, 8, 30, 14, "#");
+  g.fill(22, 1, 22, 3, "#").fill(22, 4, 22, 7, "A");
+  g.fill(28, 6, 28, 7, "X");
+  g.set(6, 9, "L").set(18, 5, "L").set(26, 5, "L");
+});
+
 def(3, "WAYPOINT", {
   echoes: ["phase", "shade"], recMax: 24, swap: true,
   hint: "A SWAP DOES NOT CARE ABOUT WALLS. AND A WALL IS ONLY IN THE WAY WHILE IT IS THERE.",
@@ -455,6 +481,20 @@ def(3, "WAYPOINT", {
   g.fill(22, 9, 23, 14, "%");
   g.fill(25, 13, 25, 14, "X");
   g.set(5, 9, "L").set(16, 12, "L");
+});
+
+def(3, "TWO BANKS", {
+  echoes: ["spring", "shade"], recMax: 20, swap: true,
+  hint: "THE DOOR WANTS BOTH PLATES: ONE ON THE BLOCK, ONE IN THE AIR. THE SPRING THAT THROWS YOU UP CAN BE THE ONE YOU LEAVE UP THERE.",
+}, (g) => {
+  g.base();
+  g.set(26, 14, "@");
+  g.fill(28, 1, 28, 8, "#").fill(28, 9, 28, 14, "A");
+  g.fill(30, 13, 30, 14, "X");
+  g.fill(6, 8, 14, 14, "#");
+  g.set(10, 7, "a");
+  g.set(18, 5, "1");
+  g.set(3, 9, "L").set(22, 9, "L");
 });
 
 // ================================================================ tier 5: the beacon
@@ -580,5 +620,8 @@ const PAR = {
   "CHORUS": { t: 100, r: 6 },
   "THE BEACON": { t: 90, r: 6 },
   "SAIL": { t: 25, r: 2 },
+  "STAY BEHIND": { t: 25, r: 1 },
+  "APEX": { t: 18, r: 2 },
+  "TWO BANKS": { t: 35, r: 3 },
 };
 for (const l of LEVELS) l.par = PAR[l.name];
