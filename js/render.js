@@ -1009,7 +1009,13 @@ const Render = (() => {
 
   function hud(ctx, T, num) {
     const L = G.L;
-    Font.draw(ctx, num + "  " + L.name, 8, 6, { scale: 1, color: "#e8e2d0" });
+    const title = num + "  " + L.name;
+    Font.draw(ctx, title, 8, 6, { scale: 1, color: "#e8e2d0" });
+    if (G.timing) {
+      // the level clock, small, beside the name; it appears with the first input
+      const t = G.time, m = Math.floor(t / 60), sec = Math.floor(t % 60), tenth = Math.floor((t * 10) % 10);
+      Font.draw(ctx, m + ":" + (sec < 10 ? "0" : "") + sec + "." + tenth, 8 + Font.width(title, 1) + 10, 6, { scale: 1, color: "rgba(200,210,235,0.6)", shadow: null });
+    }
     if (L.swap) {
       // swap is an ability some levels switch on, not an echo, so it gets its own chip away from the echo slots
       const kq = keyName(Input.bind.swap[0]);
