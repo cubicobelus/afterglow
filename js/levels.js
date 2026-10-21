@@ -62,6 +62,7 @@ def(0, "THE PLATE", {
   g.base();
   g.set(2, 14, "@");
   g.set(9, 14, "a");
+  g.set(7, 8, "o");
   g.fill(18, 1, 18, 8, "#");
   g.fill(18, 9, 18, 14, "A");
   g.fill(22, 14, 23, 14, "^");
@@ -254,6 +255,7 @@ def(1, "OVERHEAD", {
   g.set(2, 14, "@");
   g.pit(12, 15);
   g.fill(8, 1, 20, 12, "#");
+  g.set(2, 8, "o");
   g.fill(28, 13, 28, 14, "X");
   g.set(5, 8, "L").set(26, 8, "L");
 });
@@ -299,6 +301,7 @@ def(1, "HALF OPEN", {
   g.fill(10, 5, 29, 8, ".");
   g.fill(14, 9, 16, 11, ".");
   g.fill(14, 12, 16, 12, "%");
+  g.set(29, 14, "o");
   g.fill(27, 7, 27, 8, "X");
   g.set(5, 8, "L").set(12, 6, "L");
 });
@@ -385,24 +388,6 @@ def(2, "TWO STAGES", {
   g.set(5, 9, "L").set(16, 3, "L");
 });
 
-def(2, "FERRY LIGHT", {
-  echoes: ["glow", "tide"], recMax: 14, dark: true,
-  hint: "THE LIGHT CANNOT BE IN TWO PLACES. THE TIDE STILL REMEMBERS THE WAY.",
-}, (g) => {
-  g.base();
-  g.set(2, 14, "@");
-  g.pit(8, 21);
-  g.fill(8, 14, 13, 14, "~");
-  g.fill(14, 14, 17, 17, "#");
-  g.fill(18, 14, 21, 14, "~");
-  g.fill(18, 1, 21, 11, "#");
-  g.set(10, 12, "L");
-  g.fill(26, 1, 26, 12, "#");
-  g.fill(26, 13, 26, 14, "G");
-  g.fill(29, 13, 29, 14, "X");
-  g.set(30, 8, "L");
-});
-
 def(2, "SLUICE", {
   echoes: ["shade", "tide"], recMax: 14,
   hint: "THREE DOORS AND ONE SHADE. A TIDE NEVER RESTS, BUT IT KEEPS VISITING.",
@@ -428,6 +413,24 @@ def(2, "STAGECOACH", {
   g.fill(26, 1, 26, 3, "#").fill(26, 4, 26, 7, "A");
   g.fill(29, 6, 29, 7, "X");
   g.set(4, 9, "L").set(16, 9, "L").set(23, 4, "L");
+});
+
+def(2, "FERRY LIGHT", {
+  echoes: ["glow", "tide"], recMax: 14, dark: true,
+  hint: "THE LIGHT CANNOT BE IN TWO PLACES. THE TIDE STILL REMEMBERS THE WAY.",
+}, (g) => {
+  g.base();
+  g.set(2, 14, "@");
+  g.pit(8, 21);
+  g.fill(8, 14, 13, 14, "~");
+  g.fill(14, 14, 17, 17, "#");
+  g.fill(18, 14, 21, 14, "~");
+  g.fill(18, 1, 21, 11, "#");
+  g.set(10, 12, "L");
+  g.fill(26, 1, 26, 12, "#");
+  g.fill(26, 13, 26, 14, "G");
+  g.fill(29, 13, 29, 14, "X");
+  g.set(30, 8, "L");
 });
 
 def(2, "SLINGSHOT", {
@@ -457,6 +460,19 @@ def(2, "PUMP ROOM", {
   g.fill(26, 1, 26, 4, "#").fill(26, 5, 26, 7, "G");
   g.fill(28, 6, 28, 7, "X");
   g.set(4, 11, "L").set(11, 5, "L").set(17, 4, "L");
+});
+
+def(2, "LONG CROSSING", {
+  bonus: 20, echoes: ["tide", "tide", "spring"], recMax: 28,
+  hint: "THE GAP IS TOO WIDE FOR ONE FERRY. YOU CAN RECORD WHILE RIDING A FERRY.",
+}, (g) => {
+  g.base();
+  g.set(2, 14, "@");
+  g.pit(6, 16);
+  g.set(6, 16, "o");
+  g.fill(22, 7, 30, 14, "#");
+  g.fill(28, 5, 28, 6, "X");
+  g.set(4, 9, "L").set(12, 5, "L").set(18, 8, "L");
 });
 
 // ================================================================ tier 4: the mirror
@@ -655,6 +671,7 @@ const PAR = {
   "LOOKING GLASS": { t: 55, r: 4 },
   "HALF OPEN": { t: 25, r: 1 },
   "SKYLIGHT": { t: 55, r: 3 },
+  "LONG CROSSING": { t: 45, r: 3 },
   "FERRY": { t: 25, r: 1 },
   "TRAMPOLINE": { t: 20, r: 1 },
   "SKYHOOK": { t: 20, r: 1 },

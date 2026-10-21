@@ -22,6 +22,28 @@ SOLUTIONS["FIRST STEPS"] = () => {
 
 // 2 THE PLATE
 SOLUTIONS["THE PLATE"] = () => {
+  // First hang a shade in the air as a step and jump from it to the lantern; then record the shade on the plate.
+  Bot.record("shade");
+  Bot.walkTo(156, 3);
+  Bot.jumpKey(true);
+  let found = false;
+  for (let i = 0; i < 80; i++) {
+    Bot.tick();
+    const h = 300 - Bot.feet();
+    if (i > 8 && G.p.vy > 0 && h <= 40 && h >= 28) { found = true; break; }
+  }
+  Bot.expect(found, "a hover window beside the lantern");
+  Bot.jumpKey(false);
+  Bot.stop();
+  Bot.waitUntil(() => G.echoes.shade.restT > 30, 900, "the step to settle");
+  const e = G.echoes.shade;
+  Bot.walkTo(e.x + 6 - 30, 3);
+  Bot.jumpTo(e.x + 6, 24);
+  Bot.expect(G.p.stand === e, "standing on the step");
+  Bot.jumpKey(true);
+  for (let i = 0; i < 30; i++) Bot.tick();
+  Bot.jumpKey(false);
+  Bot.expect(G.lanternsGot === 1, "the lantern above the step");
   Bot.record("shade");
   Bot.walkTo(190);
   Bot.run(8);
@@ -29,41 +51,6 @@ SOLUTIONS["THE PLATE"] = () => {
   Bot.waitUntil(() => G.L.doorOpen.a, 400, "door open");
   Bot.route([["to", 420], ["jump", 500], ["to", 550]]);
 };
-
-// 3 STEPPING STONE: freeze an echo in mid air over the gap, stand on it, hop across.
-SOLUTIONS["STEPPING STONE"] = () => {
-  Bot.record("shade");
-  Bot.walkTo(250);
-  Bot.jumpKey(true);
-  Bot.dir(1);
-  let found = false;
-  for (let i = 0; i < 90; i++) {
-    Bot.tick();
-    const h = 300 - Bot.feet();
-    if (i > 8 && G.p.vy > 0 && h <= 44 && h >= 28) { found = true; break; }
-  }
-  Bot.expect(found, "a hover window over the gap");
-  Bot.jumpKey(false);
-  Bot.dir(0);
-  Bot.stop();
-  Bot.walkTo(250);
-  Bot.waitUntil(echoDone("shade"), 600, "echo to settle");
-  const e = G.echoes.shade;
-  Bot.jumpTo(e.x + PW / 2, 24);
-  Bot.expect(G.p.stand === e, "standing on the echo");
-  Bot.jumpTo(310, 24); // hop up for the lantern above the gap
-  Bot.expect(G.p.stand === e, "back on the echo after the lantern hop");
-  Bot.jumpTo(420, 24);
-  Bot.walkTo(570);
-};
-
-// Shared route: from spawn onto the platform in the thorn levels (L5, L6). Ends standing at the landing spot.
-const toThornPlatform = () => {
-  Bot.walkTo(150);
-  Bot.jumpTo(180, 24); // onto the step
-  Bot.jumpTo(235, 24); // across the gap onto the platform
-};
-
 SOLUTIONS["TWIN PLATES"] = () => {
   // slots: shade, shade2. The first holds the low plate and is the step for the second.
   Bot.record("shade");
@@ -176,15 +163,24 @@ SOLUTIONS["UNDER GLASS"] = () => {
 // 10 OVERHEAD
 SOLUTIONS["OVERHEAD"] = () => {
   // A low tunnel with a pit in the floor: the flip echo stands at the lip and the ceiling is the road across.
+  // First a flip next to the spawn lifts you up to the lantern above it; the flip is then recorded again at the pit.
+  const rest = () => G.echoes.flip && G.echoes.flip.restT > 30;
+  Bot.record("flip");
+  Bot.walkTo(84, 3);
+  Bot.run(10);
+  Bot.stop();
+  Bot.waitUntil(rest, 600, "the first flip to settle");
+  Bot.waitUntil(() => G.lanternsGot === 1, 300, "the lift to the lantern");
   Bot.record("flip");
   Bot.walkTo(228, 3);
   Bot.run(10);
   Bot.stop();
-  Bot.waitUntil(() => G.echoes.flip.restT > 30, 600, "flip echo to settle");
+  Bot.waitUntil(rest, 600, "flip echo to settle");
   Bot.dir(1);
   for (let i = 0; i < 300 && !(G.p.onGround && Bot.px() > 340); i++) Bot.tick();
   Bot.dir(0);
   Bot.expect(G.p.onGround && Bot.px() > 340, "across the pit");
+  Bot.expect(G.lanternsGot === 1, "the lantern above the spawn");
   Bot.walkTo(570);
 };
 
@@ -1444,6 +1440,8 @@ SOLUTIONS["HALF OPEN"] = () => {
   Bot.run(10);
   Bot.stop();
   Bot.waitUntil(rest("phase"), 900, "the phase echo to settle");
+  Bot.walkTo(590, 3);
+  Bot.expect(G.lanternsGot === 1, "the lantern at the dead end of the tunnel");
   Bot.walkTo(270, 3);
   Bot.dir(1);
   for (let i = 0; i < 300 && Bot.px() < 286; i++) Bot.tick();
@@ -1500,4 +1498,109 @@ SOLUTIONS["SKYLIGHT"] = () => {
   for (let i = 0; i < 1500 && !G.won; i++) Bot.tick();
   Bot.dir(0);
   Bot.expect(G.won, "across the pit and out");
+};
+
+SOLUTIONS["LONG CROSSING"] = () => {
+  // slots: tide, tide2, spring. The first tide hangs out over the gap. The second is recorded while riding the first, so it is
+  // a longer ferry, and the first tide is free afterwards. The spring is recorded on the far bank, at the foot of the block.
+  // The first slot is then used again as a lift down into the chasm for the lantern.
+  const A = () => G.echoes.tide, B = () => G.echoes.tide2;
+  const edge = (t, lo, hi) => Math.abs(t().x + PW / 2 - 112) < 3 && t().y >= lo && t().y <= hi;
+  const rideTo = (t, minX) => {
+    let prev = -1;
+    for (let i = 0; i < 700; i++) {
+      Bot.tick();
+      const x = t().x;
+      if (x < prev - 0.01 && x > minX) return;
+      prev = x;
+    }
+    Bot.fail("the ferry never reached its far end");
+  };
+  const boardResting = (t, lo, hi) => {
+    Bot.walkTo(112, 3);
+    Bot.waitUntil(() => edge(t, lo, hi), 1500, "the ferry to wait at the edge");
+    Bot.jumpKey(true);
+    for (let i = 0; i < 40 && G.p.stand !== t(); i++) Bot.tick();
+    Bot.jumpKey(false);
+  };
+  // 1: the first ferry
+  Bot.record("tide");
+  Bot.walkTo(112, 3);
+  Bot.run(120);
+  Bot.jumpKey(true);
+  Bot.dir(1);
+  for (let i = 0; i < 36; i++) Bot.tick();
+  Bot.jumpKey(false);
+  Bot.dir(0);
+  Bot.stop();
+  // 2: the second ferry, recorded while riding the first
+  Bot.record("tide2");
+  Bot.walkTo(112, 3);
+  Bot.waitUntil(() => edge(A, 280, 300) && G.t < 200, 900, "the first ferry to wait at the edge");
+  Bot.jumpTo(A().x + PW / 2, 12);
+  Bot.expect(G.p.stand === A(), "standing on the first ferry");
+  rideTo(A, 170);
+  Bot.jumpKey(true);
+  Bot.dir(1);
+  for (let i = 0; i < 32; i++) { if (i === 24) Bot.jumpKey(false); Bot.tick(); }
+  Bot.jumpKey(false);
+  Bot.dir(0);
+  Bot.stop();
+  // 3: the spring at the foot of the block, reached on the second ferry
+  Bot.record("spring");
+  boardResting(B, 262, 272);
+  rideTo(B, 230);
+  Bot.jumpKey(true);
+  Bot.dir(1);
+  for (let i = 0; i < 140; i++) {
+    if (i === 24) Bot.jumpKey(false);
+    Bot.tick();
+    if (i > 10 && G.p.onGround) break;
+  }
+  Bot.jumpKey(false);
+  Bot.dir(0);
+  Bot.expect(G.p.onGround && Bot.px() > 345, "on the far bank");
+  Bot.walkTo(412, 3);
+  Bot.run(6);
+  Bot.stop();
+  // 4: the first slot again, as a lift down into the chasm
+  Bot.record("tide");
+  Bot.walkTo(112, 2);
+  Bot.run(40);
+  Bot.dir(1);
+  for (let i = 0; i < 200; i++) {
+    if (i === 8) Bot.dir(0);
+    Bot.tick();
+    if (G.p.y >= 336) break;
+  }
+  Bot.dir(0);
+  Bot.stop();
+  Bot.walkTo(112, 3);
+  Bot.waitUntil(() => edge(A, 280, 300) && G.t < 70, 900, "the lift to wait at the edge");
+  Bot.jumpTo(A().x + PW / 2, 12);
+  Bot.expect(G.p.stand === A(), "standing on the lift");
+  for (let i = 0; i < 300 && G.lanternsGot < 1; i++) Bot.tick();
+  Bot.expect(G.lanternsGot === 1, "the lantern at the bottom of the chasm");
+  // 5: the way across
+  Bot.waitUntil(() => edge(A, 280, 300) && G.p.stand === A(), 600, "the lift to come back up to the edge");
+  Bot.dir(-1);
+  for (let i = 0; i < 14; i++) Bot.tick();
+  Bot.dir(0);
+  boardResting(B, 262, 272);
+  rideTo(B, 230);
+  Bot.jumpKey(true);
+  Bot.dir(1);
+  for (let i = 0; i < 140; i++) {
+    if (i === 24) Bot.jumpKey(false);
+    Bot.tick();
+    if (i > 10 && G.p.onGround) break;
+  }
+  Bot.jumpKey(false);
+  Bot.dir(0);
+  Bot.expect(G.p.onGround && Bot.px() > 345, "on the far bank");
+  Bot.walkTo(412, 3);
+  Bot.waitUntil(restOf("spring"), 900, "the spring to settle");
+  jumpToSpring(412, 1);
+  Bot.expect(G.p.y < 130, "up on the block");
+  Bot.walkTo(570);
 };
