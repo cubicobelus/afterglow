@@ -186,6 +186,8 @@ const App = (() => {
     return (l.chapter + 1) + "-" + n;
   });
   const tierLevels = CHAPTERS.map((c, t) => LEVELS.map((l, i) => i).filter((i) => LEVELS[i].chapter === t));
+  const pageOf = (i) => Math.floor(LEVELS[i].chapter / TIERS_PER_PAGE);
+  const pageHasLevels = (p) => LEVELS.some((l, i) => pageOf(i) === p);
   const tierKinds = CHAPTERS.map((c, t) => tierLevels[t].map((i) => LEVELS[i].unlock).filter(Boolean));
   const totalLanterns = LEVELS.filter((l) => levelHasLantern(l)).length;
 
@@ -200,7 +202,7 @@ const App = (() => {
   const A = {
     state: "title", T: 0, idx: 0, sel: 0, hits: [], settingsBack: "title",
     fade: 1, fadeTarget: 0, fadeCb: null, cards: [], cardT: 0, introT: 0, hintT: 0, hintForce: 0,
-    result: null, selLevel: 0, endT: 0, rebind: null, resetArm: 0, toast: null,
+    result: null, selLevel: 0, page: 0, syncSel: 0, endT: 0, rebind: null, resetArm: 0, toast: null,
   };
 
   function fadeTo(cb) {
@@ -280,7 +282,7 @@ const App = (() => {
   };
 
   function goSelect() {
-    fadeTo(() => { A.state = "select"; A.selLevel = Math.min(A.idx, LEVELS.length - 1); });
+    fadeTo(() => { A.state = "select"; A.selLevel = Math.min(A.idx, LEVELS.length - 1); A.syncSel = A.selLevel; A.page = pageOf(A.selLevel); });
   }
 
   function goTitle() {
@@ -325,7 +327,7 @@ const App = (() => {
     const any = save.done.some(Boolean);
     return [
       { label: any ? "CONTINUE" : "PLAY", fs: true, act: () => startLevel(any ? Math.min(firstOpen(), LEVELS.length - 1) : 0) },
-      { label: "LEVELS", fs: true, act: () => { fadeTo(() => { A.state = "select"; A.selLevel = Math.min(firstOpen(), LEVELS.length - 1); }); } },
+      { label: "LEVELS", fs: true, act: () => { fadeTo(() => { A.state = "select"; A.selLevel = Math.min(firstOpen(), LEVELS.length - 1); A.syncSel = A.selLevel; A.page = pageOf(A.selLevel); }); } },
       { label: "SETTINGS", act: () => openSettings("title") },
     ];
   }
@@ -475,7 +477,24 @@ const App = (() => {
         break;
       }
       case "select": {
-        // Each tier is a row; move along it with left and right, between tiers with up and down.
+        // Each tier is a row; move along it with left and right, between tiers with up and down. Q and E (or the page keys)
+        // turn the page; a page with no levels yet only shows its empty rows.
+        if (A.selLevel !== A.syncSel) { A.syncSel = A.selLevel; A.page = pageOf(A.selLevel); }
+        const turn = Input.hitAny(["KeyE", "PageDown"]) ? 1 : Input.hitAny(["KeyQ", "PageUp"]) ? -1 : 0;
+        if (turn) {
+          const np = Math.max(0, Math.min(PAGES.length - 1, A.page + turn));
+          if (np !== A.page) {
+            A.page = np;
+            Sfx.play("ui");
+            const first = LEVELS.findIndex((l) => pageOf(LEVELS.indexOf(l)) === np);
+            if (first >= 0) { A.selLevel = first; A.syncSel = first; }
+          }
+          break;
+        }
+        if (!pageHasLevels(A.page)) {
+          if (Input.hitAny(["Escape", "Backspace"])) goTitle();
+          break;
+        }
         const cur = A.selLevel, t = LEVELS[cur].chapter, pos = tierLevels[t].indexOf(cur);
         let next = cur;
         if (Input.hitAny(["ArrowRight", "KeyD"])) next = tierLevels[t][Math.min(tierLevels[t].length - 1, pos + 1)];
@@ -688,14 +707,42 @@ const App = (() => {
   function drawSelect(hits) {
     drawPlainBg();
     Font.draw(ctx, "LEVELS", W / 2, 10, { scale: 3, color: "#ffe9a8", align: "center" });
+    // Page tabs, top left. Q and E (or the page keys) turn the page.
+    PAGES.forEach((pg, k) => {
+      const on = A.page === k, ty = 8 + k * 13;
+      Font.draw(ctx, "PAGE " + (k + 1) + "  " + pg.name, 12, ty, { scale: 1, color: on ? "#ffe9a8" : "#6d7690", shadow: null });
+      hits.push({ x: 8, y: ty - 2, w: 140, h: 12, i: 90 + k, act: () => { A.page = k; if (pageHasLevels(k)) { const f = LEVELS.findIndex((l, n) => pageOf(n) === k); A.selLevel = f; A.syncSel = f; } } });
+    });
     const tw = 40, th = 46, x0 = 150, gap = 3;
     const bonusX = x0 + 9 * (tw + gap) + 16;
     ctx.fillStyle = "rgba(200,210,235,0.12)";
-    ctx.fillRect(bonusX - 9, 42, 1, (CHAPTERS.length - 1) * 54 + th);
-    for (let t = 0; t < CHAPTERS.length; t++) {
-      const y = 42 + t * 54;
+    ctx.fillRect(bonusX - 9, 42, 1, (TIERS_PER_PAGE - 1) * 54 + th);
+    const lock = (x, y, col) => {
+      ctx.fillStyle = col;
+      ctx.fillRect(x + 15, y + 22, 10, 8);
+      ctx.strokeStyle = col;
+      ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.arc(x + 20, y + 22, 3.5, Math.PI, 0); ctx.stroke();
+    };
+    for (let t = A.page * TIERS_PER_PAGE; t < Math.min(CHAPTERS.length, (A.page + 1) * TIERS_PER_PAGE); t++) {
+      const y = 42 + (t - A.page * TIERS_PER_PAGE) * 54;
       const pal = CHAPTERS[t].pal;
-      Font.draw(ctx, CHAPTERS[t].name, 12, y + 4, { scale: 1, color: pal.accent });
+      Font.draw(ctx, CHAPTERS[t].name, 12, y + 4, { scale: 1, color: pal.accent, alpha: tierLevels[t].length ? 1 : 0.6 });
+      if (!tierLevels[t].length) {
+        // A planned tier: ten empty slots, nine levels and a bonus, until the levels exist.
+        Font.draw(ctx, "NEW ECHO ?", 12, y + 20, { scale: 1, color: "#6d7690", shadow: null });
+        for (let n = 0; n < 10; n++) {
+          const x = n === 9 ? bonusX : x0 + n * (tw + gap);
+          ctx.fillStyle = "rgba(14,16,28,0.6)";
+          ctx.fillRect(x, y, tw, th);
+          ctx.strokeStyle = "#232838";
+          ctx.lineWidth = 1;
+          ctx.strokeRect(x + 0.5, y + 0.5, tw - 1, th - 1);
+          Font.draw(ctx, (t + 1) + "-" + (n + 1), x + 5, y + 5, { scale: 1, color: "#3a4054", shadow: null });
+          lock(x, y, "#3a4054");
+        }
+        continue;
+      }
       tierKinds[t].forEach((kind, k) => {
         if (Render.EMBLEMS[kind]) Render.slotIcon(ctx, 18 + k * 18, y + 26, kind, 0, true);
         else Render.drawSwapIcon(ctx, 22 + k * 18, y + 26, "#ffffff");
@@ -711,29 +758,28 @@ const App = (() => {
         ctx.strokeRect(x + 0.5, y + 0.5, tw - 1, th - 1);
         Font.draw(ctx, levelNum[i], x + 5, y + 5, { scale: 1, color: open ? "#ffffff" : "#4d5468", shadow: null });
         if (open) drawStarPips(x + 5, y + 20, i, 9, 3);
-        if (!open) {
-          ctx.fillStyle = "#4d5468";
-          ctx.fillRect(x + 15, y + 22, 10, 8);
-          ctx.strokeStyle = "#4d5468";
-          ctx.lineWidth = 1;
-          ctx.beginPath(); ctx.arc(x + 20, y + 22, 3.5, Math.PI, 0); ctx.stroke();
-        }
+        if (!open) lock(x, y, "#4d5468");
         if (lanternLevels[i]) Render.drawLanternIcon(ctx, x + tw - 9, y + th - 11, !!save.lanterns[i]);
         if (LEVELS[i].swap) Render.drawSwapIcon(ctx, x + 9, y + th - 9, open ? "#ffffff" : "#4d5468");
         hits.push({ x, y, w: tw, h: th, level: i });
       });
     }
-    const L = LEVELS[A.selLevel];
-    let line = levelNum[A.selLevel] + "  " + L.name;
-    if (!isUnlocked(A.selLevel)) line += L.bonus ? "   BONUS: " + tierStars(L.chapter) + "/" + L.bonus + " STARS IN " + CHAPTERS[L.chapter].name : "   LOCKED";
-    else {
-      if (L.bonus) line += "   BONUS";
-      if (save.best[A.selLevel] !== undefined) line += "   BEST " + fmtTime(save.best[A.selLevel]);
-      if (L.par) line += "   PAR " + fmtTime(L.par.t) + " / " + L.par.r + " ECHO" + (L.par.r === 1 ? "" : "ES");
+    let line;
+    if (!pageHasLevels(A.page)) {
+      line = PAGES[A.page].name + "   LEVELS COMING SOON";
+    } else {
+      const L = LEVELS[A.selLevel];
+      line = levelNum[A.selLevel] + "  " + L.name;
+      if (!isUnlocked(A.selLevel)) line += L.bonus ? "   BONUS: " + tierStars(L.chapter) + "/" + L.bonus + " STARS IN " + CHAPTERS[L.chapter].name : "   LOCKED";
+      else {
+        if (L.bonus) line += "   BONUS";
+        if (save.best[A.selLevel] !== undefined) line += "   BEST " + fmtTime(save.best[A.selLevel]);
+        if (L.par) line += "   PAR " + fmtTime(L.par.t) + " / " + L.par.r + " ECHO" + (L.par.r === 1 ? "" : "ES");
+      }
     }
     Font.draw(ctx, line, W / 2, H - 38, { scale: 1, color: "#e8e2d0", align: "center" });
     Font.draw(ctx, "STARS " + totalStars() + "/" + (LEVELS.length * 3) + "   LANTERNS " + totalLanternsGot() + "/" + totalLanterns, W - 10, 10, { scale: 1, color: "#ffd35a", align: "right" });
-    Font.draw(ctx, "ARROWS MOVE   ENTER PLAY   ESC BACK", W / 2, H - 20, { scale: 1, color: "rgba(200,210,235,0.5)", align: "center" });
+    Font.draw(ctx, "ARROWS MOVE   ENTER PLAY   Q E PAGES   ESC BACK", W / 2, H - 20, { scale: 1, color: "rgba(200,210,235,0.5)", align: "center" });
   }
 
   function drawCard() {

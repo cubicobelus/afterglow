@@ -30,7 +30,33 @@ const CHAPTERS = [
     name: "THE MIRROR", line: "STEP THROUGH. SOMETHING TAKES YOUR PLACE.", theme: "mirror", mood: 3,
     pal: { bg1: "#210f1d", bg2: "#5a2a48", wall: "#74506c", wallHi: "#c08fb6", wallLo: "#412639", mortar: "#2a1426", accent: "#ff9fc8" },
   },
+  // Page two, the drowned half of the tower: planned, no levels yet (the level select shows them as empty rows).
+  // Each tier is meant to introduce one new echo. The theme names are placeholders until there is scenery for them.
+  {
+    name: "THE SHALLOWS", line: "THE SURFACE IS A CEILING NOW.", theme: "tideworks", mood: 1, planned: true,
+    pal: { bg1: "#06222c", bg2: "#14707a", wall: "#3d7480", wallHi: "#8fd0d4", wallLo: "#264b54", mortar: "#0d2f38", accent: "#7ff0e0" },
+  },
+  {
+    name: "THE WRECK", line: "SOMETHING BIGGER WENT DOWN HERE.", theme: "cellar", mood: 0, planned: true,
+    pal: { bg1: "#1c120c", bg2: "#4a3320", wall: "#6b5440", wallHi: "#a8896a", wallLo: "#3d2e22", mortar: "#241810", accent: "#ffb067" },
+  },
+  {
+    name: "THE GARDEN", line: "NOTHING HERE STAYS WHERE YOU LEFT IT.", theme: "gallery", mood: 2, planned: true,
+    pal: { bg1: "#06200f", bg2: "#1d5a2c", wall: "#3f6b48", wallHi: "#86c58f", wallLo: "#264a2e", mortar: "#0c2a14", accent: "#a6ff9a" },
+  },
+  {
+    name: "THE TRENCH", line: "THE LIGHT STOPS HERE.", theme: "mirror", mood: 3, planned: true,
+    pal: { bg1: "#02030a", bg2: "#0a1030", wall: "#2a3350", wallHi: "#5a6a9a", wallLo: "#151b30", mortar: "#080c1c", accent: "#8aa4ff" },
+  },
+  {
+    name: "THE FOUNDATION", line: "WHERE THE FIRST LIGHT WAS LIT.", theme: "beacon", mood: 4, planned: true,
+    pal: { bg1: "#1a1204", bg2: "#5c4310", wall: "#7a6a40", wallHi: "#d8c27a", wallLo: "#463a1c", mortar: "#2a1f08", accent: "#ffe27a" },
+  },
 ];
+
+// The level select shows five tiers per page.
+const PAGES = [{ name: "THE TOWER" }, { name: "THE REFLECTION" }];
+const TIERS_PER_PAGE = 5;
 
 const LEVELS = [];
 function def(chapter, name, opts, build) {
