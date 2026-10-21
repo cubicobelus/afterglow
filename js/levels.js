@@ -274,16 +274,19 @@ def(1, "CEILING PLATE", {
 });
 
 def(1, "LOOKING GLASS", {
-  echoes: ["phase", "flip"], recMax: 14,
-  hint: "THE ROAD ACROSS IS ON THE CEILING, AND A WALL OF GLASS WAITS AT THE FAR EDGE. AN ECHO CAN STAND ON THE CEILING TOO.",
+  echoes: ["shade", "phase", "flip"], recMax: 16,
+  hint: "THE BUTTON IS ON THE CEILING, HIGHER THAN YOU CAN JUMP. A FLIP HUNG HIGH IN THE AIR LIFTS YOU TO IT. ECHOES CAN BE RECORDED AGAIN WHEN THEIR JOB IS DONE.",
 }, (g) => {
   g.base();
   g.set(2, 14, "@");
+  g.fill(1, 1, 30, 9, "#");
+  g.fill(8, 10, 30, 12, "#");
+  g.set(5, 10, "1");
+  g.fill(8, 13, 8, 14, "A");
   g.pit(12, 15);
-  g.fill(8, 1, 30, 12, "#");
   g.fill(16, 13, 16, 14, "%");
   g.fill(28, 13, 28, 14, "X");
-  g.set(5, 8, "L");
+  g.set(4, 12, "L");
 });
 
 def(1, "HALF OPEN", {
@@ -317,21 +320,21 @@ def(1, "HALL OF MIRRORS", {
   g.set(10, 12, "L").set(24, 5, "L");
 });
 
-def(1, "LONG GALLERY", {
-  bonus: 20, echoes: ["phase", "phase", "flip", "flip"], recMax: 24,
-  hint: "TWO PITS, A WALL OF GLASS AND A PLUG UNDER ONE LOW CEILING. EACH ROAD STARTS WHERE THE LAST ONE ENDS.",
+def(1, "SKYLIGHT", {
+  bonus: 20, echoes: ["phase", "flip", "flip"], recMax: 20,
+  hint: "THE GLASS IS HIGH ABOVE THE FLOOR. AN ECHO CAN HANG IN THE AIR. THE HIGHER IT HANGS, THE HIGHER ITS FIELD REACHES.",
 }, (g) => {
   g.base();
   g.set(2, 14, "@");
-  g.pit(12, 15).pit(18, 21);
-  g.fill(8, 1, 30, 12, "#");
-  g.fill(16, 13, 16, 14, "%");
-  g.fill(22, 5, 30, 8, ".");
-  g.fill(25, 9, 27, 11, ".");
-  g.fill(25, 12, 27, 12, "%");
-  g.fill(29, 7, 29, 8, "X");
-  g.set(5, 8, "L");
+  g.fill(8, 1, 30, 9, "#");
+  g.fill(10, 2, 16, 8, ".");
+  g.fill(17, 7, 29, 8, ".");
+  g.fill(14, 9, 16, 9, "%");
+  g.fill(20, 9, 23, 9, ".");
+  g.fill(28, 7, 28, 8, "X");
+  g.set(5, 8, "L").set(12, 4, "L");
 });
+
 
 // ================================================================ tier 3: the tideworks
 def(2, "FERRY", {
@@ -648,9 +651,9 @@ const PAR = {
   "CEILING PLATE": { t: 25, r: 2 },
   "GHOST GLASS": { t: 20, r: 3 },
   "HALL OF MIRRORS": { t: 50, r: 4 },
-  "LOOKING GLASS": { t: 30, r: 2 },
+  "LOOKING GLASS": { t: 55, r: 4 },
   "HALF OPEN": { t: 25, r: 1 },
-  "LONG GALLERY": { t: 75, r: 4 },
+  "SKYLIGHT": { t: 55, r: 3 },
   "FERRY": { t: 25, r: 1 },
   "TRAMPOLINE": { t: 20, r: 1 },
   "SKYHOOK": { t: 20, r: 1 },

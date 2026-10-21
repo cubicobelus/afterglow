@@ -1387,15 +1387,37 @@ SOLUTIONS["WEATHERVANE"] = () => {
 
 
 SOLUTIONS["LOOKING GLASS"] = () => {
-  // slots: phase, flip. The flip at the lip of the pit opens the ceiling road. The phase is recorded standing on that road,
-  // over the pit, where its circle reaches the wall of glass at the far edge.
+  // slots: shade, phase, flip. A flip hung in the air lifts the shade to the ceiling button. The flip's zone also covers the low
+  // door, so it is recorded again at the lip of the pit. The phase is then recorded standing on the ceiling road over the pit,
+  // where its circle reaches the wall of glass at the far edge.
   const rest = (k) => () => G.echoes[k] && G.echoes[k].restT > 30;
+  const onCeiling = () => G.p.g === -1 && G.p.onGround && G.p.y < 205;
   Bot.record("flip");
+  Bot.walkTo(125, 3);
+  Bot.jumpKey(true);
+  for (let i = 0; i < 10; i++) Bot.tick();
+  Bot.jumpKey(false);
+  Bot.stop();
+  Bot.record("shade");
+  Bot.waitUntil(rest("flip"), 900, "the hanging flip to settle");
+  Bot.dir(1);
+  for (let i = 0; i < 400 && !onCeiling(); i++) Bot.tick();
+  Bot.expect(onCeiling(), "on the porch ceiling");
+  Bot.dir(-1);
+  for (let i = 0; i < 400 && Bot.px() > 112; i++) Bot.tick();
+  Bot.dir(0);
+  Bot.run(10);
+  Bot.expect(G.L.plates[0].pressed, "the ceiling button pressed");
+  Bot.run(20);
+  Bot.stop();
+  Bot.record("flip");
+  Bot.waitUntil(() => rest("shade")() && G.L.doorOpen.a, 900, "the low door to open");
   Bot.walkTo(228, 3);
   Bot.run(10);
   Bot.stop();
   Bot.record("phase");
-  Bot.waitUntil(rest("flip"), 900, "the flip echo to settle");
+  Bot.waitUntil(() => rest("shade")() && rest("flip")() && G.L.doorOpen.a, 900, "the shade and the flip to settle");
+  Bot.walkTo(200, 3);
   Bot.dir(1);
   for (let i = 0; i < 300 && !(G.p.g === -1 && G.p.onGround); i++) Bot.tick();
   Bot.expect(G.p.g === -1 && G.p.onGround, "on the ceiling road");
@@ -1403,45 +1425,12 @@ SOLUTIONS["LOOKING GLASS"] = () => {
   Bot.dir(0);
   Bot.run(20);
   Bot.stop();
-  Bot.waitUntil(() => rest("flip")() && rest("phase")(), 900, "both echoes to settle");
+  Bot.waitUntil(() => rest("shade")() && rest("flip")() && rest("phase")() && G.L.doorOpen.a, 1200, "all three to settle");
   Bot.dir(1);
-  for (let i = 0; i < 700 && !(G.p.onGround && Bot.px() > 380); i++) Bot.tick();
+  for (let i = 0; i < 1200 && !(G.p.onGround && G.p.g === 1 && Bot.px() > 380); i++) Bot.tick();
   Bot.dir(0);
   Bot.expect(G.p.onGround && Bot.px() > 380, "across the pit and through the glass");
   Bot.walkTo(570);
-};
-
-SOLUTIONS["HANGING GLASS"] = () => {
-  // slots: shade, phase, flip. The phase opens the hanging pane while the shade is recorded riding the ceiling road to
-  // the hanging plate; the flip holds the pedestal plate. The phase is then recorded again beyond the door, at the last wall.
-  const rest = (k) => () => G.echoes[k] && G.echoes[k].restT > 30;
-  Bot.record("phase");
-  Bot.walkTo(262, 3);
-  Bot.run(10);
-  Bot.stop();
-  Bot.record("flip");
-  Bot.waitUntil(rest("phase"), 900, "the phase echo to settle");
-  Bot.walkTo(250, 3);
-  Bot.jumpTo(310, 24);
-  Bot.run(10);
-  Bot.stop();
-  Bot.record("shade");
-  Bot.waitUntil(() => rest("phase")() && rest("flip")(), 900, "phase and flip to settle");
-  Bot.walkTo(230, 3);
-  Bot.dir(1);
-  for (let i = 0; i < 200 && !(G.p.g === -1 && G.p.onGround); i++) Bot.tick();
-  Bot.expect(G.p.g === -1 && G.p.onGround, "standing on the ceiling");
-  Bot.walkTo(292, 3);
-  Bot.expect(G.L.plates[0].pressed, "the hanging plate pressed");
-  Bot.run(10);
-  Bot.stop();
-  Bot.record("phase");
-  Bot.waitUntil(() => rest("flip")() && rest("shade")() && G.L.doorOpen.a, 900, "the door to open");
-  Bot.walkTo(490, 3);
-  Bot.run(10);
-  Bot.stop();
-  Bot.waitUntil(() => rest("flip")() && rest("shade")() && rest("phase")() && G.L.doorOpen.a, 900, "everything to settle");
-  Bot.walkTo(590);
 };
 
 SOLUTIONS["HALF OPEN"] = () => {
@@ -1480,60 +1469,35 @@ SOLUTIONS["HALF OPEN"] = () => {
   Bot.expect(G.won, "at the door");
 };
 
-SOLUTIONS["LONG GALLERY"] = () => {
-  // slots: phase, phase2, flip, flip2. Looking Glass first: the flip carries you over the first pit and the phase (recorded on that
-  // ceiling road) opens the glass. The second flip is recorded at the lip of the second pit. The second phase is then placed beside
-  // the plug at the end, so that it opens only part of it, and the rest is the step up to the room with the door.
+SOLUTIONS["SKYLIGHT"] = () => {
+  // slots: phase, flip, flip2. The phase hangs at the top of a jump under the glass; the flip hangs lower, so its field lifts you
+  // far enough to go through the hole. The second flip is recorded up in the room at the lip of the pit in the low road.
   const rest = (k) => () => G.echoes[k] && G.echoes[k].restT > 30;
-  Bot.record("flip");
-  Bot.walkTo(228, 3);
-  Bot.run(10);
-  Bot.stop();
   Bot.record("phase");
-  Bot.waitUntil(rest("flip"), 900, "the first flip to settle");
-  Bot.dir(1);
-  for (let i = 0; i < 300 && !(G.p.g === -1 && G.p.onGround); i++) Bot.tick();
-  Bot.expect(G.p.g === -1 && G.p.onGround, "on the ceiling road");
-  for (let i = 0; i < 300 && Bot.px() < 280; i++) Bot.tick();
-  Bot.dir(0);
-  Bot.run(20);
+  Bot.walkTo(310, 3);
+  Bot.jumpKey(true);
+  for (let i = 0; i < 18; i++) Bot.tick();
+  Bot.jumpKey(false);
+  Bot.stop();
+  Bot.record("flip");
+  Bot.waitUntil(rest("phase"), 900, "the phase echo to settle");
+  Bot.walkTo(290, 3);
+  Bot.jumpKey(true);
+  for (let i = 0; i < 8; i++) Bot.tick();
+  Bot.jumpKey(false);
   Bot.stop();
   Bot.record("flip2");
-  Bot.waitUntil(() => rest("flip")() && rest("phase")(), 900, "the first flip and the phase to settle");
+  Bot.waitUntil(() => rest("phase")() && rest("flip")(), 900, "the phase and the flip to settle");
   Bot.dir(1);
-  for (let i = 0; i < 700 && !(G.p.onGround && G.p.g === 1 && Bot.px() > 330); i++) Bot.tick();
+  for (let i = 0; i < 700 && !(G.p.onGround && G.p.g === 1 && G.p.y < 170 && Bot.px() > 350); i++) Bot.tick();
   Bot.dir(0);
-  Bot.expect(G.p.onGround && Bot.px() > 330, "across the first pit and the glass");
-  Bot.walkTo(352, 3);
+  Bot.expect(G.p.onGround && G.p.y < 170, "up in the room");
+  Bot.walkTo(388, 3);
   Bot.run(10);
   Bot.stop();
-  Bot.record("phase2");
-  Bot.waitUntil(() => rest("flip")() && rest("phase")() && rest("flip2")(), 1200, "three echoes to settle");
+  Bot.waitUntil(() => rest("phase")() && rest("flip")() && rest("flip2")(), 1500, "all three to settle");
   Bot.dir(1);
-  for (let i = 0; i < 1200 && !(G.p.onGround && G.p.g === 1 && Bot.px() > 470); i++) Bot.tick();
+  for (let i = 0; i < 1500 && !G.won; i++) Bot.tick();
   Bot.dir(0);
-  Bot.expect(G.p.onGround && Bot.px() > 470, "across both pits");
-  Bot.walkTo(490, 3);
-  Bot.run(10);
-  Bot.stop();
-  Bot.waitUntil(() => rest("flip")() && rest("phase")() && rest("flip2")() && rest("phase2")(), 1500, "all four to settle");
-  Bot.dir(1);
-  for (let i = 0; i < 1200 && !(G.p.onGround && G.p.g === 1 && Bot.px() > 470); i++) Bot.tick();
-  Bot.walkTo(518, 3);
-  for (let rep = 0; rep < 3 && !(G.p.onGround && G.p.y < 175); rep++) {
-    Bot.jumpKey(true);
-    for (let i = 0; i < 45; i++) { Bot.dir(i > 14 ? 1 : 0); Bot.tick(); }
-    Bot.jumpKey(false);
-    for (let i = 0; i < 40; i++) { Bot.dir(1); Bot.tick(); }
-  }
-  Bot.dir(0);
-  Bot.expect(G.p.y < 175, "up in the room");
-  Bot.dir(1);
-  for (let i = 0; i < 600 && !G.won; i++) {
-    if (G.p.onGround && Bot.px() > 550 && Bot.px() < 565) Bot.jumpKey(true); else if (G.p.onGround) Bot.jumpKey(false);
-    Bot.tick();
-  }
-  Bot.jumpKey(false);
-  Bot.dir(0);
-  Bot.expect(G.won, "at the door");
+  Bot.expect(G.won, "across the pit and out");
 };
