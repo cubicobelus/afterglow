@@ -18,7 +18,7 @@ const App = (() => {
   // ---------------------------------------------------------------- save
   const SAVE_KEY = "afterglow.save";
   const SETTINGS_KEY = "afterglow.settings";
-  const SAVE_VERSION = 7;
+  const SAVE_VERSION = 8;
   let save = { done: [], best: {}, stars: {}, lanterns: {}, seen: {} };
   let hadSave = false;
   try {
@@ -58,6 +58,11 @@ const App = (() => {
         "FERRY", "TRAMPOLINE", "SKYHOOK", "TWO STAGES", "FERRY LIGHT", "SLUICE", "STAGECOACH", "SLINGSHOT", "PUMP ROOM",
         "LEAPFROG", "STAY BEHIND", "APEX", "WAYPOINT", "UPSIDE DOWN", "GLASS CEILING", "NIGHT TRAIN",
         "BREEZE", "SAIL", "GALLOP", "WEATHERVANE", "UP AND OVER", "AFTERIMAGE", "CHORUS"],
+      7: ["FIRST STEPS", "THE PLATE", "STEPPING STONE", "TWIN PLATES", "STAIRCASE", "LAMPLIGHT", "SUNKEN GATE", "RELAY", "SWITCHBOARD",
+        "GLASS WALL", "UNDER GLASS", "UPDRAFT", "CEILING PLATE", "GHOST GLASS", "THREE PANES", "HALL OF MIRRORS",
+        "FERRY", "TRAMPOLINE", "SKYHOOK", "TWO STAGES", "FERRY LIGHT", "SLUICE", "STAGECOACH", "SLINGSHOT", "PUMP ROOM",
+        "LEAPFROG", "STAY BEHIND", "APEX", "UPSIDE DOWN", "GLASS CEILING", "NIGHT TRAIN",
+        "BREEZE", "SAIL", "GALLOP", "WEATHERVANE", "UP AND OVER", "AFTERIMAGE", "CHORUS"],
     };
     // Same name but a different puzzle now: the old result no longer applies.
     const REDESIGNED = {
@@ -67,9 +72,11 @@ const App = (() => {
       4: { "SAIL": true, "SWITCHBOARD": true },
       5: { "SWITCHBOARD": true },
       6: {},
+      7: {},
     };
     // The level is the same but its lantern moved, so the old pickup no longer counts.
-    const LANTERN_MOVED = { "TRAMPOLINE": true, "SUNKEN GATE": true };
+    // Value: the save version in which the lantern moved; older saves lose that pickup.
+    const LANTERN_MOVED = { "TRAMPOLINE": 6, "SUNKEN GATE": 8 };
     const from = save.v || 1;
     const order = ORDERS[from] || ORDERS[2];
     const redesigned = REDESIGNED[from] || REDESIGNED[2];
@@ -82,7 +89,7 @@ const App = (() => {
       if (save.done && save.done[oi]) moved.done[ni] = true;
       if (save.best && save.best[oi] !== undefined) moved.best[ni] = save.best[oi];
       if (save.stars && save.stars[oi]) moved.stars[ni] = save.stars[oi];
-      if (save.lanterns && save.lanterns[oi] && !LANTERN_MOVED[name]) moved.lanterns[ni] = save.lanterns[oi];
+      if (save.lanterns && save.lanterns[oi] && !(LANTERN_MOVED[name] > from)) moved.lanterns[ni] = save.lanterns[oi];
     });
     save = moved;
     persist();

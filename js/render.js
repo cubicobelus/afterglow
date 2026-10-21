@@ -671,6 +671,24 @@ const Render = (() => {
         ctx.fillRect(sx, pl.y + 5, 3, 1);
       }
     }
+    // The top edge of everything you can stand on, so ledges can be told from the black.
+    if (!L.edges) {
+      L.edges = [];
+      for (const w of L.walls) {
+        if (w === L.ped) { L.edges.push({ x: w.x, y: w.y, w: w.w }); continue; }
+        for (let x = w.x; x < w.x + w.w; x += TILE) {
+          const c = x / TILE, r = w.y / TILE;
+          if (!(r > 0 && L.rows[r - 1][c] === "#")) L.edges.push({ x, y: w.y, w: TILE });
+        }
+      }
+      for (const o of L.oneways) L.edges.push({ x: o.x, y: o.y, w: o.w });
+    }
+    for (const e of L.edges) {
+      ctx.fillStyle = rgba(pal.accent, 0.42);
+      ctx.fillRect(e.x, e.y, e.w, 1);
+      ctx.fillStyle = rgba(pal.accent, 0.2);
+      ctx.fillRect(e.x, e.y + 1, e.w, 1);
+    }
     ctx.fillStyle = rgba(pal.accent, 0.3);
     for (const th of L.thorns) {
       if (th.lit) continue;

@@ -300,35 +300,50 @@ SOLUTIONS["HALL OF MIRRORS"] = () => {
 // ---------------------------------------------------------------- tier 1 additions
 
 SOLUTIONS["SUNKEN GATE"] = () => {
-  // The lantern hangs in the top left: jump back off the left end of the top ledge to reach it, then land on the middle ledge
-  // and climb again.
-  const climb = (lantern) => {
+  // The lantern lies at the bottom right, past the thorn bed. A glow hung over the middle of the bed lights nine of the
+  // fourteen thorn tiles, and the dark ones at either end are short enough to jump. Then the glow is recorded again, beside
+  // the gate (the one slot does both jobs).
+  const climb = () => {
     Bot.walkTo(88);
     Bot.jumpTo(118, 24); // ledge A
     Bot.jumpTo(182, 24); // ledge B
     Bot.jumpTo(242, 24); // ledge C
-    if (lantern) {
-      Bot.walkTo(226);
-      Bot.jumpKey(true);
-      Bot.dir(-1);
-      for (let i = 0; i < 70 && G.lanternsGot === 0; i++) { Bot.tick(); if (G.dead) Bot.fail("died on the way to the lantern"); }
-      Bot.expect(G.lanternsGot === 1, "the lantern in the top left");
-      Bot.jumpKey(false);
-      Bot.dir(1);
-      for (let i = 0; i < 120 && !G.p.onGround; i++) { Bot.tick(); if (G.dead) Bot.fail("died coming down from the lantern"); }
-      Bot.dir(0);
-      Bot.expect(G.p.onGround && G.p.y < 170, "back on the middle ledge");
-      Bot.walkTo(186);
-      Bot.jumpTo(242, 24); // ledge C again
-    }
     Bot.jumpTo(305, 24); // platform D
   };
+  // First recording: jump off ledge A and stop in mid air over the bed.
   Bot.record("glow");
-  climb(false);
+  Bot.walkTo(88);
+  Bot.jumpTo(118, 24);
+  Bot.walkTo(128);
+  Bot.jumpKey(true);
+  Bot.dir(1);
+  let hung = false;
+  for (let i = 0; i < 80; i++) {
+    Bot.tick();
+    if (G.dead) Bot.fail("died hanging the glow");
+    if (i > 10 && G.p.vy > 0 && G.p.y >= 232) { hung = true; break; }
+  }
+  Bot.expect(hung, "the glow hangs over the thorns");
+  Bot.jumpKey(false);
+  Bot.dir(0);
+  Bot.stop();
+  // A real run for the lantern (it only counts outside a recording): hop the dark thorns at each end, walk the lit ones.
+  Bot.waitUntil(() => G.L.thorns.filter((t) => t.lit).length >= 9, 900, "the thorns to wither");
+  Bot.walkTo(92);
+  Bot.jumpTo(172, 24);
+  Bot.walkTo(330);
+  Bot.jumpTo(390, 24);
+  Bot.expect(G.lanternsGot === 1, "the lantern at the bottom right");
+  Bot.jumpTo(320, 24);
+  Bot.walkTo(172);
+  Bot.jumpTo(88, 24);
+  // Second recording: the glow goes to the platform beside the gate.
+  Bot.record("glow");
+  climb();
   Bot.walkTo(362);
   Bot.run(6);
   Bot.stop();
-  climb(true); // a lantern only counts on a real run, so it is picked up here, not while recording
+  climb();
   Bot.walkTo(366);
   Bot.waitUntil(() => G.L.gates.every((x) => x.open), 600, "the gate to open");
   Bot.walkTo(570);
