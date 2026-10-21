@@ -23,12 +23,12 @@ const CHAPTERS = [
     pal: { bg1: "#06182a", bg2: "#0d4a5c", wall: "#3f5f70", wallHi: "#79a5b4", wallLo: "#243d4b", mortar: "#12212c", accent: "#7fe0e6" },
   },
   {
-    name: "THE MIRROR", line: "STEP THROUGH. SOMETHING TAKES YOUR PLACE.", theme: "mirror", mood: 3,
-    pal: { bg1: "#210f1d", bg2: "#5a2a48", wall: "#74506c", wallHi: "#c08fb6", wallLo: "#412639", mortar: "#2a1426", accent: "#ff9fc8" },
-  },
-  {
     name: "THE BEACON", line: "RELIGHT THE LAMP.", theme: "beacon", mood: 4,
     pal: { bg1: "#080c2a", bg2: "#243b70", wall: "#4b5b83", wallHi: "#7488b8", wallLo: "#2b3656", mortar: "#1d2740", accent: "#fff0b0" },
+  },
+  {
+    name: "THE MIRROR", line: "STEP THROUGH. SOMETHING TAKES YOUR PLACE.", theme: "mirror", mood: 3,
+    pal: { bg1: "#210f1d", bg2: "#5a2a48", wall: "#74506c", wallHi: "#c08fb6", wallLo: "#412639", mortar: "#2a1426", accent: "#ff9fc8" },
   },
 ];
 
@@ -341,17 +341,6 @@ def(1, "SKYLIGHT", {
 
 
 // ================================================================ tier 3: the tideworks
-def(2, "FERRY", {
-  unlock: "tide", echoes: ["tide"], recMax: 10,
-  hint: "TIDE REPLAYS YOUR PATH BACK AND FORTH, WAITING WHERE YOU WAITED. WAIT AT THE EDGE, JUMP OUT, STOP IN MID AIR, THEN RIDE IT.",
-}, (g) => {
-  g.base();
-  g.set(2, 14, "@");
-  g.pit(9, 15);
-  g.fill(28, 13, 28, 14, "X");
-  g.set(5, 8, "L").set(12, 5, "L").set(25, 8, "L");
-});
-
 def(2, "TRAMPOLINE", {
   unlock: "spring", echoes: ["spring"], recMax: 8,
   hint: "LAND ON A SPRING TO BOUNCE. HOLD JUMP AS YOU LAND FOR A MUCH BIGGER BOUNCE.",
@@ -374,6 +363,45 @@ def(2, "SKYHOOK", {
   g.fill(16, 5, 30, 14, "#");
   g.fill(28, 3, 28, 4, "X");
   g.set(5, 8, "L").set(12, 4, "L");
+});
+
+def(2, "STAGECOACH", {
+  echoes: ["shade", "spring"], recMax: 24,
+  hint: "A SPRING THAT CARRIES YOU CAN STILL THROW YOU WHEN IT STOPS. WHAT YOU NEEDED TO MAKE IT IS NOT NEEDED AFTER.",
+}, (g) => {
+  g.base();
+  g.set(2, 14, "@");
+  g.fill(6, 14, 12, 14, "^");
+  g.fill(20, 8, 30, 14, "#");
+  g.set(22, 7, "a");
+  g.fill(26, 1, 26, 3, "#").fill(26, 4, 26, 7, "A");
+  g.fill(29, 6, 29, 7, "X");
+  g.set(4, 9, "L").set(16, 9, "L").set(23, 4, "L");
+});
+
+def(2, "SLINGSHOT", {
+  echoes: ["glow", "spring"], recMax: 24, dark: true,
+  hint: "ONE ECHO CAN BE THE FERRY AND THE LAUNCHER. THE LIGHT HAS TO BE IN TWO PLACES, SO IT CANNOT STAY IN THE FIRST.",
+}, (g) => {
+  g.base();
+  g.set(2, 14, "@");
+  g.pit(5, 12).fill(5, 14, 12, 14, "~");
+  g.fill(24, 7, 30, 14, "#");
+  g.fill(27, 1, 27, 6, "G");
+  g.fill(29, 5, 29, 6, "X");
+  g.set(14, 5, "o");
+  g.set(2, 7, "L").set(13, 5, "L").set(20, 9, "L");
+});
+
+def(2, "FERRY", {
+  unlock: "tide", echoes: ["tide"], recMax: 10,
+  hint: "TIDE REPLAYS YOUR PATH BACK AND FORTH, WAITING WHERE YOU WAITED. WAIT AT THE EDGE, JUMP OUT, STOP IN MID AIR, THEN RIDE IT.",
+}, (g) => {
+  g.base();
+  g.set(2, 14, "@");
+  g.pit(9, 15);
+  g.fill(28, 13, 28, 14, "X");
+  g.set(5, 8, "L").set(12, 5, "L").set(25, 8, "L");
 });
 
 def(2, "TWO STAGES", {
@@ -401,20 +429,6 @@ def(2, "SLUICE", {
   g.set(4, 9, "L").set(13, 6, "L").set(25, 9, "L");
 });
 
-def(2, "STAGECOACH", {
-  echoes: ["shade", "spring"], recMax: 24,
-  hint: "A SPRING THAT CARRIES YOU CAN STILL THROW YOU WHEN IT STOPS. WHAT YOU NEEDED TO MAKE IT IS NOT NEEDED AFTER.",
-}, (g) => {
-  g.base();
-  g.set(2, 14, "@");
-  g.fill(6, 14, 12, 14, "^");
-  g.fill(20, 8, 30, 14, "#");
-  g.set(22, 7, "a");
-  g.fill(26, 1, 26, 3, "#").fill(26, 4, 26, 7, "A");
-  g.fill(29, 6, 29, 7, "X");
-  g.set(4, 9, "L").set(16, 9, "L").set(23, 4, "L");
-});
-
 def(2, "FERRY LIGHT", {
   echoes: ["glow", "tide"], recMax: 14, dark: true,
   hint: "THE LIGHT CANNOT BE IN TWO PLACES. THE TIDE STILL REMEMBERS THE WAY.",
@@ -431,20 +445,6 @@ def(2, "FERRY LIGHT", {
   g.fill(26, 13, 26, 14, "G");
   g.fill(29, 13, 29, 14, "X");
   g.set(30, 8, "L");
-});
-
-def(2, "SLINGSHOT", {
-  echoes: ["glow", "spring"], recMax: 24, dark: true,
-  hint: "ONE ECHO CAN BE THE FERRY AND THE LAUNCHER. THE LIGHT HAS TO BE IN TWO PLACES, SO IT CANNOT STAY IN THE FIRST.",
-}, (g) => {
-  g.base();
-  g.set(2, 14, "@");
-  g.pit(5, 12).fill(5, 14, 12, 14, "~");
-  g.fill(24, 7, 30, 14, "#");
-  g.fill(27, 1, 27, 6, "G");
-  g.fill(29, 5, 29, 6, "X");
-  g.set(14, 5, "o");
-  g.set(2, 7, "L").set(13, 5, "L").set(20, 9, "L");
 });
 
 def(2, "PUMP ROOM", {
@@ -475,88 +475,8 @@ def(2, "LONG CROSSING", {
   g.set(4, 9, "L").set(12, 5, "L").set(18, 8, "L");
 });
 
-// ================================================================ tier 4: the mirror
-// Swap (Q) is on in every level of this tier and nowhere else.
-def(3, "LEAPFROG", {
-  unlock: "swap", echoes: ["glow"], recMax: 8, dark: true, swap: true,
-  hint: "THE BRIDGE IS LONGER THAN ONE LIGHT. WALK TO THE EDGE OF THE LIGHT, THEN PRESS Q.",
-}, (g) => {
-  g.base();
-  g.set(2, 14, "@");
-  g.pit(6, 25);
-  g.fill(6, 14, 25, 14, "~");
-  g.fill(28, 13, 28, 14, "X");
-  g.set(27, 10, "L");
-});
-
-def(3, "STAY BEHIND", {
-  echoes: ["spring"], recMax: 14, swap: true,
-  hint: "THE PLATE IS UP ON THE BLOCK AND THE DOOR IS DOWN HERE. WHAT YOU SWAP WITH TAKES YOUR PLACE, AND STAYS THERE.",
-}, (g) => {
-  g.base();
-  g.set(5, 14, "@");
-  g.fill(3, 1, 3, 8, "#").fill(3, 9, 3, 14, "A");
-  g.fill(1, 13, 1, 14, "X");
-  g.fill(17, 8, 25, 14, "#");
-  g.set(21, 7, "a");
-  g.set(8, 9, "L").set(28, 9, "L");
-});
-
-def(3, "APEX", {
-  echoes: ["spring"], recMax: 12, swap: true,
-  hint: "THE DOOR ANSWERS TO A PLATE THAT HANGS WHERE ONLY A BOUNCE REACHES, AND NOTHING CAN STAND THERE. SWAP DOES NOT NEED SOLID GROUND.",
-}, (g) => {
-  g.base();
-  g.set(2, 14, "@");
-  g.set(11, 5, "1");
-  g.fill(16, 1, 16, 8, "#").fill(16, 9, 16, 14, "A");
-  g.fill(28, 13, 28, 14, "X");
-  g.set(6, 9, "L").set(20, 9, "L").set(25, 9, "L");
-});
-
-def(3, "UPSIDE DOWN", {
-  echoes: ["flip"], recMax: 10, swap: true,
-  hint: "THE FLOOR IS DEATH ALL THE WAY ACROSS AND ONE ZONE ONLY REACHES SO FAR. WHEREVER YOU SWAP FROM, THE ZONE GOES THERE, AND THE DOOR WANTS SOMETHING LEFT ON ITS PLATE.",
-}, (g) => {
-  g.base();
-  g.set(2, 14, "@");
-  g.fill(1, 1, 30, 11, "#");
-  g.fill(5, 14, 24, 14, "^");
-  g.set(22, 12, "1");
-  g.fill(26, 12, 26, 14, "A");
-  g.fill(29, 13, 29, 14, "X");
-  g.set(4, 12, "L").set(14, 12, "L").set(28, 12, "L");
-});
-
-def(3, "GLASS CEILING", {
-  echoes: ["flip", "phase"], recMax: 30, swap: true,
-  hint: "A WALL OF GLASS STANDS ACROSS THE CEILING ROAD. YOUR SWAPS ARE KEPT IN WHAT YOU RECORD, SO AN ECHO CAN BE LEFT WHERE YOU WILL NEED IT.",
-}, (g) => {
-  g.base();
-  g.set(2, 14, "@");
-  g.fill(1, 1, 30, 11, "#");
-  g.fill(5, 14, 24, 14, "^");
-  g.fill(14, 12, 14, 14, "%");
-  g.fill(29, 13, 29, 14, "X");
-  g.set(4, 12, "L").set(26, 12, "L");
-});
-
-def(3, "NIGHT TRAIN", {
-  echoes: ["glow", "spring"], recMax: 40, dark: true, swap: true,
-  hint: "A RECORDING KEEPS EVERYTHING YOU DID, SWAPS TOO. SOMETHING HAS TO BE WAITING ON THE FAR BANK BEFORE YOU GET THERE FOR REAL.",
-}, (g) => {
-  g.base();
-  g.set(2, 14, "@");
-  g.pit(6, 21);
-  g.fill(6, 14, 21, 14, "~");
-  g.fill(22, 1, 22, 8, "#").fill(22, 9, 22, 14, "G");
-  g.fill(27, 8, 30, 14, "#");
-  g.fill(29, 6, 29, 7, "X");
-  g.set(28, 5, "L");
-});
-
-// ================================================================ tier 5: the beacon
-def(4, "BREEZE", {
+// ================================================================ tier 4: the beacon
+def(3, "BREEZE", {
   unlock: "gust", echoes: ["gust"], recMax: 8,
   hint: "A GUST BLOWS THE WAY YOU FACED WHEN YOU STOPPED. STAND AT THE EDGE FACING THE GAP, THEN JUMP INTO THE WIND.",
 }, (g) => {
@@ -568,7 +488,7 @@ def(4, "BREEZE", {
   g.set(5, 8, "L").set(13, 5, "L").set(24, 8, "L");
 });
 
-def(4, "SAIL", {
+def(3, "SAIL", {
   echoes: ["gust", "gust"], recMax: 14,
   hint: "A GUST FROZEN IN MID-AIR IS A STEP WITH A WIND OF ITS OWN. ONE IS NOT ENOUGH FOR THIS PIT.",
 }, (g) => {
@@ -579,7 +499,7 @@ def(4, "SAIL", {
   g.set(5, 8, "L").set(15, 5, "L").set(26, 8, "L");
 });
 
-def(4, "GALLOP", {
+def(3, "GALLOP", {
   echoes: ["shade", "gust"], recMax: 24,
   hint: "A GUST THAT CARRIES YOU CAN STILL BLOW WHEN IT STOPS. THE SHADE ONLY HAS TO BE A STEP WHILE YOU RECORD.",
 }, (g) => {
@@ -591,7 +511,7 @@ def(4, "GALLOP", {
   g.set(3, 9, "L").set(14, 9, "L").set(24, 9, "L");
 });
 
-def(4, "WEATHERVANE", {
+def(3, "WEATHERVANE", {
   echoes: ["gust", "shade"], recMax: 20,
   hint: "A GUST BLOWS THE WAY IT FACED WHEN YOU STOPPED. THE DOOR IS ON ONE SIDE AND ITS PLATE IS ON THE OTHER, AND ONE GUST CANNOT FACE BOTH WAYS.",
 }, (g) => {
@@ -605,7 +525,7 @@ def(4, "WEATHERVANE", {
   g.set(5, 9, "L").set(16, 8, "L").set(26, 9, "L");
 });
 
-def(4, "UP AND OVER", {
+def(3, "UP AND OVER", {
   echoes: ["spring", "shade"], recMax: 20,
   hint: "ONE SPRING, TWO CLIMBS, AND THEY ARE NOT IN THE SAME PLACE. WHAT YOU SEND UP THE FIRST CLIMB CAN STAY THERE.",
 }, (g) => {
@@ -619,7 +539,7 @@ def(4, "UP AND OVER", {
   g.set(8, 9, "L").set(15, 5, "L").set(24, 5, "L");
 });
 
-def(4, "AFTERIMAGE", {
+def(3, "AFTERIMAGE", {
   echoes: ["glow", "phase", "shade"], recMax: 28, dark: true,
   hint: "THE THORNS ARE ONLY SAFE WHILE LIT. WHAT YOU RECORDED CROSSING THEM STILL WALKS THERE. NOTHING SAYS WHICH ECHO HAS TO CARRY YOU.",
 }, (g) => {
@@ -634,7 +554,7 @@ def(4, "AFTERIMAGE", {
   g.set(8, 11, "L").set(17, 6, "L").set(5, 12, "L");
 });
 
-def(4, "CHORUS", {
+def(3, "CHORUS", {
   echoes: ["gust", "gust", "spring", "shade"], recMax: 30,
   hint: "THE DOOR UP HERE ANSWERS TO A PLATE DOWN BELOW. WIND ONLY HAS TO BE THERE WHEN YOU RECORD, IF SOMETHING ELSE CAN CARRY YOU.",
 }, (g) => {
@@ -649,6 +569,86 @@ def(4, "CHORUS", {
   g.fill(2, 6, 2, 7, "X");
   g.set(13, 5, "o");
   g.set(4, 12, "L").set(24, 12, "L").set(9, 4, "L").set(17, 4, "L");
+});
+
+// ================================================================ tier 5: the mirror
+// Swap (Q) is on in every level of this tier and nowhere else.
+def(4, "LEAPFROG", {
+  unlock: "swap", echoes: ["glow"], recMax: 8, dark: true, swap: true,
+  hint: "THE BRIDGE IS LONGER THAN ONE LIGHT. WALK TO THE EDGE OF THE LIGHT, THEN PRESS Q.",
+}, (g) => {
+  g.base();
+  g.set(2, 14, "@");
+  g.pit(6, 25);
+  g.fill(6, 14, 25, 14, "~");
+  g.fill(28, 13, 28, 14, "X");
+  g.set(27, 10, "L");
+});
+
+def(4, "STAY BEHIND", {
+  echoes: ["spring"], recMax: 14, swap: true,
+  hint: "THE PLATE IS UP ON THE BLOCK AND THE DOOR IS DOWN HERE. WHAT YOU SWAP WITH TAKES YOUR PLACE, AND STAYS THERE.",
+}, (g) => {
+  g.base();
+  g.set(5, 14, "@");
+  g.fill(3, 1, 3, 8, "#").fill(3, 9, 3, 14, "A");
+  g.fill(1, 13, 1, 14, "X");
+  g.fill(17, 8, 25, 14, "#");
+  g.set(21, 7, "a");
+  g.set(8, 9, "L").set(28, 9, "L");
+});
+
+def(4, "APEX", {
+  echoes: ["spring"], recMax: 12, swap: true,
+  hint: "THE DOOR ANSWERS TO A PLATE THAT HANGS WHERE ONLY A BOUNCE REACHES, AND NOTHING CAN STAND THERE. SWAP DOES NOT NEED SOLID GROUND.",
+}, (g) => {
+  g.base();
+  g.set(2, 14, "@");
+  g.set(11, 5, "1");
+  g.fill(16, 1, 16, 8, "#").fill(16, 9, 16, 14, "A");
+  g.fill(28, 13, 28, 14, "X");
+  g.set(6, 9, "L").set(20, 9, "L").set(25, 9, "L");
+});
+
+def(4, "UPSIDE DOWN", {
+  echoes: ["flip"], recMax: 10, swap: true,
+  hint: "THE FLOOR IS DEATH ALL THE WAY ACROSS AND ONE ZONE ONLY REACHES SO FAR. WHEREVER YOU SWAP FROM, THE ZONE GOES THERE, AND THE DOOR WANTS SOMETHING LEFT ON ITS PLATE.",
+}, (g) => {
+  g.base();
+  g.set(2, 14, "@");
+  g.fill(1, 1, 30, 11, "#");
+  g.fill(5, 14, 24, 14, "^");
+  g.set(22, 12, "1");
+  g.fill(26, 12, 26, 14, "A");
+  g.fill(29, 13, 29, 14, "X");
+  g.set(4, 12, "L").set(14, 12, "L").set(28, 12, "L");
+});
+
+def(4, "GLASS CEILING", {
+  echoes: ["flip", "phase"], recMax: 30, swap: true,
+  hint: "A WALL OF GLASS STANDS ACROSS THE CEILING ROAD. YOUR SWAPS ARE KEPT IN WHAT YOU RECORD, SO AN ECHO CAN BE LEFT WHERE YOU WILL NEED IT.",
+}, (g) => {
+  g.base();
+  g.set(2, 14, "@");
+  g.fill(1, 1, 30, 11, "#");
+  g.fill(5, 14, 24, 14, "^");
+  g.fill(14, 12, 14, 14, "%");
+  g.fill(29, 13, 29, 14, "X");
+  g.set(4, 12, "L").set(26, 12, "L");
+});
+
+def(4, "NIGHT TRAIN", {
+  echoes: ["glow", "spring"], recMax: 40, dark: true, swap: true,
+  hint: "A RECORDING KEEPS EVERYTHING YOU DID, SWAPS TOO. SOMETHING HAS TO BE WAITING ON THE FAR BANK BEFORE YOU GET THERE FOR REAL.",
+}, (g) => {
+  g.base();
+  g.set(2, 14, "@");
+  g.pit(6, 21);
+  g.fill(6, 14, 21, 14, "~");
+  g.fill(22, 1, 22, 8, "#").fill(22, 9, 22, 14, "G");
+  g.fill(27, 8, 30, 14, "#");
+  g.fill(29, 6, 29, 7, "X");
+  g.set(28, 5, "L");
 });
 
 // Par for the two bonus stars: finish under par.t seconds, and use no more than par.r recordings.
