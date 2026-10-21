@@ -144,6 +144,18 @@ def(0, "SUNKEN GATE", {
   g.set(1, 10, "L").set(27, 3, "L");
 });
 
+def(0, "GATEHOUSE", {
+  echoes: ["shade", "glow"], recMax: 14, dark: true,
+  hint: "THE LEDGE IS TOO HIGH, AND THE GATE OPENS ONLY WHILE LIGHT FALLS ON IT. A STEP FIRST, THEN THE LIGHT.",
+}, (g) => {
+  g.base();
+  g.set(2, 14, "@");
+  g.fill(14, 10, 30, 14, "#");
+  g.fill(21, 1, 21, 6, "#").fill(21, 7, 21, 9, "G");
+  g.fill(28, 8, 28, 9, "X");
+  g.set(2, 8, "L").set(29, 5, "L");
+});
+
 def(0, "RELAY", {
   echoes: ["shade", "glow"], recMax: 12, dark: true,
   hint: "EACH SLOT HOLDS ONE ECHO. RECORD THEM IN ORDER. THEY ALL REPLAY TOGETHER.",
@@ -158,18 +170,6 @@ def(0, "RELAY", {
   g.fill(20, 13, 20, 14, "A");
   g.fill(28, 13, 28, 14, "X");
   g.set(4, 11, "L").set(26, 11, "L");
-});
-
-def(0, "GATEHOUSE", {
-  echoes: ["shade", "glow"], recMax: 14, dark: true,
-  hint: "THE LEDGE IS TOO HIGH, AND THE GATE OPENS ONLY WHILE LIGHT FALLS ON IT. A STEP FIRST, THEN THE LIGHT.",
-}, (g) => {
-  g.base();
-  g.set(2, 14, "@");
-  g.fill(14, 10, 30, 14, "#");
-  g.fill(21, 1, 21, 6, "#").fill(21, 7, 21, 9, "G");
-  g.fill(28, 8, 28, 9, "X");
-  g.set(2, 8, "L").set(29, 5, "L");
 });
 
 def(0, "SWITCHBOARD", {

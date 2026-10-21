@@ -18,7 +18,7 @@ const App = (() => {
   // ---------------------------------------------------------------- save
   const SAVE_KEY = "afterglow.save";
   const SETTINGS_KEY = "afterglow.settings";
-  const SAVE_VERSION = 10;
+  const SAVE_VERSION = 11;
   let save = { done: [], best: {}, stars: {}, lanterns: {}, seen: {} };
   let hadSave = false;
   try {
@@ -73,6 +73,11 @@ const App = (() => {
         "FERRY", "TRAMPOLINE", "SKYHOOK", "TWO STAGES", "FERRY LIGHT", "SLUICE", "STAGECOACH", "SLINGSHOT", "PUMP ROOM",
         "LEAPFROG", "STAY BEHIND", "APEX", "UPSIDE DOWN", "GLASS CEILING", "NIGHT TRAIN",
         "BREEZE", "SAIL", "GALLOP", "WEATHERVANE", "UP AND OVER", "AFTERIMAGE", "CHORUS"],
+      10: ["FIRST STEPS", "THE PLATE", "STEPPING STONE", "TWIN PLATES", "STAIRCASE", "LAMPLIGHT", "SUNKEN GATE", "RELAY", "GATEHOUSE", "SWITCHBOARD",
+        "GLASS WALL", "UNDER GLASS", "UPDRAFT", "CEILING PLATE", "GHOST GLASS", "THREE PANES", "HALL OF MIRRORS",
+        "FERRY", "TRAMPOLINE", "SKYHOOK", "TWO STAGES", "FERRY LIGHT", "SLUICE", "STAGECOACH", "SLINGSHOT", "PUMP ROOM",
+        "LEAPFROG", "STAY BEHIND", "APEX", "UPSIDE DOWN", "GLASS CEILING", "NIGHT TRAIN",
+        "BREEZE", "SAIL", "GALLOP", "WEATHERVANE", "UP AND OVER", "AFTERIMAGE", "CHORUS"],
     };
     // Same name but a different puzzle now: the old result no longer applies.
     const REDESIGNED = {
@@ -85,6 +90,7 @@ const App = (() => {
       7: {},
       8: {},
       9: {},
+      10: {},
     };
     // The level is the same but its lantern moved, so the old pickup no longer counts.
     // Value: the save version in which the lantern moved; older saves lose that pickup.
@@ -653,6 +659,9 @@ const App = (() => {
     drawPlainBg();
     Font.draw(ctx, "LEVELS", W / 2, 10, { scale: 3, color: "#ffe9a8", align: "center" });
     const tw = 40, th = 46, x0 = 150, gap = 3;
+    const bonusX = x0 + 9 * (tw + gap) + 16;
+    ctx.fillStyle = "rgba(200,210,235,0.12)";
+    ctx.fillRect(bonusX - 9, 42, 1, (CHAPTERS.length - 1) * 54 + th);
     for (let t = 0; t < CHAPTERS.length; t++) {
       const y = 42 + t * 54;
       const pal = CHAPTERS[t].pal;
@@ -662,7 +671,8 @@ const App = (() => {
         else Render.drawSwapIcon(ctx, 22 + k * 18, y + 26, "#ffffff");
       });
       tierLevels[t].forEach((i, n) => {
-        const x = x0 + n * (tw + gap);
+        // Bonus levels stand apart in a column of their own at the right.
+        const x = LEVELS[i].bonus ? bonusX : x0 + n * (tw + gap);
         const sel = A.selLevel === i, open = isUnlocked(i);
         ctx.fillStyle = open ? "rgba(20,28,56,0.92)" : "rgba(14,16,28,0.9)";
         ctx.fillRect(x, y, tw, th);
