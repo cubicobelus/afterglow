@@ -18,7 +18,7 @@ const App = (() => {
   // ---------------------------------------------------------------- save
   const SAVE_KEY = "afterglow.save";
   const SETTINGS_KEY = "afterglow.settings";
-  const SAVE_VERSION = 9;
+  const SAVE_VERSION = 10;
   let save = { done: [], best: {}, stars: {}, lanterns: {}, seen: {} };
   let hadSave = false;
   try {
@@ -68,6 +68,11 @@ const App = (() => {
         "FERRY", "TRAMPOLINE", "SKYHOOK", "TWO STAGES", "FERRY LIGHT", "SLUICE", "STAGECOACH", "SLINGSHOT", "PUMP ROOM",
         "LEAPFROG", "STAY BEHIND", "APEX", "UPSIDE DOWN", "GLASS CEILING", "NIGHT TRAIN",
         "BREEZE", "SAIL", "GALLOP", "WEATHERVANE", "UP AND OVER", "AFTERIMAGE", "CHORUS"],
+      9: ["FIRST STEPS", "THE PLATE", "STEPPING STONE", "TWIN PLATES", "STAIRCASE", "LAMPLIGHT", "SUNKEN GATE", "RELAY", "EYE", "GATEHOUSE", "SWITCHBOARD",
+        "GLASS WALL", "UNDER GLASS", "UPDRAFT", "CEILING PLATE", "GHOST GLASS", "THREE PANES", "HALL OF MIRRORS",
+        "FERRY", "TRAMPOLINE", "SKYHOOK", "TWO STAGES", "FERRY LIGHT", "SLUICE", "STAGECOACH", "SLINGSHOT", "PUMP ROOM",
+        "LEAPFROG", "STAY BEHIND", "APEX", "UPSIDE DOWN", "GLASS CEILING", "NIGHT TRAIN",
+        "BREEZE", "SAIL", "GALLOP", "WEATHERVANE", "UP AND OVER", "AFTERIMAGE", "CHORUS"],
     };
     // Same name but a different puzzle now: the old result no longer applies.
     const REDESIGNED = {
@@ -79,6 +84,7 @@ const App = (() => {
       6: {},
       7: {},
       8: {},
+      9: {},
     };
     // The level is the same but its lantern moved, so the old pickup no longer counts.
     // Value: the save version in which the lantern moved; older saves lose that pickup.

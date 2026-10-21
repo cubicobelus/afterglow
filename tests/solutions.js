@@ -349,20 +349,6 @@ SOLUTIONS["SUNKEN GATE"] = () => {
   Bot.walkTo(570);
 };
 
-SOLUTIONS["EYE"] = () => {
-  // The sensor plate is sealed inside the stone block. A glow resting on top of the block lights it through the stone.
-  Bot.record("glow");
-  Bot.walkTo(150);
-  Bot.jumpTo(190, 24);
-  Bot.run(6);
-  Bot.stop();
-  Bot.waitUntil(() => G.echoes.glow.restT > 30 && G.L.doorOpen.a, 900, "the glow to settle and the door to open");
-  Bot.walkTo(150);
-  Bot.jumpTo(250, 24);
-  Bot.jumpTo(330, 24);
-  Bot.walkTo(570);
-};
-
 SOLUTIONS["GATEHOUSE"] = () => {
   // slots: shade, glow. The shade hangs in the air beside the ledge as a step. The glow is recorded climbing it and resting
   // by the gate. Both are needed again on the real run.

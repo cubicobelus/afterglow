@@ -160,20 +160,6 @@ def(0, "RELAY", {
   g.set(4, 11, "L").set(26, 11, "L");
 });
 
-def(0, "EYE", {
-  echoes: ["glow"], recMax: 10, dark: true,
-  hint: "THE EYE ON THE PLATE IS SEALED IN STONE. LIGHT GOES THROUGH STONE.",
-}, (g) => {
-  g.base();
-  g.set(2, 14, "@");
-  g.fill(8, 12, 13, 14, "#");
-  g.fill(10, 13, 11, 13, ".");
-  g.set(10, 13, "5");
-  g.fill(20, 1, 20, 8, "#").fill(20, 9, 20, 14, "A");
-  g.fill(28, 13, 28, 14, "X");
-  g.set(2, 8, "L").set(25, 10, "L");
-});
-
 def(0, "GATEHOUSE", {
   echoes: ["shade", "glow"], recMax: 14, dark: true,
   hint: "THE LEDGE IS TOO HIGH, AND THE GATE OPENS ONLY WHILE LIGHT FALLS ON IT. A STEP FIRST, THEN THE LIGHT.",
@@ -639,7 +625,6 @@ const PAR = {
   "GLASS CEILING": { t: 35, r: 2 },
   "UP AND OVER": { t: 40, r: 3 },
   "STAIRCASE": { t: 45, r: 3 },
-  "EYE": { t: 20, r: 1 },
   "GATEHOUSE": { t: 40, r: 2 },
   "STAGECOACH": { t: 35, r: 3 },
   "WEATHERVANE": { t: 20, r: 3 },
