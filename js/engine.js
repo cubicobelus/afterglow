@@ -14,6 +14,13 @@ const PED_W = 26, PED_H = 4; // spawn slab
 const STEP = 5;              // small ledges up to this tall are stepped onto without a jump
 const SPRING_V = 600, SPRING_V_HELD = 720; // bounce speeds (about 120 and 173 px high)
 const GUST_R = 72, GUST_ACC = 900, GUST_V = 170, GUST_GROUND = 90, WIND_DECAY = 300;
+// Newer echoes (see the lab): each is a zone around an echo at rest, like glow, flip and gust.
+const CALM_R = 80;                        // silences every other echo power inside it
+const FLOAT_R = 72, FLOAT_G = 0.4, FLOAT_FALL = 170; // low gravity
+const PULL_R = 96, PULL_VX = 220, PULL_K = 36, PULL_C = 9, PULL_G = 0.15; // draws you in and holds you near its centre
+const SLOW_R = 88, SLOW_RATE = 0.3;       // other echoes replay slowly inside it
+const SHRINK_R = 64, SHRINK_K = 0.5;      // you become half size inside it
+const VINE_H = 120, VINE_UP = 100, VINE_DOWN = 60; // a column that grows up from the echo; hold jump to climb
 
 const KINDS = {
   shade: { name: "SHADE", color: "#8fb4ff", blurb: "HOLDS PLATES AND IS SOLID TO STAND ON." },
@@ -23,10 +30,18 @@ const KINDS = {
   tide: { name: "TIDE", color: "#ff8f8f", blurb: "REPLAYS ITS PATH BACK AND FORTH FOREVER, WAITING WHERE YOU WAITED." },
   spring: { name: "SPRING", color: "#a6e86a", blurb: "BOUNCES YOU HIGH. HOLD JUMP FOR A BIGGER BOUNCE." },
   gust: { name: "GUST", color: "#dff3ff", blurb: "BLOWS A WIND IN THE DIRECTION IT WAS FACING." },
+  calm: { name: "CALM", color: "#e3dcff", blurb: "SILENCES EVERY OTHER ECHO POWER AROUND IT: LIGHT, WIND, GRAVITY, GLASS AND SPRINGS." },
+  mirror: { name: "MIRROR", color: "#ff9fd6", blurb: "REPLAYS YOUR PATH FLIPPED LEFT TO RIGHT, STARTING ON THE OTHER SIDE OF THE ROOM." },
+  float: { name: "FLOAT", color: "#8ec9ff", blurb: "GRAVITY IS A THIRD AS STRONG AROUND IT. JUMPS GO FAR AND FALLS ARE SLOW." },
+  pull: { name: "PULL", color: "#ff9b5e", blurb: "DRAWS YOU TOWARD ITSELF, LIKE A WELL." },
+  stone: { name: "STONE", color: "#bfae92", blurb: "TURNS INTO A SOLID BLOCK WHEN IT STOPS. NOTHING GETS THROUGH IT." },
+  slow: { name: "SLOW", color: "#7f98ff", blurb: "OTHER ECHOES MOVE AT HALF SPEED INSIDE ITS RING." },
+  shrink: { name: "SHRINK", color: "#f7f09a", blurb: "YOU ARE HALF SIZE INSIDE ITS RING. SMALL GAPS OPEN." },
+  vine: { name: "VINE", color: "#4fd68a", blurb: "GROWS A COLUMN UPWARD WHEN IT STOPS. HOLD JUMP TO CLIMB IT, LET GO TO SLIDE." },
 };
 // Slots always appear in this order, whatever order a level lists its echoes in, so the numbers on the keys
 // never spell out the order you should record in.
-const KIND_ORDER = ["shade", "glow", "phase", "flip", "tide", "spring", "gust"];
+const KIND_ORDER = ["shade", "glow", "phase", "flip", "tide", "spring", "gust", "calm", "mirror", "float", "pull", "stone", "slow", "shrink", "vine"];
 const PLATE_COLORS = { a: "#4fd1ff", b: "#ffb347", c: "#ff6fae", d: "#9cff6f" };
 
 // Settings the player can change (the UI loads and saves these).
@@ -100,7 +115,7 @@ function rectDist2(px, py, r) {
 // ---------------------------------------------------------------- world state
 const G = {
   L: null, t: 0, p: null, echoes: {}, rec: null, sel: 0,
-  lights: [], flips: [], phases: [], winds: [],
+  lights: [], flips: [], phases: [], winds: [], calms: [], floats: [], pulls: [], slows: [], shrinks: [], vines: [],
   dead: false, deadT: 0, won: false, winT: 0,
   deaths: 0, time: 0, timing: false, recCount: 0, swapCd: 0, lanternsGot: 0, notice: null,
   particles: [], shake: 0, onWin: null,
@@ -130,7 +145,7 @@ function parseLevel(which) {
     idx, def, name: def.name, chapter: def.chapter, dark: !!def.dark,
     echoes: (def.echoes || []).slice().sort((a, b) => KIND_ORDER.indexOf(a) - KIND_ORDER.indexOf(b)), recMax: def.recMax || 10, swap: !!def.swap, hint: def.hint || "",
     rows, walls: [], doorTiles: [], plates: [], planks: [], crystals: [], spikes: [], thorns: [], lamps: [],
-    oneways: [], gates: [], lanterns: [],
+    oneways: [], gates: [], lanterns: [], halves: [], vents: [],
     spawn: { x: 40, y: 100 }, exit: null, doorOpen: {}, hasDoor: {}, hasLamp: {},
   };
   // A level may list a kind more than once. The first slot of a kind is keyed by its name, later ones as name2, name3.
@@ -155,6 +170,9 @@ function parseLevel(which) {
       if (c >= COLS) continue;
       if (ch === "%") L.crystals.push({ x, y });
       else if (ch === "~") L.planks.push({ x, y });
+      else if (ch === "<" || ch === ">") L.vents.push({ x: x + 10, y: y + 10, dir: ch === ">" ? 1 : -1, tx: c, ty: r });
+      else if (ch === "_") { L.walls.push({ x, y: y + 10, w: TILE, h: 10 }); L.halves.push({ x, y: y + 10, top: false }); }
+      else if (ch === "-") { L.walls.push({ x, y, w: TILE, h: 10 }); L.halves.push({ x, y, top: true }); }
       else if (ch === "^") L.spikes.push({ x: x + 3, y: y + 11, w: 14, h: 9, dir: 1, tx: c, ty: r });
       else if (ch === "v") L.spikes.push({ x: x + 3, y, w: 14, h: 9, dir: -1, tx: c, ty: r });
       else if (ch === "t") L.thorns.push({ x: x + 1, y: y + 8, w: 18, h: 12, cx: x + 10, cy: y + 14, tx: c, ty: r, lit: false, wither: 0 });
@@ -247,24 +265,55 @@ function computeFields() {
   G.flips = [];
   G.phases = [];
   G.winds = [];
+  G.calms = [];
+  G.floats = [];
+  G.pulls = [];
+  G.slows = [];
+  G.shrinks = [];
+  G.vines = [];
   // Echo powers switch on only once the echo has come to rest, growing in over a short ramp.
   const power = (echo) => (echo.moving ? 0 : Math.min(1, (echo.restT + 1) / RAMP));
+  // A calm echo silences every other power inside its ring (calm itself is not silenced).
   for (const k in G.echoes) {
     const e = G.echoes[k], pw = power(e);
-    if (pw <= 0) continue;
+    if (e.kind === "calm" && pw > 0) G.calms.push({ x: e.x + PW / 2, y: e.y + PH / 2, r: CALM_R * pw });
+  }
+  const calmed = (x, y) => G.calms.some((c) => (x - c.x) * (x - c.x) + (y - c.y) * (y - c.y) <= c.r * c.r);
+  for (const k in G.echoes) {
+    const e = G.echoes[k], pw = power(e);
     const cx = e.x + PW / 2, cy = e.y + PH / 2;
+    e.silenced = e.kind !== "calm" && calmed(cx, cy);
+    if (pw <= 0 || e.silenced) continue;
     if (e.kind === "glow") G.lights.push({ x: cx, y: cy, r: GLOW_R * pw, echo: true });
     else if (e.kind === "flip") G.flips.push({ x: cx, y: cy, r: FLIP_R * pw });
     else if (e.kind === "phase") G.phases.push({ x: cx, y: cy, r: PHASE_R * pw });
     else if (e.kind === "gust") G.winds.push({ x: cx, y: cy, r: GUST_R * pw, dir: e.face >= 0 ? 1 : -1 });
+    else if (e.kind === "float") G.floats.push({ x: cx, y: cy, r: FLOAT_R * pw });
+    else if (e.kind === "pull") G.pulls.push({ x: cx, y: cy, r: PULL_R * pw });
+    else if (e.kind === "slow") G.slows.push({ x: cx, y: cy, r: SLOW_R * pw });
+    else if (e.kind === "shrink") G.shrinks.push({ x: cx, y: cy, r: SHRINK_R * pw });
+    else if (e.kind === "vine" && e.restT > 12) {
+      // the column grows from the feet of the echo, and stops under a ceiling
+      const base = e.y + PH, grown = Math.min(VINE_H, (e.restT - 12) * 1.3);
+      let top = base - grown;
+      for (const w of L.walls) {
+        if (cx > w.x && cx < w.x + w.w && w.y + w.h <= base - 4 && w.y + w.h > top) top = w.y + w.h;
+      }
+      G.vines.push({ x: cx, base, top, echo: e });
+    }
   }
+  for (const v of L.vents) if (!calmed(v.x, v.y)) G.winds.push({ x: v.x, y: v.y, r: GUST_R, dir: v.dir, vent: true });
   for (const gt of L.gates) gt.open = litRect(gt);
 }
 
+const inZone = (z, x, y) => (x - z.x) * (x - z.x) + (y - z.y) * (y - z.y) <= z.r * z.r;
+
 // ---------------------------------------------------------------- echoes
 function makeEcho(kind, trace, key) {
+  // A mirror puppet replays the path flipped left to right about the middle of the room.
+  if (kind === "mirror") trace = trace.map((t) => ({ x: W - PW - t.x, y: t.y, f: -t.f, s: t.s, g: t.g }));
   const s = trace[0];
-  return { kind, key: key || kind, trace, x: s.x, y: s.y, px: s.x, py: s.y, dx: 0, dy: 0, face: s.f, st: s.s, g: s.g, frozen: null, i: 0, moving: true, restT: 0 };
+  return { kind, key: key || kind, trace, x: s.x, y: s.y, px: s.x, py: s.y, dx: 0, dy: 0, face: s.f, st: s.s, g: s.g, frozen: null, i: 0, clk: 0, moving: true, restT: 0 };
 }
 
 function placeEchoes() {
@@ -273,7 +322,7 @@ function placeEchoes() {
     const s = e.trace[0];
     e.frozen = null;
     e.x = e.px = s.x; e.y = e.py = s.y; e.dx = e.dy = 0;
-    e.face = s.f; e.st = s.s; e.g = s.g; e.i = 0; e.moving = true; e.restT = 0;
+    e.face = s.f; e.st = s.s; e.g = s.g; e.i = 0; e.clk = 0; e.moving = true; e.restT = 0;
   }
 }
 
@@ -281,23 +330,31 @@ function updateEchoes() {
   for (const k in G.echoes) {
     const e = G.echoes[k];
     e.px = e.x; e.py = e.y;
+    // Each echo has its own clock. It runs one tick per tick, except inside a slow ring (other echoes only).
+    const c = Math.floor(e.clk);
+    let rate = 1;
+    if (e.kind !== "slow" && !e.frozen) {
+      const ecx = e.x + PW / 2, ecy = e.y + PH / 2;
+      for (const z of G.slows) if (inZone(z, ecx, ecy)) { rate = SLOW_RATE; break; }
+    }
     if (e.frozen) {
       e.x = e.frozen.x; e.y = e.frozen.y;
       e.moving = false;
     } else if (e.kind === "tide" && e.trace.length > 1) {
       // Tide plays its path forward, then backward, forever: smooth, never snapping back to the start.
-      const n = e.trace.length, period = 2 * (n - 1), k = G.t % period;
-      const fwd = k < n;
-      const i = fwd ? k : period - k;
+      const n = e.trace.length, period = 2 * (n - 1), k2 = c % period;
+      const fwd = k2 < n;
+      const i = fwd ? k2 : period - k2;
       const s = e.trace[i];
       e.x = s.x; e.y = s.y; e.face = fwd ? s.f : -s.f; e.st = s.s; e.g = s.g; e.i = i;
       e.moving = true;
     } else {
-      const i = Math.min(G.t, e.trace.length - 1);
+      const i = Math.min(c, e.trace.length - 1);
       const s = e.trace[i];
       e.x = s.x; e.y = s.y; e.face = s.f; e.st = s.s; e.g = s.g; e.i = i;
-      e.moving = G.t < e.trace.length - 1;
+      e.moving = c < e.trace.length - 1;
     }
+    e.clk += rate;
     e.dx = e.x - e.px;
     e.dy = e.y - e.py;
     e.restT = e.moving ? 0 : e.restT + 1;
@@ -311,7 +368,7 @@ function restartAttempt() {
   G.t = 0;
   G.dead = false;
   G.deadT = 0;
-  G.p = { x: s.x, y: s.y, w: PW, h: PH, vx: 0, vy: 0, windV: 0, onGround: false, face: 1, coy: 0, buf: 0, jumping: false, stand: null, g: 1, sq: 0 };
+  G.p = { x: s.x, y: s.y, w: PW, h: PH, vx: 0, vy: 0, windV: 0, pullV: 0, onGround: false, face: 1, coy: 0, buf: 0, jumping: false, stand: null, g: 1, sq: 0 };
   placeEchoes();
   computeFields();
 }
@@ -424,12 +481,12 @@ function buildSolids(p, withEchoes, g) {
   for (const gt of L.gates) if (!gt.open) out.push(gt);
   if (g !== undefined) {
     for (const o of L.oneways) {
-      if (g > 0 ? p.y + PH <= o.y + 4 : p.y >= o.y + o.h - 4) out.push(o);
+      if (g > 0 ? p.y + p.h <= o.y + 4 : p.y >= o.y + o.h - 4) out.push(o);
     }
   }
   const pad = 36;
   for (const pl of L.planks) {
-    if (pl.x > p.x - pad - TILE && pl.x < p.x + PW + pad && pl.y > p.y - pad - TILE && pl.y < p.y + PH + pad) {
+    if (pl.x > p.x - pad - TILE && pl.x < p.x + p.w + pad && pl.y > p.y - pad - TILE && pl.y < p.y + p.h + pad) {
       for (let i = 0; i < 5; i++) {
         const s = { x: pl.x + i * 4, y: pl.y, w: 4, h: 6 };
         if (litRect(s)) out.push(s);
@@ -437,7 +494,7 @@ function buildSolids(p, withEchoes, g) {
     }
   }
   for (const c of L.crystals) {
-    if (c.x > p.x - pad - TILE && c.x < p.x + PW + pad && c.y > p.y - pad - TILE && c.y < p.y + PH + pad) {
+    if (c.x > p.x - pad - TILE && c.x < p.x + p.w + pad && c.y > p.y - pad - TILE && c.y < p.y + p.h + pad) {
       for (let cy = 0; cy < 5; cy++) {
         for (let cx = 0; cx < 5; cx++) {
           const s = { x: c.x + cx * 4, y: c.y + cy * 4, w: 4, h: 4, crystal: true };
@@ -449,7 +506,12 @@ function buildSolids(p, withEchoes, g) {
   if (withEchoes) {
     for (const k in G.echoes) {
       const e = G.echoes[k];
-      const ok = g > 0 ? p.y + PH <= e.y + 4 : p.y >= e.y + PH - 4;
+      if (e.kind === "stone" && !e.moving && e.restT >= 6) {
+        // a stone that has stopped is a wall, unless you are inside it, in which case it waits until you are out
+        const r = { x: e.x, y: e.y, w: PW, h: PH, stone: true };
+        if (!overlap(p, r)) { out.push(r); continue; }
+      }
+      const ok = g > 0 ? p.y + p.h <= e.y + 4 : p.y >= e.y + PH - 4;
       if (ok) out.push({ x: e.x, y: e.y, w: PW, h: PH, ow: true, src: e });
     }
   }
@@ -463,7 +525,7 @@ function playerState(p) {
 
 function stepPlayer() {
   const L = G.L, p = G.p;
-  const cx = p.x + PW / 2, cy = p.y + PH / 2;
+  const cx = p.x + p.w / 2, cy = p.y + p.h / 2;
   let g = 1;
   for (const f of G.flips) {
     const dx = cx - f.x, dy = cy - f.y;
@@ -475,10 +537,27 @@ function stepPlayer() {
     burst(cx, cy, 10, "#4fe3c1", 70, 0.5, 2, 0);
   }
 
+  // A shrink ring makes you half size. You grow back only where there is room, so a gap that was only open to the small you
+  // does not squash you.
+  {
+    const small = p.w < PW;
+    const want = G.shrinks.some((z) => inZone(z, cx, cy));
+    const fit = (nw, nh) => ({ x: p.x + (p.w - nw) / 2, y: g > 0 ? p.y + p.h - nh : p.y, w: nw, h: nh });
+    if (want && !small) {
+      const r = fit(PW * SHRINK_K, PH * SHRINK_K);
+      p.x = r.x; p.y = r.y; p.w = r.w; p.h = r.h;
+      SFX("flip");
+      burst(cx, cy, 8, KINDS.shrink.color, 60, 0.4, 2, 0);
+    } else if (!want && small) {
+      const r = fit(PW, PH);
+      if (!buildSolids(r, false, g).some((o) => !o.ow && overlap(r, o))) { p.x = r.x; p.y = r.y; p.w = r.w; p.h = r.h; }
+    }
+  }
+
   // Crystal that has just formed again around the player crushes them. Pushing them out instead would slide them
   // through the wall (out of the bottom of it, into the floor).
   for (const s of buildSolids(p, false, g)) {
-    if (s.crystal && overlap({ x: p.x + 1, y: p.y + 1, w: PW - 2, h: PH - 2 }, s)) { kill(); return; }
+    if (s.crystal && overlap({ x: p.x + 1, y: p.y + 1, w: p.w - 2, h: p.h - 2 }, s)) { kill(); return; }
   }
 
   const dir = (Input.right() ? 1 : 0) - (Input.left() ? 1 : 0);
@@ -505,14 +584,30 @@ function stepPlayer() {
   if (p.windV < windTarget) p.windV = Math.min(windTarget, p.windV + wacc * DT);
   else if (p.windV > windTarget) p.windV = Math.max(windTarget, p.windV - wacc * DT);
 
+  // A pull draws you toward its centre and holds you near it. It is strongest in the middle of its ring and weak at the rim, and
+  // gentler while you steer, so you can always walk out of it.
+  let pullTarget = 0, pulled = false;
+  for (const z of G.pulls) {
+    if (!inZone(z, cx, cy)) continue;
+    pulled = true;
+    const dxp = z.x - cx, dyp = z.y - cy, dist = Math.hypot(dxp, dyp);
+    const mag = Math.min(Math.abs(dxp) * 4, PULL_VX * (1 - 0.6 * dist / z.r));
+    pullTarget += Math.sign(dxp) * mag * (dir ? 0.4 : 1);
+  }
+  pullTarget = Math.max(-PULL_VX, Math.min(PULL_VX, pullTarget));
+  if (p.pullV < pullTarget) p.pullV = Math.min(pullTarget, p.pullV + 1400 * DT);
+  else if (p.pullV > pullTarget) p.pullV = Math.max(pullTarget, p.pullV - 1400 * DT);
+
   p.buf = jumpPressed ? JUMP_BUF : Math.max(0, p.buf - DT);
   p.coy = p.onGround ? COYOTE : Math.max(0, p.coy - DT);
-  if (p.buf > 0 && p.coy > 0) {
+  // On a vine, jump climbs and letting go slides, so a jump press is not a jump.
+  const vine = G.vines.find((v) => Math.abs(cx - v.x) < 9 && p.y + p.h > v.top && p.y < v.base);
+  if (!vine && p.buf > 0 && p.coy > 0) {
     p.vy = -JUMP * g;
     p.buf = 0; p.coy = 0; p.jumping = true; p.onGround = false; p.stand = null;
     p.sq = -0.25;
     SFX("jump");
-    burst(p.x + PW / 2, p.y + (g > 0 ? PH : 0), 5, "#cfd8e8", 40, 0.3, 2, 0);
+    burst(p.x + p.w / 2, p.y + (g > 0 ? p.h : 0), 5, "#cfd8e8", 40, 0.3, 2, 0);
   }
   if (p.jumping) {
     if (p.vy * g >= 0) p.jumping = false;
@@ -520,11 +615,21 @@ function stepPlayer() {
   }
   let gr = GRAV;
   if (!p.onGround && Math.abs(p.vy) < 80 && jumpHeld) gr *= 0.65;
+  const floating = G.floats.some((z) => inZone(z, cx, cy));
+  if (floating) gr *= FLOAT_G;
+  if (pulled) gr *= PULL_G;
   p.vy += gr * g * DT;
+  for (const z of G.pulls) {
+    if (!inZone(z, cx, cy)) continue;
+    // a spring toward the centre height, with damping, so you settle there instead of swinging through
+    p.vy += ((z.y - cy) * PULL_K - p.vy * PULL_C) * DT;
+  }
   // Terminal speed applies to falling only, so strong bounces are not clipped.
   const along = p.vy * g;
-  if (along > MAXFALL) p.vy = MAXFALL * g;
+  const maxFall = floating ? FLOAT_FALL : MAXFALL;
+  if (along > maxFall) p.vy = maxFall * g;
   else if (along < -900) p.vy = -900 * g;
+  if (vine) { p.vy = (jumpHeld ? -VINE_UP : VINE_DOWN) * g; p.jumping = false; p.buf = 0; }
 
   const prevStand = p.stand;
   if (prevStand) {
@@ -546,23 +651,23 @@ function stepPlayer() {
   // ceiling cannot leave you embedded in it (or pop you up through it).
   solids.sort((a, b) => (b.ow ? 1 : 0) - (a.ow ? 1 : 0));
 
-  const evx = p.vx + p.windV;
+  const evx = p.vx + p.windV + p.pullV;
   p.x += evx * DT;
   if (evx !== 0) {
     for (const s of solids) {
       if (s.ow) continue;
       if (!overlap(p, s)) continue;
-      const rise = p.y + PH - s.y;
+      const rise = p.y + p.h - s.y;
       if (g > 0 && p.onGround && rise > 0 && rise <= STEP) {
-        const up = { x: p.x, y: s.y - PH, w: PW, h: PH };
+        const up = { x: p.x, y: s.y - p.h, w: p.w, h: p.h };
         if (!solids.some((o) => !o.ow && overlap(up, o))) { p.y = up.y; continue; }
       }
       // A player already overlapping a wall by a pixel or two vertically (pressed into a ceiling, say) must be pushed out
       // vertically. Pushing sideways would move them to the far end of the whole wall.
-      const xPen = evx > 0 ? p.x + PW - s.x : s.x + s.w - p.x;
-      const yPen = Math.min(p.y + PH - s.y, s.y + s.h - p.y);
+      const xPen = evx > 0 ? p.x + p.w - s.x : s.x + s.w - p.x;
+      const yPen = Math.min(p.y + p.h - s.y, s.y + s.h - p.y);
       if (yPen < xPen) continue;
-      p.x = evx > 0 ? s.x - PW : s.x + s.w;
+      p.x = evx > 0 ? s.x - p.w : s.x + s.w;
     }
   }
 
@@ -573,8 +678,8 @@ function stepPlayer() {
     if (!overlap(p, s)) continue;
     if (s.ow) {
       if (g > 0 ? p.vy >= 0 : p.vy <= 0) {
-        if (g > 0) p.y = s.y - PH; else p.y = s.y + s.h;
-        if (s.src && s.src.kind === "spring" && s.src.restT >= 6) {
+        if (g > 0) p.y = s.y - p.h; else p.y = s.y + s.h;
+        if (s.src && s.src.kind === "spring" && s.src.restT >= 6 && !s.src.silenced) {
           // Landing on a resting spring throws you back up (higher if jump is held).
           p.vy = -g * (jumpHeld ? SPRING_V_HELD : SPRING_V);
           p.jumping = false;
@@ -590,9 +695,9 @@ function stepPlayer() {
     }
     // Push out of the wall the short way. Choosing by velocity alone threw a rider that an echo had pressed a pixel
     // into a ceiling up onto the far side of it, through the whole slab.
-    const upPush = p.y + PH - s.y, downPush = s.y + s.h - p.y;
+    const upPush = p.y + p.h - s.y, downPush = s.y + s.h - p.y;
     const goUp = upPush < downPush || (upPush === downPush && (p.vy > 0 || (p.vy === 0 && g > 0)));
-    if (goUp) { p.y = s.y - PH; hitDown = true; }
+    if (goUp) { p.y = s.y - p.h; hitDown = true; }
     else { p.y = s.y + s.h; hitUp = true; }
     p.vy = 0;
   }
@@ -601,25 +706,25 @@ function stepPlayer() {
   if (p.onGround && !wasGround && Math.abs(vyBefore) > 140) {
     p.sq = 0.28;
     SFX("land");
-    burst(p.x + PW / 2, p.y + (g > 0 ? PH : 0), 6, "#cfd8e8", 50, 0.3, 2, 0);
+    burst(p.x + p.w / 2, p.y + (g > 0 ? p.h : 0), 6, "#cfd8e8", 50, 0.3, 2, 0);
   }
   if (bounced) {
     bounced.bounceT = 14;
     p.sq = -0.4;
     SFX("spring");
-    burst(p.x + PW / 2, p.y + (g > 0 ? PH : 0), 8, KINDS.spring.color, 80, 0.4, 2, 0);
+    burst(p.x + p.w / 2, p.y + (g > 0 ? p.h : 0), 8, KINDS.spring.color, 80, 0.4, 2, 0);
   }
   p.sq *= 0.82;
 
-  p.x = Math.max(0, Math.min(W - PW, p.x));
+  p.x = Math.max(0, Math.min(W - p.w, p.x));
 
   // Crushed by something that solidified around the player.
   for (const s of solids) {
-    if ((s.crystal || s.door) && overlap({ x: p.x + 1, y: p.y + 1, w: PW - 2, h: PH - 2 }, s)) { kill(); return; }
+    if ((s.crystal || s.door) && overlap({ x: p.x + 1, y: p.y + 1, w: p.w - 2, h: p.h - 2 }, s)) { kill(); return; }
   }
 
   if (p.onGround && Math.abs(p.vx) > 70 && G.t % 7 === 0) {
-    emit({ x: p.x + PW / 2 - p.face * 4, y: p.y + (g > 0 ? PH : 0) - 1, vx: -p.face * 14, vy: -g * 10, life: 0.3, max: 0.3, size: 2, color: "#aab7c9" });
+    emit({ x: p.x + p.w / 2 - p.face * 4, y: p.y + (g > 0 ? p.h : 0) - 1, vx: -p.face * 14, vy: -g * 10, life: 0.3, max: 0.3, size: 2, color: "#aab7c9" });
   }
 }
 
@@ -635,7 +740,7 @@ function updatePlates() {
     if (pl.sensor) on = litRect(pl); // light sensors are pressed by light, not by weight
     else {
       for (const b of bodies) {
-        if (b.x < pl.x + pl.w && b.x + PW > pl.x && b.y < pl.y + pl.h && b.y + PH > pl.y) { on = true; break; }
+        if (b.x < pl.x + pl.w && b.x + (b.w || PW) > pl.x && b.y < pl.y + pl.h && b.y + (b.h || PH) > pl.y) { on = true; break; }
       }
     }
     if (on && !pl.pressed) { SFX("plateOn"); burst(pl.x + 8, pl.y + 3, 6, PLATE_COLORS[pl.id], 50, 0.4, 2, 0); }
@@ -703,17 +808,17 @@ function tick() {
   if (G.dead) { updateParticles(); return; }
 
   const p = G.p;
-  if (p.y > H + 24 || p.y + PH < -24) { kill(); updateParticles(); return; }
+  if (p.y > H + 24 || p.y + p.h < -24) { kill(); updateParticles(); return; }
   for (const sp of L.spikes) {
-    if (overlap({ x: p.x + 2, y: p.y + 2, w: PW - 4, h: PH - 4 }, sp)) { kill(); updateParticles(); return; }
+    if (overlap({ x: p.x + 2, y: p.y + 2, w: p.w - 4, h: p.h - 4 }, sp)) { kill(); updateParticles(); return; }
   }
   for (const th of L.thorns) {
     const lit = litPoint(th.cx, th.cy);
     if (lit && !th.lit) { SFX("wither"); burst(th.cx, th.cy - 4, 5, "#9fe3a0", 40, 0.5, 2, 0); }
     th.lit = lit;
-    if (!lit && overlap({ x: p.x + 2, y: p.y + 2, w: PW - 4, h: PH - 4 }, th)) { kill(); updateParticles(); return; }
+    if (!lit && overlap({ x: p.x + 2, y: p.y + 2, w: p.w - 4, h: p.h - 4 }, th)) { kill(); updateParticles(); return; }
   }
-  const pcx = p.x + PW / 2, pcy = p.y + PH / 2;
+  const pcx = p.x + p.w / 2, pcy = p.y + p.h / 2;
   // A lantern only counts on a real run, not while an echo is being recorded.
   for (const ln of L.lanterns) {
     if (!G.rec && !ln.got && Math.abs(pcx - ln.x) < 11 && Math.abs(pcy - ln.y) < 13) {

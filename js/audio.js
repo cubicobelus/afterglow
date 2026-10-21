@@ -8,10 +8,11 @@ const Sfx = (() => {
   try { muted = localStorage.getItem("afterglow.muted") === "1"; } catch (e) { /* storage unavailable */ }
 
   const mtof = (m) => 440 * Math.pow(2, (m - 69) / 12);
-  const SCALES = [[0, 3, 5, 7, 10], [0, 2, 4, 7, 9], [0, 3, 5, 7, 10], [0, 2, 5, 7, 9], [0, 2, 4, 7, 9]];
-  const ROOTS = [45, 43, 41, 38, 48];
+  const SCALES = [[0, 3, 5, 7, 10], [0, 2, 4, 7, 9], [0, 3, 5, 7, 10], [0, 2, 5, 7, 9], [0, 2, 4, 7, 9],
+    [0, 2, 4, 7, 9], [0, 3, 5, 7, 10], [0, 2, 4, 7, 11], [0, 1, 5, 7, 8], [0, 2, 4, 7, 9]];
+  const ROOTS = [45, 43, 41, 38, 48, 50, 40, 47, 36, 43];
   const CHORDS = [0, 5, 3, 7];
-  const KIND_NOTE = { shade: 67, glow: 72, phase: 70, flip: 65, tide: 62, spring: 69, gust: 74 };
+  const KIND_NOTE = { shade: 67, glow: 72, phase: 70, flip: 65, tide: 62, spring: 69, gust: 74, calm: 60, mirror: 71, float: 76, pull: 59, stone: 55, slow: 64, shrink: 79, vine: 66 };
 
   function ensure() {
     if (ac) return true;

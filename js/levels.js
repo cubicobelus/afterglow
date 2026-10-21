@@ -33,29 +33,35 @@ const CHAPTERS = [
   // Page two, the drowned half of the tower: planned, no levels yet (the level select shows them as empty rows).
   // Each tier is meant to introduce one new echo. The theme names are placeholders until there is scenery for them.
   {
-    name: "THE SHALLOWS", line: "THE SURFACE IS A CEILING NOW.", theme: "tideworks", mood: 1, planned: true,
+    name: "THE SHALLOWS", line: "THE SURFACE IS A CEILING NOW.", theme: "shallows", mood: 5, planned: true,
     pal: { bg1: "#06222c", bg2: "#14707a", wall: "#3d7480", wallHi: "#8fd0d4", wallLo: "#264b54", mortar: "#0d2f38", accent: "#7ff0e0" },
   },
   {
-    name: "THE WRECK", line: "SOMETHING BIGGER WENT DOWN HERE.", theme: "cellar", mood: 0, planned: true,
+    name: "THE WRECK", line: "SOMETHING BIGGER WENT DOWN HERE.", theme: "wreck", mood: 6, planned: true,
     pal: { bg1: "#1c120c", bg2: "#4a3320", wall: "#6b5440", wallHi: "#a8896a", wallLo: "#3d2e22", mortar: "#241810", accent: "#ffb067" },
   },
   {
-    name: "THE GARDEN", line: "NOTHING HERE STAYS WHERE YOU LEFT IT.", theme: "gallery", mood: 2, planned: true,
+    name: "THE GARDEN", line: "NOTHING HERE STAYS WHERE YOU LEFT IT.", theme: "garden", mood: 7, planned: true,
     pal: { bg1: "#06200f", bg2: "#1d5a2c", wall: "#3f6b48", wallHi: "#86c58f", wallLo: "#264a2e", mortar: "#0c2a14", accent: "#a6ff9a" },
   },
   {
-    name: "THE TRENCH", line: "THE LIGHT STOPS HERE.", theme: "mirror", mood: 3, planned: true,
+    name: "THE TRENCH", line: "THE LIGHT STOPS HERE.", theme: "trench", mood: 8, planned: true,
     pal: { bg1: "#02030a", bg2: "#0a1030", wall: "#2a3350", wallHi: "#5a6a9a", wallLo: "#151b30", mortar: "#080c1c", accent: "#8aa4ff" },
   },
   {
-    name: "THE FOUNDATION", line: "WHERE THE FIRST LIGHT WAS LIT.", theme: "beacon", mood: 4, planned: true,
+    name: "THE FOUNDATION", line: "WHERE THE FIRST LIGHT WAS LIT.", theme: "foundation", mood: 9, planned: true,
     pal: { bg1: "#1a1204", bg2: "#5c4310", wall: "#7a6a40", wallHi: "#d8c27a", wallLo: "#463a1c", mortar: "#2a1f08", accent: "#ffe27a" },
+  },
+  // Not part of the game: a room per new echo, to try each one. Shows up on the last page of the level select when the dev
+  // switch (backslash) has unlocked everything.
+  {
+    name: "THE LAB", line: "TRY THE NEW ECHOES.", theme: "lab", mood: 0, lab: true,
+    pal: { bg1: "#10131f", bg2: "#1d2640", wall: "#445070", wallHi: "#7f8fb8", wallLo: "#262d45", mortar: "#161b2c", accent: "#9fe3ff" },
   },
 ];
 
 // The level select shows five tiers per page.
-const PAGES = [{ name: "THE TOWER" }, { name: "THE REFLECTION" }];
+const PAGES = [{ name: "THE TOWER" }, { name: "THE REFLECTION" }, { name: "THE LAB", dev: true }];
 const TIERS_PER_PAGE = 5;
 
 const LEVELS = [];
@@ -675,6 +681,165 @@ def(4, "NIGHT TRAIN", {
   g.fill(27, 8, 30, 14, "#");
   g.fill(29, 6, 29, 7, "X");
   g.set(28, 5, "L");
+});
+
+// ================================================================ tier 6 to 10: temporary levels, one per tier, to see the scenery
+// Each is a blank room: a floor, a few blocks, some lamps, a door of light. They are placeholders for the real levels.
+def(5, "SHALLOWS TEMP", {
+  temp: true, echoes: [], hint: "A BLANK ROOM TO SEE THE SCENERY OF THE SHALLOWS.",
+}, (g) => {
+  g.base();
+  g.set(2, 14, "@");
+  g.pit(9, 11);
+  g.fill(14, 12, 16, 14, "#");
+  g.fill(18, 10, 20, 10, "=");
+  g.fill(22, 13, 24, 14, "#");
+  g.fill(28, 13, 28, 14, "X");
+  g.set(5, 8, "L").set(15, 6, "L").set(26, 8, "L");
+});
+
+def(6, "WRECK TEMP", {
+  temp: true, echoes: [], hint: "A BLANK ROOM TO SEE THE SCENERY OF THE WRECK.",
+}, (g) => {
+  g.base();
+  g.set(2, 14, "@");
+  g.fill(8, 12, 10, 14, "#");
+  g.fill(13, 9, 17, 9, "=");
+  g.set(14, 14, "^");
+  g.fill(21, 12, 24, 14, "#");
+  g.fill(28, 13, 28, 14, "X");
+  g.set(4, 9, "L").set(15, 5, "L").set(26, 8, "L");
+});
+
+def(7, "GARDEN TEMP", {
+  temp: true, echoes: [], hint: "A BLANK ROOM TO SEE THE SCENERY OF THE GARDEN.",
+}, (g) => {
+  g.base();
+  g.set(2, 14, "@");
+  g.fill(7, 12, 9, 14, "#");
+  g.fill(12, 9, 14, 9, "=");
+  g.fill(17, 12, 19, 14, "#");
+  g.fill(23, 10, 25, 10, "=");
+  g.fill(28, 13, 28, 14, "X");
+  g.set(5, 8, "L").set(13, 5, "L").set(22, 7, "L");
+});
+
+def(8, "TRENCH TEMP", {
+  temp: true, echoes: [], dark: true, hint: "A BLANK ROOM TO SEE THE SCENERY OF THE TRENCH. IT IS DARK.",
+}, (g) => {
+  g.base();
+  g.set(2, 14, "@");
+  g.pit(9, 12);
+  g.fill(9, 14, 12, 14, "~");
+  g.fill(16, 12, 18, 14, "#");
+  g.fill(22, 9, 24, 9, "=");
+  g.fill(28, 13, 28, 14, "X");
+  g.set(4, 10, "L").set(10, 12, "L").set(17, 8, "L").set(27, 11, "L");
+});
+
+def(9, "FOUNDATION TEMP", {
+  temp: true, echoes: [], hint: "A BLANK ROOM TO SEE THE SCENERY OF THE FOUNDATION.",
+}, (g) => {
+  g.base();
+  g.set(2, 14, "@");
+  g.fill(7, 12, 9, 14, "#");
+  g.fill(10, 10, 12, 14, "#");
+  g.fill(16, 12, 18, 14, "#");
+  g.fill(28, 13, 28, 14, "X");
+  g.set(4, 9, "L").set(12, 5, "L").set(19, 7, "L").set(26, 8, "L");
+});
+
+// ================================================================ the lab: one room per new echo
+def(10, "CALM", {
+  lab: true, unlock: "calm", echoes: ["calm"], recMax: 8,
+  hint: "A VENT BLOWS ACROSS THE GAP. RECORD A CALM BY THE EDGE: IT SILENCES THE WIND AROUND IT.",
+}, (g) => {
+  g.base();
+  g.set(2, 14, "@");
+  g.pit(10, 12);
+  g.set(11, 13, "<");
+  g.fill(28, 13, 28, 14, "X");
+  g.set(5, 8, "L").set(24, 8, "L");
+});
+
+def(10, "MIRROR", {
+  lab: true, unlock: "mirror", echoes: ["mirror"], recMax: 8,
+  hint: "THE PLATE IS BEHIND THE DOOR. WALK RIGHT AND YOUR PUPPET WALKS LEFT FROM THE OTHER SIDE. THE ROOM IS SYMMETRIC.",
+}, (g) => {
+  g.base();
+  g.set(2, 14, "@");
+  g.fill(15, 1, 15, 8, "#").fill(15, 9, 15, 14, "A");
+  g.set(24, 14, "a");
+  g.fill(28, 13, 28, 14, "X");
+  g.set(5, 9, "L").set(25, 9, "L");
+});
+
+def(10, "FLOAT", {
+  lab: true, unlock: "float", echoes: ["float"], recMax: 8,
+  hint: "THE LEDGE IS A LITTLE HIGHER THAN A JUMP. GRAVITY IS WEAK INSIDE THE RING.",
+}, (g) => {
+  g.base();
+  g.set(2, 14, "@");
+  g.fill(20, 10, 30, 14, "#");
+  g.fill(28, 8, 28, 9, "X");
+  g.set(5, 8, "L").set(14, 6, "L");
+});
+
+def(10, "PULL", {
+  lab: true, unlock: "pull", echoes: ["pull"], recMax: 8,
+  hint: "THE GAP IS TOO WIDE TO JUMP. RECORD A PULL IN THE AIR OVER THE MIDDLE: IT CATCHES YOU MID JUMP AND HOLDS YOU THERE.",
+}, (g) => {
+  g.base();
+  g.set(2, 14, "@");
+  g.pit(9, 14);
+  g.fill(28, 13, 28, 14, "X");
+  g.set(5, 8, "L").set(13, 5, "L").set(24, 8, "L");
+});
+
+def(10, "STONE", {
+  lab: true, unlock: "stone", echoes: ["stone"], recMax: 8,
+  hint: "A STONE THAT HAS STOPPED IS A SOLID BLOCK: YOU CANNOT WALK THROUGH IT OR JUMP UP THROUGH IT. HANG ONE IN THE AIR FOR A STEP.",
+}, (g) => {
+  g.base();
+  g.set(2, 14, "@");
+  g.fill(14, 10, 30, 14, "#");
+  g.fill(28, 8, 28, 9, "X");
+  g.set(5, 8, "L").set(10, 5, "L");
+});
+
+def(10, "SLOW", {
+  lab: true, unlock: "slow", echoes: ["tide", "slow"], recMax: 14,
+  hint: "THE DOOR OPENS ONLY WHILE THE TIDE PASSES OVER THE PLATE, AND IT IS FAR TOO THICK TO CROSS IN THAT TIME. A SLOW RING MAKES THE TIDE LINGER.",
+}, (g) => {
+  g.base();
+  g.set(2, 14, "@");
+  g.set(8, 14, "a");
+  g.fill(14, 1, 16, 8, "#").fill(14, 9, 16, 14, "A");
+  g.fill(28, 13, 28, 14, "X");
+  g.set(5, 8, "L").set(21, 8, "L");
+});
+
+def(10, "SHRINK", {
+  lab: true, unlock: "shrink", echoes: ["shrink"], recMax: 8,
+  hint: "THE TUNNEL IS HALF A TILE HIGH. YOU ARE HALF SIZE INSIDE THE RING, AND STAY SMALL UNTIL THERE IS ROOM TO GROW.",
+}, (g) => {
+  g.base();
+  g.set(2, 14, "@");
+  g.fill(12, 1, 20, 13, "#");
+  g.fill(12, 14, 20, 14, "-");
+  g.fill(28, 13, 28, 14, "X");
+  g.set(5, 8, "L").set(25, 8, "L");
+});
+
+def(10, "VINE", {
+  lab: true, unlock: "vine", echoes: ["vine"], recMax: 8,
+  hint: "RECORD A VINE AT THE FOOT OF THE WALL AND WAIT. HOLD JUMP TO CLIMB IT. LET GO AND YOU SLIDE.",
+}, (g) => {
+  g.base();
+  g.set(2, 14, "@");
+  g.fill(20, 9, 30, 14, "#");
+  g.fill(28, 7, 28, 8, "X");
+  g.set(5, 8, "L").set(14, 5, "L");
 });
 
 // Par for the two bonus stars: finish under par.t seconds, and use no more than par.r recordings.

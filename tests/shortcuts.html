@@ -21,6 +21,7 @@
   window.RESULTS = [];
   let html = "";
   for (let i = 0; i < LEVELS.length; i++) {
+    if (LEVELS[i].temp) continue; // the blank scenery rooms are meant to be walkable
     let won = null;
     for (const r of rhythms) {
       Bot.load(i);

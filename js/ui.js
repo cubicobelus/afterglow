@@ -146,12 +146,15 @@ const App = (() => {
   const isDone = (i) => !!save.done[i];
   // A bonus level (`bonus: N` in its definition) sits outside the main path: the level before it in the list does not
   // unlock it, the level after it does not wait for it, and it opens once N stars are earned in its tier.
-  const mainPrev = (i) => { for (let j = i - 1; j >= 0; j--) if (!LEVELS[j].bonus) return j; return -1; };
-  const mainNext = (i) => { for (let j = i + 1; j < LEVELS.length; j++) if (!LEVELS[j].bonus) return j; return -1; };
+  const mainPrev = (i) => { for (let j = i - 1; j >= 0; j--) if (!LEVELS[j].bonus && !LEVELS[j].lab) return j; return -1; };
+  const mainNext = (i) => { for (let j = i + 1; j < LEVELS.length; j++) if (!LEVELS[j].bonus && !LEVELS[j].lab) return j; return -1; };
+  // The lab rooms (dev only) follow each other and never end the game.
+  const labNext = (i) => { for (let j = i + 1; j < LEVELS.length; j++) if (LEVELS[j].lab) return j; return -1; };
   const tierStars = (t) => tierLevels[t].reduce((n, i) => n + (LEVELS[i].bonus ? 0 : starsOf(i)), 0);
   const isUnlocked = (i) => {
     if (UNLOCK_ALL || dev.unlockAll || i === 0) return true;
     const L = LEVELS[i];
+    if (L.lab) return false;
     if (L.bonus) return isDone(i) || tierStars(L.chapter) >= L.bonus;
     return isDone(mainPrev(i)) || isDone(i);
   };
@@ -183,13 +186,15 @@ const App = (() => {
   const levelNum = LEVELS.map((l, i) => {
     let n = 0;
     for (let k = 0; k <= i; k++) if (LEVELS[k].chapter === l.chapter) n++;
-    return (l.chapter + 1) + "-" + n;
+    return (CHAPTERS[l.chapter].lab ? "L" : String(l.chapter + 1)) + "-" + n;
   });
   const tierLevels = CHAPTERS.map((c, t) => LEVELS.map((l, i) => i).filter((i) => LEVELS[i].chapter === t));
   const pageOf = (i) => Math.floor(LEVELS[i].chapter / TIERS_PER_PAGE);
+  const pageVisible = (p) => !PAGES[p].dev || dev.unlockAll;
+  const lastPage = () => { let q = 0; PAGES.forEach((pg, k) => { if (pageVisible(k)) q = k; }); return q; };
   const pageHasLevels = (p) => LEVELS.some((l, i) => pageOf(i) === p);
   const tierKinds = CHAPTERS.map((c, t) => tierLevels[t].map((i) => LEVELS[i].unlock).filter(Boolean));
-  const totalLanterns = LEVELS.filter((l) => levelHasLantern(l)).length;
+  const totalLanterns = LEVELS.filter((l) => !l.lab && levelHasLantern(l)).length;
 
   function levelHasLantern(def) {
     const g = makeGrid();
@@ -219,8 +224,9 @@ const App = (() => {
     const s = save.stars[i];
     return s ? s.filter(Boolean).length : 0;
   };
-  const totalStars = () => LEVELS.reduce((n, l, i) => n + starsOf(i), 0);
-  const totalLanternsGot = () => Object.keys(save.lanterns).filter((k) => save.lanterns[k]).length;
+  const gameLevels = LEVELS.filter((l) => !l.lab).length;
+  const totalStars = () => LEVELS.reduce((n, l, i) => n + (l.lab ? 0 : starsOf(i)), 0);
+  const totalLanternsGot = () => Object.keys(save.lanterns).filter((k) => save.lanterns[k] && !LEVELS[k].lab).length;
 
   // ---------------------------------------------------------------- cards
   // Cards show once ever: a tier card on its first level, and an echo card on the level that unlocks it.
@@ -231,7 +237,7 @@ const App = (() => {
   function cardsFor(i) {
     const def = LEVELS[i], list = [];
     const t = def.chapter;
-    if (tierLevels[t][0] === i && !save.seen["tier" + t]) list.push({ type: "tier", tier: t, key: "tier" + t });
+    if (!def.lab && tierLevels[t][0] === i && !save.seen["tier" + t]) list.push({ type: "tier", tier: t, key: "tier" + t });
     if (def.unlock && !save.seen["echo_" + def.unlock]) list.push({ type: "echo", kind: def.unlock, key: "echo_" + def.unlock });
     return list;
   }
@@ -343,6 +349,14 @@ const App = (() => {
   }
 
   function completeItems() {
+    if (LEVELS[A.idx].lab) {
+      const ln = labNext(A.idx);
+      return [
+        { label: ln < 0 ? "LEVELS" : "NEXT ROOM", act: () => { if (ln < 0) goSelect(); else startLevel(ln); } },
+        { label: "RETRY", act: () => startLevel(A.idx) },
+        { label: "LEVELS", act: goSelect },
+      ];
+    }
     const nxt = mainNext(A.idx), last = nxt < 0;
     return [
       { label: last ? "FINISH" : "NEXT LEVEL", act: () => { if (last) fadeTo(() => { A.state = "ending"; A.endT = 0; Sfx.play("card"); }); else startLevel(nxt); } },
@@ -480,9 +494,10 @@ const App = (() => {
         // Each tier is a row; move along it with left and right, between tiers with up and down. Q and E (or the page keys)
         // turn the page; a page with no levels yet only shows its empty rows.
         if (A.selLevel !== A.syncSel) { A.syncSel = A.selLevel; A.page = pageOf(A.selLevel); }
+        if (!pageVisible(A.page)) A.page = 0;
         const turn = Input.hitAny(["KeyE", "PageDown"]) ? 1 : Input.hitAny(["KeyQ", "PageUp"]) ? -1 : 0;
         if (turn) {
-          const np = Math.max(0, Math.min(PAGES.length - 1, A.page + turn));
+          const np = Math.max(0, Math.min(lastPage(), A.page + turn));
           if (np !== A.page) {
             A.page = np;
             Sfx.play("ui");
@@ -503,7 +518,7 @@ const App = (() => {
           let nt = t;
           for (let k = 0; k < CHAPTERS.length; k++) {
             nt = (nt + d + CHAPTERS.length) % CHAPTERS.length;
-            if (tierLevels[nt].length) return nt;
+            if (tierLevels[nt].length && (!CHAPTERS[nt].lab || dev.unlockAll)) return nt;
           }
           return t;
         };
@@ -621,7 +636,7 @@ const App = (() => {
     ctx.closePath(); ctx.fill();
     // the spirit and an echo looking at the light
     Render.drawActor(ctx, 100, 272, Object.assign({ face: 1, st: 0, g: 1, t, sq: 0, vx: 0 }, Render.PLAYER_LOOK));
-    const kinds = Object.keys(KINDS);
+    const kinds = KIND_ORDER.slice(0, 7);
     const ek = kinds[Math.floor(t / 90) % kinds.length];
     const ecol = KINDS[ek].color;
     Render.drawActor(ctx, 126, 273, { face: 1, st: 0, g: 1, t, sq: 0, vx: 0, alpha: 0.7, cloak: Render.rgba(ecol, 0.5), cloakDark: Render.rgba(ecol, 0.28), eye: "#ffffff", flame: ecol, core: "#ffffff", emblem: ek });
@@ -655,7 +670,7 @@ const App = (() => {
     menu(titleItems(), hits, 200, 150, 28);
     Font.draw(ctx, "ARROWS OR WASD + ENTER   F FULLSCREEN", 200, H - 22, { scale: 1, color: "rgba(200,210,235,0.5)", align: "center" });
     const sx = totalStars(), lx = totalLanternsGot();
-    if (sx || lx) Font.draw(ctx, "STARS " + sx + "/" + (LEVELS.length * 3) + "   LANTERNS " + lx + "/" + totalLanterns, 200, 96, { scale: 1, color: "#ffd35a", align: "center" });
+    if (sx || lx) Font.draw(ctx, "STARS " + sx + "/" + (gameLevels * 3) + "   LANTERNS " + lx + "/" + totalLanterns, 200, 96, { scale: 1, color: "#ffd35a", align: "center" });
   }
 
   function slider(x, y, v, on) {
@@ -709,6 +724,7 @@ const App = (() => {
     Font.draw(ctx, "LEVELS", W / 2, 10, { scale: 3, color: "#ffe9a8", align: "center" });
     // Page tabs, top left. Q and E (or the page keys) turn the page.
     PAGES.forEach((pg, k) => {
+      if (!pageVisible(k)) return;
       const on = A.page === k, ty = 8 + k * 13;
       Font.draw(ctx, "PAGE " + (k + 1) + "  " + pg.name, 12, ty, { scale: 1, color: on ? "#ffe9a8" : "#6d7690", shadow: null });
       hits.push({ x: 8, y: ty - 2, w: 140, h: 12, i: 90 + k, act: () => { A.page = k; if (pageHasLevels(k)) { const f = LEVELS.findIndex((l, n) => pageOf(n) === k); A.selLevel = f; A.syncSel = f; } } });
@@ -728,10 +744,11 @@ const App = (() => {
       const y = 42 + (t - A.page * TIERS_PER_PAGE) * 54;
       const pal = CHAPTERS[t].pal;
       Font.draw(ctx, CHAPTERS[t].name, 12, y + 4, { scale: 1, color: pal.accent, alpha: tierLevels[t].length ? 1 : 0.6 });
-      if (!tierLevels[t].length) {
-        // A planned tier: ten empty slots, nine levels and a bonus, until the levels exist.
-        Font.draw(ctx, "NEW ECHO ?", 12, y + 20, { scale: 1, color: "#6d7690", shadow: null });
-        for (let n = 0; n < 10; n++) {
+      // A planned tier shows its missing levels as empty slots (nine levels and a bonus) until they exist.
+      const ghosts = () => {
+        const have = tierLevels[t].filter((i) => !LEVELS[i].bonus).length, hasBonus = tierLevels[t].some((i) => LEVELS[i].bonus);
+        for (let n = have; n < 10; n++) {
+          if (n === 9 && hasBonus) continue;
           const x = n === 9 ? bonusX : x0 + n * (tw + gap);
           ctx.fillStyle = "rgba(14,16,28,0.6)";
           ctx.fillRect(x, y, tw, th);
@@ -741,8 +758,9 @@ const App = (() => {
           Font.draw(ctx, (t + 1) + "-" + (n + 1), x + 5, y + 5, { scale: 1, color: "#3a4054", shadow: null });
           lock(x, y, "#3a4054");
         }
-        continue;
-      }
+      };
+      if (CHAPTERS[t].planned && !tierKinds[t].length) Font.draw(ctx, "NEW ECHO ?", 12, y + 20, { scale: 1, color: "#6d7690", shadow: null });
+      if (!tierLevels[t].length) { ghosts(); continue; }
       tierKinds[t].forEach((kind, k) => {
         if (Render.EMBLEMS[kind]) Render.slotIcon(ctx, 18 + k * 18, y + 26, kind, 0, true);
         else Render.drawSwapIcon(ctx, 22 + k * 18, y + 26, "#ffffff");
@@ -763,6 +781,7 @@ const App = (() => {
         if (LEVELS[i].swap) Render.drawSwapIcon(ctx, x + 9, y + th - 9, open ? "#ffffff" : "#4d5468");
         hits.push({ x, y, w: tw, h: th, level: i });
       });
+      if (CHAPTERS[t].planned) ghosts();
     }
     let line;
     if (!pageHasLevels(A.page)) {
@@ -778,7 +797,7 @@ const App = (() => {
       }
     }
     Font.draw(ctx, line, W / 2, H - 38, { scale: 1, color: "#e8e2d0", align: "center" });
-    Font.draw(ctx, "STARS " + totalStars() + "/" + (LEVELS.length * 3) + "   LANTERNS " + totalLanternsGot() + "/" + totalLanterns, W - 10, 10, { scale: 1, color: "#ffd35a", align: "right" });
+    Font.draw(ctx, "STARS " + totalStars() + "/" + (gameLevels * 3) + "   LANTERNS " + totalLanternsGot() + "/" + totalLanterns, W - 10, 10, { scale: 1, color: "#ffd35a", align: "right" });
     Font.draw(ctx, "ARROWS MOVE   ENTER PLAY   Q E PAGES   ESC BACK", W / 2, H - 20, { scale: 1, color: "rgba(200,210,235,0.5)", align: "center" });
   }
 
@@ -904,7 +923,7 @@ const App = (() => {
     ctx.globalAlpha = a;
     Font.draw(ctx, "THANK YOU FOR PLAYING", W / 2, 50, { scale: 3, color: "#ffe9a8", align: "center" });
     lines.forEach((l, i) => Font.draw(ctx, l, W / 2, 110 + i * 14, { scale: 1, color: "#e5e9f5", align: "center" }));
-    Font.draw(ctx, "STARS " + totalStars() + "/" + (LEVELS.length * 3) + "   LANTERNS " + totalLanternsGot() + "/" + totalLanterns, W / 2, 230, { scale: 1, color: "#ffd35a", align: "center" });
+    Font.draw(ctx, "STARS " + totalStars() + "/" + (gameLevels * 3) + "   LANTERNS " + totalLanternsGot() + "/" + totalLanterns, W / 2, 230, { scale: 1, color: "#ffd35a", align: "center" });
     if (A.endT > 60 && Math.floor(A.T / 30) % 2 === 0) Font.draw(ctx, "PRESS ENTER", W / 2, H - 30, { scale: 1, color: "#9aa3bb", align: "center" });
     ctx.globalAlpha = 1;
   }

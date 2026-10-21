@@ -51,6 +51,40 @@ SOLUTIONS["THE PLATE"] = () => {
   Bot.waitUntil(() => G.L.doorOpen.a, 400, "door open");
   Bot.route([["to", 420], ["jump", 500], ["to", 550]]);
 };
+// 3 STEPPING STONE: freeze an echo in mid air over the gap, stand on it, hop across.
+SOLUTIONS["STEPPING STONE"] = () => {
+  Bot.record("shade");
+  Bot.walkTo(250);
+  Bot.jumpKey(true);
+  Bot.dir(1);
+  let found = false;
+  for (let i = 0; i < 90; i++) {
+    Bot.tick();
+    const h = 300 - Bot.feet();
+    if (i > 8 && G.p.vy > 0 && h <= 44 && h >= 28) { found = true; break; }
+  }
+  Bot.expect(found, "a hover window over the gap");
+  Bot.jumpKey(false);
+  Bot.dir(0);
+  Bot.stop();
+  Bot.walkTo(250);
+  Bot.waitUntil(echoDone("shade"), 600, "echo to settle");
+  const e = G.echoes.shade;
+  Bot.jumpTo(e.x + PW / 2, 24);
+  Bot.expect(G.p.stand === e, "standing on the echo");
+  Bot.jumpTo(310, 24); // hop up for the lantern above the gap
+  Bot.expect(G.p.stand === e, "back on the echo after the lantern hop");
+  Bot.jumpTo(420, 24);
+  Bot.walkTo(570);
+};
+
+// Shared route: from spawn onto the platform in the thorn levels (L5, L6). Ends standing at the landing spot.
+const toThornPlatform = () => {
+  Bot.walkTo(150);
+  Bot.jumpTo(180, 24); // onto the step
+  Bot.jumpTo(235, 24); // across the gap onto the platform
+};
+
 SOLUTIONS["TWIN PLATES"] = () => {
   // slots: shade, shade2. The first holds the low plate and is the step for the second.
   Bot.record("shade");
@@ -1603,4 +1637,163 @@ SOLUTIONS["LONG CROSSING"] = () => {
   jumpToSpring(412, 1);
   Bot.expect(G.p.y < 130, "up on the block");
   Bot.walkTo(570);
+};
+
+// ---------------------------------------------------------------- tier 6 to 10 temporary levels: just run and jump
+const runAndJump = (xs, hold) => {
+  const done = new Set();
+  let held = 0;
+  Bot.dir(1);
+  for (let i = 0; i < 1500 && !G.won; i++) {
+    const x = Bot.px();
+    if (held === 0 && G.p.onGround) {
+      for (const jx of xs) if (!done.has(jx) && x >= jx) { done.add(jx); held = hold || 24; Bot.jumpKey(true); break; }
+    }
+    Bot.tick();
+    if (Bot.px() > 0 && held > 0) { held--; if (held === 0) Bot.jumpKey(false); }
+    if (G.dead) Bot.fail("died on the way");
+  }
+  Bot.jumpKey(false);
+  Bot.dir(0);
+  Bot.expect(G.won, "reached the door");
+};
+SOLUTIONS["SHALLOWS TEMP"] = () => runAndJump([168, 266, 428]);
+SOLUTIONS["WRECK TEMP"] = () => runAndJump([148, 268, 408]);
+SOLUTIONS["GARDEN TEMP"] = () => runAndJump([128, 328]);
+SOLUTIONS["TRENCH TEMP"] = () => runAndJump([168, 308]);
+SOLUTIONS["FOUNDATION TEMP"] = () => runAndJump([128, 190, 308]);
+
+// ---------------------------------------------------------------- the lab: one room per new echo
+SOLUTIONS["CALM"] = () => {
+  // The vent blows back across the gap; a calm by the edge silences it.
+  Bot.record("calm");
+  Bot.walkTo(164, 8);
+  Bot.run(10);
+  Bot.stop();
+  Bot.waitUntil(() => G.echoes.calm.restT > 40, 900, "the calm to settle");
+  Bot.dir(1);
+  for (let i = 0; i < 300 && Bot.px() < 192; i++) Bot.tick();
+  Bot.jumpKey(true);
+  for (let i = 0; i < 160; i++) { if (i === 26) Bot.jumpKey(false); Bot.tick(); if (G.dead) Bot.fail("fell in the gap"); if (G.p.onGround && i > 20) break; }
+  Bot.jumpKey(false);
+  Bot.dir(0);
+  Bot.expect(G.p.onGround && Bot.px() > 266, "across the gap");
+  Bot.walkTo(570);
+};
+SOLUTIONS["MIRROR"] = () => {
+  // Walk right a little: the puppet walks left from the far side and stands on the plate behind the door.
+  Bot.record("mirror");
+  Bot.walkTo(146, 3);
+  Bot.run(10);
+  Bot.stop();
+  Bot.waitUntil(() => G.L.doorOpen.a, 900, "the door to open");
+  Bot.walkTo(570);
+};
+SOLUTIONS["FLOAT"] = () => {
+  Bot.record("float");
+  Bot.walkTo(330, 3);
+  Bot.run(10);
+  Bot.stop();
+  Bot.waitUntil(() => G.echoes.float.restT > 40, 900, "the float to settle");
+  Bot.walkTo(372, 3);
+  Bot.dir(1);
+  Bot.jumpKey(true);
+  for (let i = 0; i < 200; i++) { if (i === 40) Bot.jumpKey(false); Bot.tick(); if (G.p.onGround && i > 30) break; }
+  Bot.jumpKey(false);
+  Bot.expect(G.p.onGround && G.p.y < 190, "up on the ledge");
+  Bot.walkTo(570);
+};
+SOLUTIONS["PULL"] = () => {
+  // A pull hung in the air over the middle of the gap catches you mid jump and holds you there until you walk out of it.
+  Bot.record("pull");
+  Bot.walkTo(174, 3);
+  Bot.dir(1);
+  Bot.jumpKey(true);
+  for (let i = 0; i < 28; i++) { if (i === 22) Bot.jumpKey(false); Bot.tick(); }
+  Bot.jumpKey(false);
+  Bot.dir(0);
+  Bot.stop();
+  Bot.waitUntil(() => G.echoes.pull.restT > 40, 900, "the pull to settle");
+  Bot.dir(1);
+  for (let i = 0; i < 200 && Bot.px() < 172; i++) Bot.tick();
+  Bot.jumpKey(true);
+  for (let i = 0; i < 300; i++) { if (i === 22) Bot.jumpKey(false); Bot.tick(); if (G.dead) Bot.fail("fell into the gap"); if (i > 20 && G.p.onGround && Bot.px() > 305) break; }
+  Bot.jumpKey(false);
+  Bot.dir(0);
+  Bot.expect(G.p.onGround && Bot.px() > 305, "across the gap");
+  Bot.walkTo(570);
+};
+SOLUTIONS["STONE"] = () => {
+  // A stone hung in the air is a solid step.
+  Bot.record("stone");
+  Bot.walkTo(262, 3);
+  Bot.dir(1);
+  Bot.jumpKey(true);
+  let found = false;
+  for (let i = 0; i < 60; i++) {
+    Bot.tick();
+    const h = 300 - Bot.feet();
+    if (i > 8 && G.p.vy > 0 && h <= 50 && h >= 36) { found = true; break; }
+  }
+  Bot.expect(found, "a hover window");
+  Bot.jumpKey(false);
+  Bot.dir(0);
+  Bot.stop();
+  Bot.waitUntil(() => G.echoes.stone.restT > 30, 900, "the stone to settle");
+  const e = G.echoes.stone;
+  Bot.walkTo(e.x + 6 - 40, 3);
+  Bot.jumpTo(e.x + 6, 24);
+  Bot.jumpTo(300, 24);
+  Bot.expect(G.p.onGround && G.p.y < 190, "up on the ledge");
+  Bot.walkTo(570);
+};
+SOLUTIONS["SLOW"] = () => {
+  // The tide passes over the plate and the door is three tiles thick. A slow ring around the plate makes the tide linger.
+  Bot.record("tide");
+  Bot.walkTo(250, 3);
+  Bot.run(30);
+  Bot.stop();
+  Bot.record("slow");
+  Bot.walkTo(150, 3);
+  Bot.run(10);
+  Bot.stop();
+  Bot.waitUntil(() => G.echoes.slow.restT > 30, 900, "the slow ring to settle");
+  Bot.walkTo(268, 3);
+  for (let i = 0; i < 900 && Bot.px() < 350; i++) {
+    if (G.L.doorOpen.a) Bot.dir(1); else if (Bot.px() > 272) Bot.dir(-1); else Bot.dir(0);
+    Bot.tick();
+    if (G.dead) Bot.fail("crushed by the door");
+  }
+  Bot.expect(Bot.px() > 350, "through the door");
+  Bot.walkTo(570);
+};
+SOLUTIONS["SHRINK"] = () => {
+  Bot.record("shrink");
+  Bot.walkTo(200, 3);
+  Bot.run(10);
+  Bot.stop();
+  Bot.waitUntil(() => G.echoes.shrink.restT > 30, 900, "the shrink ring to settle");
+  Bot.dir(1);
+  for (let i = 0; i < 700 && !G.won; i++) Bot.tick();
+  Bot.dir(0);
+  Bot.expect(G.won, "through the tunnel");
+};
+SOLUTIONS["VINE"] = () => {
+  Bot.record("vine");
+  Bot.walkTo(388, 3);
+  Bot.run(10);
+  Bot.stop();
+  Bot.walkTo(388, 3);
+  Bot.waitUntil(() => G.vines.length && G.vines[0].base - G.vines[0].top >= 118, 400, "the vine to grow");
+  Bot.walkTo(G.vines[0].x, 2);
+  Bot.jumpKey(true);
+  for (let i = 0; i < 400 && !G.won; i++) {
+    Bot.dir(G.p.y < 190 ? 1 : 0);
+    Bot.tick();
+    if (G.dead) Bot.fail("fell");
+    if (G.p.onGround && G.p.y < 170 && Bot.px() > 405) Bot.jumpKey(false);
+  }
+  Bot.jumpKey(false);
+  Bot.dir(0);
+  Bot.expect(G.won, "up the vine and to the door");
 };
