@@ -170,7 +170,7 @@ const App = (() => {
   }
 
   // ---------------------------------------------------------------- flow
-  function startLevel(i, instant) {
+  function startLevel(i, instant, skipCards) {
     const go = () => {
       A.idx = i;
       Game.load(i);
@@ -178,7 +178,7 @@ const App = (() => {
       A.introT = 0;
       A.hintT = 0;
       A.hintForce = 0;
-      A.cards = cardsFor(i);
+      A.cards = skipCards ? [] : cardsFor(i);
       if (A.cards.length) {
         A.state = "chapter";
         A.cardT = 0;
@@ -364,7 +364,7 @@ const App = (() => {
   // ---------------------------------------------------------------- update
   function update() {
     A.T++;
-    if (Input.hit("Backquote")) { dev.open = !dev.open; Sfx.play("ui"); Input.clear(); }
+    if (Input.hit("Backslash")) { dev.open = !dev.open; Sfx.play("ui"); Input.clear(); }
     if (dev.open) {
       if (Input.hitAny(["Enter", "Space"])) { setDevUnlock(!dev.unlockAll); Sfx.play("ok"); }
       if (Input.hit("Escape")) dev.open = false;
@@ -380,6 +380,17 @@ const App = (() => {
       Input.clear();
     } else if (A.fadeTarget === 0 && A.fade > 0) A.fade = Math.max(0, A.fade - 0.05);
     if (A.fadeTarget === 1) return;
+
+    // Temporary dev tool: = goes to the next level and - to the previous one, from play or pause.
+    if ((A.state === "play" || A.state === "pause") && A.fade === 0) {
+      const step = Input.hit("Equal") ? 1 : Input.hit("Minus") ? -1 : 0;
+      const to = A.idx + step;
+      if (step && to >= 0 && to < LEVELS.length) {
+        A.toast = { text: "DEV: " + levelNum[to] + " " + LEVELS[to].name, t: A.T };
+        startLevel(to, false, true);
+        return;
+      }
+    }
 
     switch (A.state) {
       case "title": {
@@ -800,7 +811,7 @@ const App = (() => {
     if (dev.open) {
       ctx.fillStyle = "rgba(4,5,12,0.82)";
       ctx.fillRect(0, 0, W, H);
-      const bw = 320, bh = 100, bx = Math.round((W - bw) / 2), by = Math.round((H - bh) / 2);
+      const bw = 320, bh = 112, bx = Math.round((W - bw) / 2), by = Math.round((H - bh) / 2);
       ctx.fillStyle = "rgba(18,22,44,0.97)";
       ctx.fillRect(bx, by, bw, bh);
       ctx.strokeStyle = "#ffe9a8";
@@ -811,7 +822,8 @@ const App = (() => {
       ctx.fillStyle = dev.unlockAll ? "rgba(90,200,120,0.28)" : "rgba(255,255,255,0.08)";
       ctx.fillRect(bx + 20, ty - 5, bw - 40, 19);
       Font.draw(ctx, "UNLOCK ALL LEVELS   " + (dev.unlockAll ? "ON" : "OFF"), W / 2, ty, { scale: 1, color: dev.unlockAll ? "#9fe3a0" : "#e8e2d0", align: "center" });
-      Font.draw(ctx, "ENTER OR CLICK TOGGLES   ` OR ESC CLOSES", W / 2, by + bh - 18, { scale: 1, color: "rgba(200,210,235,0.6)", align: "center", shadow: null });
+      Font.draw(ctx, "= NEXT LEVEL   - PREVIOUS LEVEL", W / 2, by + bh - 34, { scale: 1, color: "rgba(200,210,235,0.6)", align: "center", shadow: null });
+      Font.draw(ctx, "ENTER OR CLICK TOGGLES   \\ OR ESC CLOSES", W / 2, by + bh - 18, { scale: 1, color: "rgba(200,210,235,0.6)", align: "center", shadow: null });
       dev.rect = { x: bx + 20, y: ty - 5, w: bw - 40, h: 19 };
     }
     if (A.toast && A.T - A.toast.t < 240) {
