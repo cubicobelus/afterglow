@@ -895,6 +895,10 @@ const Render = (() => {
     d.fillStyle = "rgba(3,4,12,0.9)";
     d.fillRect(0, 0, W, H);
     d.globalCompositeOperation = "destination-out";
+    // Solid ground and walls sit in a lighter dark (about 80% instead of 90%), so they can be told from the empty air.
+    d.fillStyle = "rgba(0,0,0,0.111)";
+    for (const w of L.walls) d.fillRect(w.x, w.y, w.w, w.h);
+    for (const o of L.oneways) d.fillRect(o.x, o.y, o.w, o.h);
     const holes = L.exit ? G.lights.concat([{ x: L.exit.x + L.exit.w / 2, y: L.exit.y + L.exit.h / 2, r: 54 }]) : G.lights;
     for (const l of holes) {
       const fl = 1 + Math.sin(t * 0.11 + l.x) * 0.015;
@@ -910,7 +914,7 @@ const Render = (() => {
     for (const ln of L.lanterns) {
       if (ln.got) continue;
       const g = d.createRadialGradient(ln.x, ln.y, 0, ln.x, ln.y, 26);
-      g.addColorStop(0, "rgba(0,0,0,0.4)");
+      g.addColorStop(0, "rgba(0,0,0,0.27)");
       g.addColorStop(1, "rgba(0,0,0,0)");
       d.fillStyle = g;
       d.fillRect(ln.x - 26, ln.y - 26, 52, 52);
