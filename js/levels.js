@@ -159,7 +159,7 @@ def(0, "GATEHOUSE", {
 
 def(0, "RELAY", {
   echoes: ["shade", "glow"], recMax: 12, dark: true,
-  hint: "EACH SLOT HOLDS ONE ECHO. RECORD THEM IN ORDER. THEY ALL REPLAY TOGETHER.",
+  hint: "THE PLATE IS UP ON THE SLAB AND THE THORNS ARE UNDER IT. ALL YOUR ECHOES REPLAY TOGETHER, SO WHAT YOU RECORD FIRST CAN HELP THE NEXT.",
 }, (g) => {
   g.base();
   g.set(2, 14, "@");
@@ -175,7 +175,7 @@ def(0, "RELAY", {
 
 def(0, "SWITCHBOARD", {
   bonus: 20, echoes: ["shade", "glow"], recMax: 14, dark: true,
-  hint: "THE LAMP OVER THE BRIDGE BURNS ONLY WHILE ITS PLATE IS HELD, AND THE PLATE IS UP ON THE LEDGE. THE ISLAND NEEDS A GLOW.",
+  hint: "THE LAMP OVER THE BRIDGE BURNS ONLY WHILE ITS PLATE IS HELD, AND THE PLATE IS UP ON THE LEDGE. THE ISLAND NEEDS A GLOW. AN ECHO THAT IS STILL MOVING CAN CARRY YOU WHILE YOU RECORD ANOTHER.",
 }, (g) => {
   g.base();
   g.set(1, 14, "@");
@@ -205,7 +205,7 @@ def(1, "GLASS WALL", {
 
 def(1, "UNDER GLASS", {
   echoes: ["phase", "shade"], recMax: 10,
-  hint: "THE PLATE IS UNDER GLASS. WHAT COULD STAND ON IT FOR YOU?",
+  hint: "THE PLATE IS SEALED UNDER GLASS. ONE ECHO OPENS THE WAY AND ANOTHER HOLDS THE PLATE.",
 }, (g) => {
   g.base();
   g.set(2, 14, "@");
@@ -262,7 +262,7 @@ def(1, "OVERHEAD", {
 
 def(1, "CEILING PLATE", {
   echoes: ["flip", "shade"], recMax: 10,
-  hint: "THE PLATE IS OUT OF REACH. NOT EVERY ROAD IS ON THE FLOOR.",
+  hint: "THE FLIP ZONE LETS YOU WALK THE CEILING. THE ECHO THAT MAKES THE ZONE CAN STAND ON A PLATE TOO.",
 }, (g) => {
   g.base();
   g.set(2, 14, "@");
@@ -355,7 +355,7 @@ def(2, "TRAMPOLINE", {
 
 def(2, "SKYHOOK", {
   echoes: ["spring"], recMax: 8,
-  hint: "A SPRING CAN HANG IN THE AIR TOO.",
+  hint: "A SPRING CAN HANG IN THE AIR TOO. RECORD ONE IN MID JUMP AND LAND ON IT.",
 }, (g) => {
   g.base();
   g.set(2, 14, "@");
@@ -406,7 +406,7 @@ def(2, "FERRY", {
 
 def(2, "TWO STAGES", {
   echoes: ["spring", "tide"], recMax: 14,
-  hint: "THE SPRING IS NO USE DOWN HERE. SOMETHING ELSE HAS TO GET UP THERE FIRST.",
+  hint: "THE SPRING IS NO USE DOWN HERE, IT HAS TO BE UP ON THE LEDGE. A TIDE REMEMBERS A CLIMB.",
 }, (g) => {
   g.base();
   g.set(2, 14, "@");
@@ -431,7 +431,7 @@ def(2, "SLUICE", {
 
 def(2, "FERRY LIGHT", {
   echoes: ["glow", "tide"], recMax: 14, dark: true,
-  hint: "THE LIGHT CANNOT BE IN TWO PLACES. THE TIDE STILL REMEMBERS THE WAY.",
+  hint: "THE LIGHT CANNOT BE IN TWO PLACES. THE TIDE STILL REMEMBERS THE WAY ACROSS.",
 }, (g) => {
   g.base();
   g.set(2, 14, "@");
