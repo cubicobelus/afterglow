@@ -349,6 +349,56 @@ SOLUTIONS["SUNKEN GATE"] = () => {
   Bot.walkTo(570);
 };
 
+SOLUTIONS["EYE"] = () => {
+  // The sensor plate is sealed inside the stone block. A glow resting on top of the block lights it through the stone.
+  Bot.record("glow");
+  Bot.walkTo(150);
+  Bot.jumpTo(190, 24);
+  Bot.run(6);
+  Bot.stop();
+  Bot.waitUntil(() => G.echoes.glow.restT > 30 && G.L.doorOpen.a, 900, "the glow to settle and the door to open");
+  Bot.walkTo(150);
+  Bot.jumpTo(250, 24);
+  Bot.jumpTo(330, 24);
+  Bot.walkTo(570);
+};
+
+SOLUTIONS["GATEHOUSE"] = () => {
+  // slots: shade, glow. The shade hangs in the air beside the ledge as a step. The glow is recorded climbing it and resting
+  // by the gate. Both are needed again on the real run.
+  Bot.record("shade");
+  Bot.walkTo(256);
+  Bot.jumpKey(true);
+  Bot.dir(1);
+  let found = false;
+  for (let i = 0; i < 90; i++) {
+    Bot.tick();
+    const h = 300 - Bot.feet();
+    if (i > 8 && G.p.vy > 0 && h <= 44 && h >= 28) { found = true; break; }
+  }
+  Bot.expect(found, "a hover window beside the ledge");
+  Bot.jumpKey(false);
+  Bot.dir(0);
+  Bot.stop();
+  const climb = () => {
+    Bot.waitUntil(() => G.echoes.shade.restT > 30 && (!G.echoes.glow || G.echoes.glow.restT > 30), 900, "the echoes to settle");
+    Bot.walkTo(240);
+    Bot.jumpTo(G.echoes.shade.x + PW / 2, 24);
+    Bot.expect(G.p.stand === G.echoes.shade, "standing on the step");
+    Bot.jumpTo(330, 24);
+    Bot.expect(G.p.onGround && G.p.y < 190, "up on the ledge");
+  };
+  Bot.record("glow");
+  climb();
+  Bot.walkTo(390);
+  Bot.run(6);
+  Bot.stop();
+  climb();
+  Bot.walkTo(380);
+  Bot.waitUntil(() => G.L.gates.every((x) => x.open), 900, "the gate to open");
+  Bot.walkTo(570);
+};
+
 SOLUTIONS["SWITCHBOARD"] = () => {
   // slots: shade, glow. The plate that lights the bridge lamp is up on a ledge. The glow hangs in mid jump beside the block as a step,
   // the shade climbs it and stands on the plate. After that the step is not needed: the shade jumps up the block on every attempt and

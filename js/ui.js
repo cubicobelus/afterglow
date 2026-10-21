@@ -18,7 +18,7 @@ const App = (() => {
   // ---------------------------------------------------------------- save
   const SAVE_KEY = "afterglow.save";
   const SETTINGS_KEY = "afterglow.settings";
-  const SAVE_VERSION = 8;
+  const SAVE_VERSION = 9;
   let save = { done: [], best: {}, stars: {}, lanterns: {}, seen: {} };
   let hadSave = false;
   try {
@@ -63,6 +63,11 @@ const App = (() => {
         "FERRY", "TRAMPOLINE", "SKYHOOK", "TWO STAGES", "FERRY LIGHT", "SLUICE", "STAGECOACH", "SLINGSHOT", "PUMP ROOM",
         "LEAPFROG", "STAY BEHIND", "APEX", "UPSIDE DOWN", "GLASS CEILING", "NIGHT TRAIN",
         "BREEZE", "SAIL", "GALLOP", "WEATHERVANE", "UP AND OVER", "AFTERIMAGE", "CHORUS"],
+      8: ["FIRST STEPS", "THE PLATE", "STEPPING STONE", "TWIN PLATES", "STAIRCASE", "LAMPLIGHT", "SUNKEN GATE", "RELAY", "SWITCHBOARD",
+        "GLASS WALL", "UNDER GLASS", "UPDRAFT", "CEILING PLATE", "GHOST GLASS", "THREE PANES", "HALL OF MIRRORS",
+        "FERRY", "TRAMPOLINE", "SKYHOOK", "TWO STAGES", "FERRY LIGHT", "SLUICE", "STAGECOACH", "SLINGSHOT", "PUMP ROOM",
+        "LEAPFROG", "STAY BEHIND", "APEX", "UPSIDE DOWN", "GLASS CEILING", "NIGHT TRAIN",
+        "BREEZE", "SAIL", "GALLOP", "WEATHERVANE", "UP AND OVER", "AFTERIMAGE", "CHORUS"],
     };
     // Same name but a different puzzle now: the old result no longer applies.
     const REDESIGNED = {
@@ -73,6 +78,7 @@ const App = (() => {
       5: { "SWITCHBOARD": true },
       6: {},
       7: {},
+      8: {},
     };
     // The level is the same but its lantern moved, so the old pickup no longer counts.
     // Value: the save version in which the lantern moved; older saves lose that pickup.
@@ -96,9 +102,19 @@ const App = (() => {
   }
   save.v = SAVE_VERSION;
   const isDone = (i) => !!save.done[i];
-  const isUnlocked = (i) => UNLOCK_ALL || dev.unlockAll || i === 0 || isDone(i - 1) || isDone(i);
+  // A bonus level (`bonus: N` in its definition) sits outside the main path: the level before it in the list does not
+  // unlock it, the level after it does not wait for it, and it opens once N stars are earned in its tier.
+  const mainPrev = (i) => { for (let j = i - 1; j >= 0; j--) if (!LEVELS[j].bonus) return j; return -1; };
+  const mainNext = (i) => { for (let j = i + 1; j < LEVELS.length; j++) if (!LEVELS[j].bonus) return j; return -1; };
+  const tierStars = (t) => tierLevels[t].reduce((n, i) => n + (LEVELS[i].bonus ? 0 : starsOf(i)), 0);
+  const isUnlocked = (i) => {
+    if (UNLOCK_ALL || dev.unlockAll || i === 0) return true;
+    const L = LEVELS[i];
+    if (L.bonus) return isDone(i) || tierStars(L.chapter) >= L.bonus;
+    return isDone(mainPrev(i)) || isDone(i);
+  };
   const firstOpen = () => {
-    for (let i = 0; i < LEVELS.length; i++) if (!isDone(i)) return i;
+    for (let i = 0; i < LEVELS.length; i++) if (!LEVELS[i].bonus && !isDone(i)) return i;
     return 0;
   };
 
@@ -283,9 +299,9 @@ const App = (() => {
   }
 
   function completeItems() {
-    const last = A.idx >= LEVELS.length - 1;
+    const nxt = mainNext(A.idx), last = nxt < 0;
     return [
-      { label: last ? "FINISH" : "NEXT LEVEL", act: () => { if (last) fadeTo(() => { A.state = "ending"; A.endT = 0; Sfx.play("card"); }); else startLevel(A.idx + 1); } },
+      { label: last ? "FINISH" : "NEXT LEVEL", act: () => { if (last) fadeTo(() => { A.state = "ending"; A.endT = 0; Sfx.play("card"); }); else startLevel(nxt); } },
       { label: "RETRY", act: () => startLevel(A.idx) },
       { label: "LEVELS", act: goSelect },
     ];
@@ -663,8 +679,9 @@ const App = (() => {
     }
     const L = LEVELS[A.selLevel];
     let line = levelNum[A.selLevel] + "  " + L.name;
-    if (!isUnlocked(A.selLevel)) line += "   LOCKED";
+    if (!isUnlocked(A.selLevel)) line += L.bonus ? "   BONUS: " + tierStars(L.chapter) + "/" + L.bonus + " STARS IN " + CHAPTERS[L.chapter].name : "   LOCKED";
     else {
+      if (L.bonus) line += "   BONUS";
       if (save.best[A.selLevel] !== undefined) line += "   BEST " + fmtTime(save.best[A.selLevel]);
       if (L.par) line += "   PAR " + fmtTime(L.par.t) + " / " + L.par.r + " ECHO" + (L.par.r === 1 ? "" : "ES");
     }
