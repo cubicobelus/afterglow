@@ -226,7 +226,7 @@ const App = (() => {
   };
   const gameLevels = LEVELS.filter((l) => !l.lab).length;
   const totalStars = () => LEVELS.reduce((n, l, i) => n + (l.lab ? 0 : starsOf(i)), 0);
-  const totalLanternsGot = () => Object.keys(save.lanterns).filter((k) => save.lanterns[k] && !LEVELS[k].lab).length;
+  const totalLanternsGot = () => Object.keys(save.lanterns).filter((k) => save.lanterns[k] && lanternLevels[k] && !LEVELS[k].lab).length;
 
   // ---------------------------------------------------------------- cards
   // Cards show once ever: a tier card on its first level, and an echo card on the level that unlocks it.
@@ -496,8 +496,9 @@ const App = (() => {
         if (A.selLevel !== A.syncSel) { A.syncSel = A.selLevel; A.page = pageOf(A.selLevel); }
         if (!pageVisible(A.page)) A.page = 0;
         const turn = Input.hitAny(["KeyE", "PageDown"]) ? 1 : Input.hitAny(["KeyQ", "PageUp"]) ? -1 : 0;
-        if (turn) {
-          const np = Math.max(0, Math.min(lastPage(), A.page + turn));
+        const jump = Input.hitAny(["Digit1", "Numpad1"]) ? 0 : Input.hitAny(["Digit2", "Numpad2"]) ? 1 : Input.hitAny(["Digit3", "Numpad3"]) ? 2 : -1;
+        if (turn || jump >= 0) {
+          const np = jump >= 0 ? (pageVisible(jump) ? jump : A.page) : Math.max(0, Math.min(lastPage(), A.page + turn));
           if (np !== A.page) {
             A.page = np;
             Sfx.play("ui");
@@ -798,7 +799,7 @@ const App = (() => {
     }
     Font.draw(ctx, line, W / 2, H - 38, { scale: 1, color: "#e8e2d0", align: "center" });
     Font.draw(ctx, "STARS " + totalStars() + "/" + (gameLevels * 3) + "   LANTERNS " + totalLanternsGot() + "/" + totalLanterns, W - 10, 10, { scale: 1, color: "#ffd35a", align: "right" });
-    Font.draw(ctx, "ARROWS MOVE   ENTER PLAY   Q E PAGES   ESC BACK", W / 2, H - 20, { scale: 1, color: "rgba(200,210,235,0.5)", align: "center" });
+    Font.draw(ctx, "ARROWS MOVE   ENTER PLAY   1 2 3 PAGES   ESC BACK", W / 2, H - 20, { scale: 1, color: "rgba(200,210,235,0.5)", align: "center" });
   }
 
   function drawCard() {

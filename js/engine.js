@@ -34,14 +34,13 @@ const KINDS = {
   mirror: { name: "MIRROR", color: "#ff9fd6", blurb: "REPLAYS YOUR PATH FLIPPED LEFT TO RIGHT, STARTING ON THE OTHER SIDE OF THE ROOM." },
   float: { name: "FLOAT", color: "#8ec9ff", blurb: "GRAVITY IS A THIRD AS STRONG AROUND IT. JUMPS GO FAR AND FALLS ARE SLOW." },
   pull: { name: "PULL", color: "#ff9b5e", blurb: "DRAWS YOU TOWARD ITSELF, LIKE A WELL." },
-  stone: { name: "STONE", color: "#bfae92", blurb: "TURNS INTO A SOLID BLOCK WHEN IT STOPS. NOTHING GETS THROUGH IT." },
   slow: { name: "SLOW", color: "#7f98ff", blurb: "OTHER ECHOES MOVE AT HALF SPEED INSIDE ITS RING." },
   shrink: { name: "SHRINK", color: "#f7f09a", blurb: "YOU ARE HALF SIZE INSIDE ITS RING. SMALL GAPS OPEN." },
   vine: { name: "VINE", color: "#4fd68a", blurb: "GROWS A COLUMN UPWARD WHEN IT STOPS. HOLD JUMP TO CLIMB IT, LET GO TO SLIDE." },
 };
 // Slots always appear in this order, whatever order a level lists its echoes in, so the numbers on the keys
 // never spell out the order you should record in.
-const KIND_ORDER = ["shade", "glow", "phase", "flip", "tide", "spring", "gust", "calm", "mirror", "float", "pull", "stone", "slow", "shrink", "vine"];
+const KIND_ORDER = ["shade", "glow", "phase", "flip", "tide", "spring", "gust", "calm", "mirror", "float", "pull", "slow", "shrink", "vine"];
 const PLATE_COLORS = { a: "#4fd1ff", b: "#ffb347", c: "#ff6fae", d: "#9cff6f" };
 
 // Settings the player can change (the UI loads and saves these).
@@ -236,9 +235,16 @@ function updateParticles() {
 }
 
 // ---------------------------------------------------------------- fields (light, gravity, phase)
+// A calm ring silences every power for whatever is inside it, and nothing outside it.
+function calmedAt(x, y) {
+  for (const c of G.calms) if ((x - c.x) * (x - c.x) + (y - c.y) * (y - c.y) <= c.r * c.r) return true;
+  return false;
+}
+const NO_ZONES = { flips: [], winds: [], floats: [], pulls: [], shrinks: [], vines: [] };
+
 function litRect(r) {
   for (const l of G.lights) {
-    if (rectDist2(l.x, l.y, r) <= l.r * l.r) return true;
+    if (rectDist2(l.x, l.y, r) <= l.r * l.r && !calmedAt(r.x + r.w / 2, r.y + r.h / 2)) return true;
   }
   return false;
 }
@@ -246,14 +252,14 @@ function litRect(r) {
 function litPoint(x, y) {
   for (const l of G.lights) {
     const dx = x - l.x, dy = y - l.y;
-    if (dx * dx + dy * dy <= l.r * l.r) return true;
+    if (dx * dx + dy * dy <= l.r * l.r && !calmedAt(x, y)) return true;
   }
   return false;
 }
 
 function inPhase(r) {
   for (const f of G.phases) {
-    if (rectDist2(f.x, f.y, r) <= f.r * f.r) return true;
+    if (rectDist2(f.x, f.y, r) <= f.r * f.r && !calmedAt(r.x + r.w / 2, r.y + r.h / 2)) return true;
   }
   return false;
 }
@@ -283,7 +289,7 @@ function computeFields() {
     const e = G.echoes[k], pw = power(e);
     const cx = e.x + PW / 2, cy = e.y + PH / 2;
     e.silenced = e.kind !== "calm" && calmed(cx, cy);
-    if (pw <= 0 || e.silenced) continue;
+    if (pw <= 0) continue;
     if (e.kind === "glow") G.lights.push({ x: cx, y: cy, r: GLOW_R * pw, echo: true });
     else if (e.kind === "flip") G.flips.push({ x: cx, y: cy, r: FLIP_R * pw });
     else if (e.kind === "phase") G.phases.push({ x: cx, y: cy, r: PHASE_R * pw });
@@ -302,7 +308,7 @@ function computeFields() {
       G.vines.push({ x: cx, base, top, echo: e });
     }
   }
-  for (const v of L.vents) if (!calmed(v.x, v.y)) G.winds.push({ x: v.x, y: v.y, r: GUST_R, dir: v.dir, vent: true });
+  for (const v of L.vents) G.winds.push({ x: v.x, y: v.y, r: GUST_R, dir: v.dir, vent: true });
   for (const gt of L.gates) gt.open = litRect(gt);
 }
 
@@ -335,7 +341,7 @@ function updateEchoes() {
     let rate = 1;
     if (e.kind !== "slow" && !e.frozen) {
       const ecx = e.x + PW / 2, ecy = e.y + PH / 2;
-      for (const z of G.slows) if (inZone(z, ecx, ecy)) { rate = SLOW_RATE; break; }
+      for (const z of G.slows) if (inZone(z, ecx, ecy) && !calmedAt(ecx, ecy)) { rate = SLOW_RATE; break; }
     }
     if (e.frozen) {
       e.x = e.frozen.x; e.y = e.frozen.y;
@@ -506,11 +512,6 @@ function buildSolids(p, withEchoes, g) {
   if (withEchoes) {
     for (const k in G.echoes) {
       const e = G.echoes[k];
-      if (e.kind === "stone" && !e.moving && e.restT >= 6) {
-        // a stone that has stopped is a wall, unless you are inside it, in which case it waits until you are out
-        const r = { x: e.x, y: e.y, w: PW, h: PH, stone: true };
-        if (!overlap(p, r)) { out.push(r); continue; }
-      }
       const ok = g > 0 ? p.y + p.h <= e.y + 4 : p.y >= e.y + PH - 4;
       if (ok) out.push({ x: e.x, y: e.y, w: PW, h: PH, ow: true, src: e });
     }
@@ -526,8 +527,9 @@ function playerState(p) {
 function stepPlayer() {
   const L = G.L, p = G.p;
   const cx = p.x + p.w / 2, cy = p.y + p.h / 2;
+  const Z = calmedAt(cx, cy) ? NO_ZONES : G;
   let g = 1;
-  for (const f of G.flips) {
+  for (const f of Z.flips) {
     const dx = cx - f.x, dy = cy - f.y;
     if (dx * dx + dy * dy <= f.r * f.r) g = -1;
   }
@@ -541,7 +543,7 @@ function stepPlayer() {
   // does not squash you.
   {
     const small = p.w < PW;
-    const want = G.shrinks.some((z) => inZone(z, cx, cy));
+    const want = Z.shrinks.some((z) => inZone(z, cx, cy));
     const fit = (nw, nh) => ({ x: p.x + (p.w - nw) / 2, y: g > 0 ? p.y + p.h - nh : p.y, w: nw, h: nh });
     if (want && !small) {
       const r = fit(PW * SHRINK_K, PH * SHRINK_K);
@@ -573,7 +575,7 @@ function stepPlayer() {
 
   // Wind from a gust echo adds a sideways drift on top of your own running.
   let windTarget = 0;
-  for (const w of G.winds) {
+  for (const w of Z.winds) {
     const dx = cx - w.x, dy = cy - w.y;
     if (dx * dx + dy * dy <= w.r * w.r) windTarget += w.dir * GUST_V;
   }
@@ -587,7 +589,7 @@ function stepPlayer() {
   // A pull draws you toward its centre and holds you near it. It is strongest in the middle of its ring and weak at the rim, and
   // gentler while you steer, so you can always walk out of it.
   let pullTarget = 0, pulled = false;
-  for (const z of G.pulls) {
+  for (const z of Z.pulls) {
     if (!inZone(z, cx, cy)) continue;
     pulled = true;
     const dxp = z.x - cx, dyp = z.y - cy, dist = Math.hypot(dxp, dyp);
@@ -601,7 +603,7 @@ function stepPlayer() {
   p.buf = jumpPressed ? JUMP_BUF : Math.max(0, p.buf - DT);
   p.coy = p.onGround ? COYOTE : Math.max(0, p.coy - DT);
   // On a vine, jump climbs and letting go slides, so a jump press is not a jump.
-  const vine = G.vines.find((v) => Math.abs(cx - v.x) < 9 && p.y + p.h > v.top && p.y < v.base);
+  const vine = Z.vines.find((v) => Math.abs(cx - v.x) < 9 && p.y + p.h > v.top && p.y < v.base);
   if (!vine && p.buf > 0 && p.coy > 0) {
     p.vy = -JUMP * g;
     p.buf = 0; p.coy = 0; p.jumping = true; p.onGround = false; p.stand = null;
@@ -615,11 +617,11 @@ function stepPlayer() {
   }
   let gr = GRAV;
   if (!p.onGround && Math.abs(p.vy) < 80 && jumpHeld) gr *= 0.65;
-  const floating = G.floats.some((z) => inZone(z, cx, cy));
+  const floating = Z.floats.some((z) => inZone(z, cx, cy));
   if (floating) gr *= FLOAT_G;
   if (pulled) gr *= PULL_G;
   p.vy += gr * g * DT;
-  for (const z of G.pulls) {
+  for (const z of Z.pulls) {
     if (!inZone(z, cx, cy)) continue;
     // a spring toward the centre height, with damping, so you settle there instead of swinging through
     p.vy += ((z.y - cy) * PULL_K - p.vy * PULL_C) * DT;
@@ -733,6 +735,8 @@ function updatePlates() {
   const bodies = [];
   if (!G.dead) bodies.push(G.p);
   for (const k in G.echoes) bodies.push(G.echoes[k]);
+  // A mirror puppet that is being recorded is already standing on the other side of the room, and presses plates.
+  if (G.rec && G.rec.kind === "mirror" && !G.dead) bodies.push({ x: W - G.p.x - G.p.w, y: G.p.y, w: G.p.w, h: G.p.h });
   const count = {}, pressed = {};
   for (const pl of L.plates) count[pl.id] = (count[pl.id] || 0) + 1;
   for (const pl of L.plates) {

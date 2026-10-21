@@ -899,8 +899,6 @@ SOLUTIONS["CHORUS"] = () => {
   Bot.waitUntil(rest("gust"), 900, "the first upper gust to blow");
   runJumpLeft(428, 271);
   Bot.walkTo(270);
-  Bot.jumpTo(270, 24); // the lantern floating over the upper island
-  Bot.expect(G.lanternsGot === 1, "the lantern over the upper island");
   Bot.waitUntil(rest("gust2"), 900, "the island gust to blow");
   Bot.dir(-1);
   for (let i = 0; i < 80 && Bot.px() > 248; i++) Bot.tick();
@@ -1667,7 +1665,7 @@ SOLUTIONS["FOUNDATION TEMP"] = () => runAndJump([128, 190, 308]);
 SOLUTIONS["CALM"] = () => {
   // The vent blows back across the gap; a calm by the edge silences it.
   Bot.record("calm");
-  Bot.walkTo(164, 8);
+  Bot.walkTo(176, 8);
   Bot.run(10);
   Bot.stop();
   Bot.waitUntil(() => G.echoes.calm.restT > 40, 900, "the calm to settle");
@@ -1721,30 +1719,6 @@ SOLUTIONS["PULL"] = () => {
   Bot.jumpKey(false);
   Bot.dir(0);
   Bot.expect(G.p.onGround && Bot.px() > 305, "across the gap");
-  Bot.walkTo(570);
-};
-SOLUTIONS["STONE"] = () => {
-  // A stone hung in the air is a solid step.
-  Bot.record("stone");
-  Bot.walkTo(262, 3);
-  Bot.dir(1);
-  Bot.jumpKey(true);
-  let found = false;
-  for (let i = 0; i < 60; i++) {
-    Bot.tick();
-    const h = 300 - Bot.feet();
-    if (i > 8 && G.p.vy > 0 && h <= 50 && h >= 36) { found = true; break; }
-  }
-  Bot.expect(found, "a hover window");
-  Bot.jumpKey(false);
-  Bot.dir(0);
-  Bot.stop();
-  Bot.waitUntil(() => G.echoes.stone.restT > 30, 900, "the stone to settle");
-  const e = G.echoes.stone;
-  Bot.walkTo(e.x + 6 - 40, 3);
-  Bot.jumpTo(e.x + 6, 24);
-  Bot.jumpTo(300, 24);
-  Bot.expect(G.p.onGround && G.p.y < 190, "up on the ledge");
   Bot.walkTo(570);
 };
 SOLUTIONS["SLOW"] = () => {

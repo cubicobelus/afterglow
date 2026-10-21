@@ -67,7 +67,6 @@ const Render = (() => {
     mirror: ["#...#", "##.##", "#.#.#", "##.##", "#...#"],
     float: [".###.", "#####", "#####", ".###.", "..#.."],
     pull: ["#...#", ".#.#.", "..#..", ".#.#.", "#...#"],
-    stone: ["#####", "#####", "#####", "#####", "#####"],
     slow: ["#####", ".###.", "..#..", ".###.", "#####"],
     shrink: [".....", ".###.", ".#.#.", ".###.", "....."],
     vine: ["..#..", ".#...", "..#..", ".#...", "..#.."],
@@ -425,23 +424,36 @@ const Render = (() => {
         x.fillRect(Math.floor(rng() * W), Math.floor(rng() * H), 1, 1);
       }
     } else if (th.theme === "trench") {
-      // black water, spires of rock, a lure far away and specks of bioluminescence
-      for (let i = 0; i < 9; i++) {
-        const sx = Math.floor(rng() * W), sh = 60 + rng() * 120, sw = 30 + rng() * 50;
+      // black water with a teal glow: rock spires, plumes from vents in the floor, drifting jellyfish and specks of light
+      for (let i = 0; i < 8; i++) {
+        const sx = Math.floor(rng() * W), sh = 50 + rng() * 110, sw = 26 + rng() * 44;
         x.fillStyle = "rgba(0,0,0,0.5)";
         x.beginPath(); x.moveTo(sx - sw, H); x.lineTo(sx, H - sh); x.lineTo(sx + sw, H); x.closePath(); x.fill();
-        x.beginPath(); x.moveTo(sx - sw, 0); x.lineTo(sx, sh * 0.6); x.lineTo(sx + sw, 0); x.closePath(); x.fill();
+        x.beginPath(); x.moveTo(sx - sw, 0); x.lineTo(sx, sh * 0.5); x.lineTo(sx + sw, 0); x.closePath(); x.fill();
       }
-      const ag = x.createRadialGradient(450, 110, 2, 450, 110, 60);
-      ag.addColorStop(0, "rgba(160,190,255,0.4)");
-      ag.addColorStop(1, "rgba(160,190,255,0)");
-      x.fillStyle = ag;
-      x.fillRect(380, 40, 140, 140);
-      x.strokeStyle = "rgba(160,190,255,0.25)";
-      x.lineWidth = 1;
-      x.beginPath(); x.moveTo(450, 110); x.quadraticCurveTo(440, 70, 410, 60); x.stroke();
+      for (let i = 0; i < 3; i++) {
+        const px = 90 + i * 220 + Math.floor(rng() * 40);
+        const pg = x.createLinearGradient(0, H, 0, 40);
+        pg.addColorStop(0, rgba(pal.accent, 0.2));
+        pg.addColorStop(1, rgba(pal.accent, 0));
+        x.fillStyle = pg;
+        x.beginPath(); x.moveTo(px - 8, H); x.lineTo(px - 22, 40); x.lineTo(px + 22, 40); x.lineTo(px + 8, H); x.closePath(); x.fill();
+      }
+      for (let i = 0; i < 4; i++) {
+        const jx = 60 + i * 150 + Math.floor(rng() * 50), jy = 50 + Math.floor(rng() * 120), jr = 12 + Math.floor(rng() * 8);
+        const jg = x.createRadialGradient(jx, jy, 1, jx, jy, jr * 3);
+        jg.addColorStop(0, rgba(pal.accent, 0.3));
+        jg.addColorStop(1, rgba(pal.accent, 0));
+        x.fillStyle = jg;
+        x.fillRect(jx - jr * 3, jy - jr * 3, jr * 6, jr * 6);
+        x.fillStyle = rgba(pal.accent, 0.35);
+        x.beginPath(); x.arc(jx, jy, jr, Math.PI, TAU); x.fill();
+        x.strokeStyle = rgba(pal.accent, 0.28);
+        x.lineWidth = 1;
+        for (let k = -2; k <= 2; k++) { x.beginPath(); x.moveTo(jx + k * 4, jy); x.quadraticCurveTo(jx + k * 6 + 3, jy + jr, jx + k * 4, jy + jr * 2.2); x.stroke(); }
+      }
       for (let i = 0; i < 60; i++) {
-        x.fillStyle = (i % 3 ? rgba(pal.accent, 0.12 + rng() * 0.3) : "rgba(200,130,255," + (0.1 + rng() * 0.25) + ")");
+        x.fillStyle = (i % 4 ? rgba(pal.accent, 0.12 + rng() * 0.3) : "rgba(255,120,220," + (0.1 + rng() * 0.25) + ")");
         x.fillRect(Math.floor(rng() * W), Math.floor(rng() * H), rng() < 0.2 ? 2 : 1, 1);
       }
     } else if (th.theme === "foundation") {
@@ -1106,19 +1118,7 @@ const Render = (() => {
       ctx.beginPath(); ctx.ellipse(e.x + PW / 2, fy, 9 + pulse * 2, 3, 0, 0, TAU); ctx.stroke();
       ctx.restore();
     }
-    if (e.kind === "stone" && !e.moving && e.restT >= 6) {
-      // a stone that has stopped is a block
-      ctx.fillStyle = "#6f6454";
-      ctx.fillRect(e.x - 1, e.y - 1, PW + 2, PH + 2);
-      ctx.fillStyle = k.color;
-      ctx.fillRect(e.x, e.y, PW, PH);
-      ctx.fillStyle = "#e6d9bd";
-      ctx.fillRect(e.x, e.y, PW, 2);
-      ctx.fillStyle = "#8a7d66";
-      ctx.fillRect(e.x, e.y + PH - 3, PW, 3);
-      ctx.fillRect(e.x + 5, e.y + 4, 2, 1);
-    }
-    drawActor(ctx, e.x, e.y, Object.assign({ face: e.face, st: e.st, g: e.g, t, sq: 0, vx: e.dx * 60, alpha: (e.kind === "stone" && !e.moving && e.restT >= 6 ? 0.45 : 0.85) * emerge, eyesClosed: false }, look));
+    drawActor(ctx, e.x, e.y, Object.assign({ face: e.face, st: e.st, g: e.g, t, sq: 0, vx: e.dx * 60, alpha: 0.85 * emerge, eyesClosed: false }, look));
     if (e.silenced && !e.moving) {
       // a small grey cross: a calm echo has silenced this one
       ctx.fillStyle = "rgba(200,205,230,0.8)";
@@ -1272,7 +1272,7 @@ const Render = (() => {
       ctx.fill();
       ctx.restore();
     }
-    const bubbles = ["tideworks", "shallows", "garden"].includes(CHAPTERS[L.chapter].theme);
+    const bubbles = ["tideworks", "shallows", "garden", "trench"].includes(CHAPTERS[L.chapter].theme);
     for (const m of L.motes) {
       let x, y;
       if (bubbles) {

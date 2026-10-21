@@ -46,7 +46,7 @@ const CHAPTERS = [
   },
   {
     name: "THE TRENCH", line: "THE LIGHT STOPS HERE.", theme: "trench", mood: 8, planned: true,
-    pal: { bg1: "#02030a", bg2: "#0a1030", wall: "#2a3350", wallHi: "#5a6a9a", wallLo: "#151b30", mortar: "#080c1c", accent: "#8aa4ff" },
+    pal: { bg1: "#02070a", bg2: "#06222a", wall: "#2b4650", wallHi: "#5f9aa8", wallLo: "#16282f", mortar: "#08161c", accent: "#4dffd8" },
   },
   {
     name: "THE FOUNDATION", line: "WHERE THE FIRST LIGHT WAS LIT.", theme: "foundation", mood: 9, planned: true,
@@ -515,7 +515,6 @@ def(3, "BREEZE", {
   g.base();
   g.set(2, 14, "@");
   g.pit(9, 14);
-  g.set(13, 11, "o");
   g.fill(28, 13, 28, 14, "X");
   g.set(5, 8, "L").set(13, 5, "L").set(24, 8, "L");
 });
@@ -599,7 +598,6 @@ def(3, "CHORUS", {
   g.set(28, 14, "a");
   g.fill(23, 1, 23, 3, "#").fill(23, 4, 23, 7, "A");
   g.fill(2, 6, 2, 7, "X");
-  g.set(13, 5, "o");
   g.set(4, 12, "L").set(24, 12, "L").set(9, 4, "L").set(17, 4, "L");
 });
 
@@ -794,17 +792,6 @@ def(10, "PULL", {
   g.pit(9, 14);
   g.fill(28, 13, 28, 14, "X");
   g.set(5, 8, "L").set(13, 5, "L").set(24, 8, "L");
-});
-
-def(10, "STONE", {
-  lab: true, unlock: "stone", echoes: ["stone"], recMax: 8,
-  hint: "A STONE THAT HAS STOPPED IS A SOLID BLOCK: YOU CANNOT WALK THROUGH IT OR JUMP UP THROUGH IT. HANG ONE IN THE AIR FOR A STEP.",
-}, (g) => {
-  g.base();
-  g.set(2, 14, "@");
-  g.fill(14, 10, 30, 14, "#");
-  g.fill(28, 8, 28, 9, "X");
-  g.set(5, 8, "L").set(10, 5, "L");
 });
 
 def(10, "SLOW", {
