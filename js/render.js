@@ -671,24 +671,6 @@ const Render = (() => {
         ctx.fillRect(sx, pl.y + 5, 3, 1);
       }
     }
-    // The top edge of everything you can stand on, so ledges can be told from the black.
-    if (!L.edges) {
-      L.edges = [];
-      for (const w of L.walls) {
-        if (w === L.ped) { L.edges.push({ x: w.x, y: w.y, w: w.w }); continue; }
-        for (let x = w.x; x < w.x + w.w; x += TILE) {
-          const c = x / TILE, r = w.y / TILE;
-          if (!(r > 0 && L.rows[r - 1][c] === "#")) L.edges.push({ x, y: w.y, w: TILE });
-        }
-      }
-      for (const o of L.oneways) L.edges.push({ x: o.x, y: o.y, w: o.w });
-    }
-    for (const e of L.edges) {
-      ctx.fillStyle = rgba(pal.accent, 0.42);
-      ctx.fillRect(e.x, e.y, e.w, 1);
-      ctx.fillStyle = rgba(pal.accent, 0.2);
-      ctx.fillRect(e.x, e.y + 1, e.w, 1);
-    }
     ctx.fillStyle = rgba(pal.accent, 0.3);
     for (const th of L.thorns) {
       if (th.lit) continue;
@@ -923,6 +905,15 @@ const Render = (() => {
       g.addColorStop(1, "rgba(0,0,0,0)");
       d.fillStyle = g;
       d.fillRect(l.x - r, l.y - r, r * 2, r * 2);
+    }
+    // A lantern you have not found shows through the dark a little, so it can be spotted.
+    for (const ln of L.lanterns) {
+      if (ln.got) continue;
+      const g = d.createRadialGradient(ln.x, ln.y, 0, ln.x, ln.y, 26);
+      g.addColorStop(0, "rgba(0,0,0,0.4)");
+      g.addColorStop(1, "rgba(0,0,0,0)");
+      d.fillStyle = g;
+      d.fillRect(ln.x - 26, ln.y - 26, 52, 52);
     }
     d.globalCompositeOperation = "source-over";
     ctx.drawImage(darkCanvas, 0, 0);
