@@ -159,9 +159,11 @@ SOLUTIONS["UNDER GLASS"] = () => {
   Bot.waitUntil(() => G.L.doorOpen.a && echoDone("phase")() && echoDone("shade")(), 900, "door open");
   // Drop into the vault for the lantern, then climb back out to the left through the open hatch.
   Bot.dir(1);
-  for (let i = 0; i < 200 && !(G.p.onGround && G.p.y > 320 && Bot.px() > 182); i++) Bot.tick();
+  for (let i = 0; i < 200 && !(G.p.onGround && G.p.y > 320); i++) Bot.tick();
+  Bot.dir(-1);
+  for (let i = 0; i < 200 && G.lanternsGot < 1; i++) Bot.tick();
   Bot.dir(0);
-  Bot.expect(G.lanternsGot === 1, "the lantern in the vault");
+  Bot.expect(G.lanternsGot === 1, "the lantern under the left lip");
   Bot.walkTo(150);
   Bot.jumpTo(105, 24);
   Bot.walkTo(110);
@@ -269,7 +271,7 @@ SOLUTIONS["HALL OF MIRRORS"] = () => {
   Bot.dir(0);
   Bot.expect(G.p.onGround && G.p.y < 190, "up on the shelf");
   Bot.walkTo(370, 3);
-  Bot.expect(G.L.plates.some((p) => p.id === "a" && p.pressed), "the shelf plate pressed");
+  Bot.expect(G.L.plates.some((p) => p.id === "b" && p.pressed), "the shelf plate pressed");
   Bot.run(6);
   Bot.stop();
   Bot.record("flip");

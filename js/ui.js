@@ -112,7 +112,7 @@ const App = (() => {
     };
     // The level is the same but its lantern moved, so the old pickup no longer counts.
     // Value: the save version in which the lantern moved; older saves lose that pickup.
-    const LANTERN_MOVED = { "TRAMPOLINE": 6, "SUNKEN GATE": 8 };
+    const LANTERN_MOVED = { "TRAMPOLINE": 6, "SUNKEN GATE": 8, "UNDER GLASS": 14 };
     const from = save.v || 1;
     const order = ORDERS[from] || ORDERS[2];
     const redesigned = Object.assign({ "HALL OF MIRRORS": true }, REDESIGNED[from] || REDESIGNED[2]); // rebuilt in v14
