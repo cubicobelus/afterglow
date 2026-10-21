@@ -218,15 +218,29 @@ def(1, "UNDER GLASS", {
   g.set(6, 8, "L").set(26, 8, "L");
 });
 
-def(1, "UPDRAFT", {
-  unlock: "flip", echoes: ["flip"], recMax: 8,
-  hint: "STEP INTO THE FLIP ZONE AND FALL UPWARD. LET GO AT THE TOP AND DRIFT ONTO THE LEDGE.",
+def(1, "THREE PANES", {
+  echoes: ["phase", "phase"], recMax: 16,
+  hint: "THREE WALLS AND TWO PHASES. ONE CIRCLE IS WIDE ENOUGH FOR TWO WALLS IF YOU STAND BETWEEN THEM.",
 }, (g) => {
   g.base();
   g.set(2, 14, "@");
-  g.fill(20, 9, 30, 14, "#");
-  g.fill(28, 7, 28, 8, "X");
-  g.set(6, 9, "L").set(14, 6, "L");
+  g.fill(6, 1, 6, 14, "%");
+  g.fill(10, 1, 10, 14, "%");
+  g.fill(14, 1, 14, 14, "%");
+  g.fill(28, 13, 28, 14, "X");
+  g.set(4, 9, "L").set(12, 9, "L").set(22, 9, "L");
+});
+
+def(1, "OVERHEAD", {
+  unlock: "flip", echoes: ["flip"], recMax: 8,
+  hint: "RECORD AT THE EDGE OF THE PIT. THEN STEP INTO THE FLIP ZONE, FALL UPWARD AND WALK THE CEILING ACROSS.",
+}, (g) => {
+  g.base();
+  g.set(2, 14, "@");
+  g.pit(12, 15);
+  g.fill(8, 1, 20, 12, "#");
+  g.fill(28, 13, 28, 14, "X");
+  g.set(5, 8, "L").set(26, 8, "L");
 });
 
 def(1, "CEILING PLATE", {
@@ -259,34 +273,66 @@ def(1, "GHOST GLASS", {
   g.set(9, 8, "L").set(16, 8, "L").set(24, 8, "L").set(1, 9, "L");
 });
 
-def(1, "THREE PANES", {
-  echoes: ["phase", "phase"], recMax: 16,
-  hint: "THREE WALLS AND TWO PHASES. ONE CIRCLE IS WIDE ENOUGH FOR TWO WALLS IF YOU STAND BETWEEN THEM.",
+def(1, "LOOKING GLASS", {
+  echoes: ["phase", "flip"], recMax: 14,
+  hint: "THE ROAD ACROSS IS ON THE CEILING, AND A WALL OF GLASS WAITS AT THE FAR EDGE. AN ECHO CAN STAND ON THE CEILING TOO.",
 }, (g) => {
   g.base();
   g.set(2, 14, "@");
-  g.fill(6, 1, 6, 14, "%");
-  g.fill(10, 1, 10, 14, "%");
-  g.fill(14, 1, 14, 14, "%");
+  g.pit(12, 15);
+  g.fill(8, 1, 20, 12, "#");
+  g.fill(16, 13, 16, 14, "%");
   g.fill(28, 13, 28, 14, "X");
-  g.set(4, 9, "L").set(12, 9, "L").set(22, 9, "L");
+  g.set(5, 8, "L").set(24, 8, "L");
+});
+
+def(1, "HANGING GLASS", {
+  echoes: ["flip", "phase", "shade"], recMax: 14,
+  hint: "A PANE OF GLASS HANGS ACROSS THE CEILING ROAD. AND ANOTHER WALL WAITS BEYOND THE DOOR.",
+}, (g) => {
+  g.base();
+  g.set(2, 14, "@");
+  g.fill(8, 1, 23, 10, "#");
+  g.fill(13, 11, 13, 12, "%");
+  g.set(15, 14, "#");
+  g.set(14, 11, "1");
+  g.set(15, 13, "a");
+  g.fill(23, 11, 23, 14, "A");
+  g.fill(26, 1, 26, 14, "%");
+  g.fill(29, 13, 29, 14, "X");
+  g.set(5, 9, "L").set(27, 9, "L");
 });
 
 def(1, "HALL OF MIRRORS", {
-  echoes: ["phase", "glow", "shade", "flip"], recMax: 24,
-  hint: "NOT EVERY BUTTON IS PRESSED THE SAME WAY. AND NOT EVERY ECHO HAS TO STAY WHERE YOU FIRST PUT IT.",
+  echoes: ["phase", "shade", "flip"], recMax: 24,
+  hint: "ONE ECHO CAN HOLD A PLATE AND DO ITS OWN JOB. AND NOT EVERY ECHO HAS TO STAY WHERE YOU FIRST PUT IT.",
 }, (g) => {
   g.base();
   g.set(2, 14, "@");
-  g.fill(4, 1, 5, 14, "%");
+  g.fill(7, 1, 7, 14, "%");
+  g.set(5, 14, "b");
   g.fill(15, 10, 20, 11, "#");
-  g.set(16, 9, "5").set(19, 9, "b");
+  g.set(18, 9, "a");
   g.fill(21, 1, 21, 8, "#").fill(21, 9, 21, 14, "A");
   g.fill(22, 1, 22, 8, "#").fill(22, 9, 22, 14, "B");
   g.fill(28, 9, 30, 14, "#");
   g.fill(29, 7, 29, 8, "X");
-  g.set(9, 12, "L").set(24, 5, "L");
+  g.set(10, 12, "L").set(24, 5, "L");
 });
+
+def(1, "LONG GALLERY", {
+  bonus: 20, echoes: ["phase", "flip", "flip"], recMax: 20,
+  hint: "TWO PITS AND A WALL OF GLASS UNDER ONE LOW CEILING. THE SECOND ROAD STARTS WHERE THE FIRST ONE ENDS.",
+}, (g) => {
+  g.base();
+  g.set(2, 14, "@");
+  g.pit(12, 15).pit(18, 21);
+  g.fill(8, 1, 27, 12, "#");
+  g.fill(16, 13, 16, 14, "%");
+  g.fill(29, 13, 29, 14, "X");
+  g.set(5, 8, "L").set(30, 8, "L");
+});
+
 
 // ================================================================ tier 3: the tideworks
 def(2, "FERRY", {
@@ -599,10 +645,13 @@ const PAR = {
   "SWITCHBOARD": { t: 40, r: 3 },
   "GLASS WALL": { t: 20, r: 1 },
   "UNDER GLASS": { t: 30, r: 2 },
-  "UPDRAFT": { t: 20, r: 1 },
+  "OVERHEAD": { t: 20, r: 1 },
   "CEILING PLATE": { t: 25, r: 2 },
   "GHOST GLASS": { t: 20, r: 3 },
-  "HALL OF MIRRORS": { t: 60, r: 5 },
+  "HALL OF MIRRORS": { t: 50, r: 4 },
+  "LOOKING GLASS": { t: 30, r: 2 },
+  "HANGING GLASS": { t: 75, r: 4 },
+  "LONG GALLERY": { t: 45, r: 3 },
   "FERRY": { t: 25, r: 1 },
   "TRAMPOLINE": { t: 20, r: 1 },
   "SKYHOOK": { t: 20, r: 1 },

@@ -171,21 +171,18 @@ SOLUTIONS["UNDER GLASS"] = () => {
 };
 
 // 9 TWO KEYS
-// 10 UPDRAFT
-SOLUTIONS["UPDRAFT"] = () => {
+// 10 OVERHEAD
+SOLUTIONS["OVERHEAD"] = () => {
+  // A low tunnel with a pit in the floor: the flip echo stands at the lip and the ceiling is the road across.
   Bot.record("flip");
-  Bot.walkTo(360);
-  Bot.run(6);
+  Bot.walkTo(228, 3);
+  Bot.run(10);
   Bot.stop();
-  Bot.walkTo(280);
   Bot.waitUntil(() => G.echoes.flip.restT > 30, 600, "flip echo to settle");
   Bot.dir(1);
-  for (let i = 0; i < 260 && !G.won; i++) {
-    if (G.p.onGround && Bot.px() > 420) break;
-    Bot.tick();
-  }
+  for (let i = 0; i < 300 && !(G.p.onGround && Bot.px() > 340); i++) Bot.tick();
   Bot.dir(0);
-  Bot.expect(G.p.onGround && G.p.y < 170, "landed on the ledge");
+  Bot.expect(G.p.onGround && Bot.px() > 340, "across the pit");
   Bot.walkTo(570);
 };
 
@@ -247,23 +244,17 @@ SOLUTIONS["LEAPFROG"] = () => {
 // so the flip ends up on the ledge. Finally swap up and ride zone 2 to the exit.
 // HALL OF MIRRORS
 SOLUTIONS["HALL OF MIRRORS"] = () => {
-  // slots: shade, glow, phase, flip.
-  // The plate on the shelf with an eye is a light sensor (the glow shines up through the shelf); the other plate
-  // needs a shade, which needs the flip to reach the shelf. The flip is then recorded again at the foot of the exit ledge.
+  // slots: shade, phase, flip. The phase stands on the floor plate, which holds the wall open and one door. The flip lifts the
+  // shade onto the shelf plate (the other door), then is recorded again at the foot of the exit block.
   const rest = (k) => () => G.echoes[k] && G.echoes[k].restT > 30;
   const pastWall = () => {
-    Bot.walkTo(70);
+    Bot.walkTo(90);
     Bot.waitUntil(rest("phase"), 900, "the glass to give way");
-    Bot.walkTo(150);
+    Bot.walkTo(172);
   };
   Bot.record("phase");
-  Bot.walkTo(70);
-  Bot.run(6);
-  Bot.stop();
-  Bot.record("glow");
-  pastWall();
-  Bot.walkTo(330);
-  Bot.run(6);
+  Bot.walkTo(110, 3);
+  Bot.run(10);
   Bot.stop();
   Bot.record("flip");
   pastWall();
@@ -277,8 +268,8 @@ SOLUTIONS["HALL OF MIRRORS"] = () => {
   for (let i = 0; i < 300 && !(G.p.onGround && Bot.px() > 310 && G.p.y < 190); i++) Bot.tick();
   Bot.dir(0);
   Bot.expect(G.p.onGround && G.p.y < 190, "up on the shelf");
-  Bot.walkTo(390);
-  Bot.expect(G.L.plates[1].pressed, "the plate on the shelf pressed");
+  Bot.walkTo(370, 3);
+  Bot.expect(G.L.plates.some((p) => p.id === "a" && p.pressed), "the shelf plate pressed");
   Bot.run(6);
   Bot.stop();
   Bot.record("flip");
@@ -1392,3 +1383,94 @@ SOLUTIONS["WEATHERVANE"] = () => {
   Bot.walkTo(30);
 };
 
+
+SOLUTIONS["LOOKING GLASS"] = () => {
+  // slots: phase, flip. The flip at the lip of the pit opens the ceiling road. The phase is recorded standing on that road,
+  // over the pit, where its circle reaches the wall of glass at the far edge.
+  const rest = (k) => () => G.echoes[k] && G.echoes[k].restT > 30;
+  Bot.record("flip");
+  Bot.walkTo(228, 3);
+  Bot.run(10);
+  Bot.stop();
+  Bot.record("phase");
+  Bot.waitUntil(rest("flip"), 900, "the flip echo to settle");
+  Bot.dir(1);
+  for (let i = 0; i < 300 && !(G.p.g === -1 && G.p.onGround); i++) Bot.tick();
+  Bot.expect(G.p.g === -1 && G.p.onGround, "on the ceiling road");
+  for (let i = 0; i < 300 && Bot.px() < 280; i++) Bot.tick();
+  Bot.dir(0);
+  Bot.run(20);
+  Bot.stop();
+  Bot.waitUntil(() => rest("flip")() && rest("phase")(), 900, "both echoes to settle");
+  Bot.dir(1);
+  for (let i = 0; i < 700 && !(G.p.onGround && Bot.px() > 380); i++) Bot.tick();
+  Bot.dir(0);
+  Bot.expect(G.p.onGround && Bot.px() > 380, "across the pit and through the glass");
+  Bot.walkTo(570);
+};
+
+SOLUTIONS["HANGING GLASS"] = () => {
+  // slots: shade, phase, flip. The phase opens the hanging pane while the shade is recorded riding the ceiling road to
+  // the hanging plate; the flip holds the pedestal plate. The phase is then recorded again beyond the door, at the last wall.
+  const rest = (k) => () => G.echoes[k] && G.echoes[k].restT > 30;
+  Bot.record("phase");
+  Bot.walkTo(262, 3);
+  Bot.run(10);
+  Bot.stop();
+  Bot.record("flip");
+  Bot.waitUntil(rest("phase"), 900, "the phase echo to settle");
+  Bot.walkTo(250, 3);
+  Bot.jumpTo(310, 24);
+  Bot.run(10);
+  Bot.stop();
+  Bot.record("shade");
+  Bot.waitUntil(() => rest("phase")() && rest("flip")(), 900, "phase and flip to settle");
+  Bot.walkTo(230, 3);
+  Bot.dir(1);
+  for (let i = 0; i < 200 && !(G.p.g === -1 && G.p.onGround); i++) Bot.tick();
+  Bot.expect(G.p.g === -1 && G.p.onGround, "standing on the ceiling");
+  Bot.walkTo(292, 3);
+  Bot.expect(G.L.plates[0].pressed, "the hanging plate pressed");
+  Bot.run(10);
+  Bot.stop();
+  Bot.record("phase");
+  Bot.waitUntil(() => rest("flip")() && rest("shade")() && G.L.doorOpen.a, 900, "the door to open");
+  Bot.walkTo(490, 3);
+  Bot.run(10);
+  Bot.stop();
+  Bot.waitUntil(() => rest("flip")() && rest("shade")() && rest("phase")() && G.L.doorOpen.a, 900, "everything to settle");
+  Bot.walkTo(590);
+};
+
+SOLUTIONS["LONG GALLERY"] = () => {
+  // slots: phase, flip, flip2. Same trick as Looking Glass, then a second road: the first flip carries you over the first pit and
+  // the phase (recorded on that ceiling road) opens the glass; the second flip is recorded at the lip of the second pit.
+  const rest = (k) => () => G.echoes[k] && G.echoes[k].restT > 30;
+  Bot.record("flip");
+  Bot.walkTo(228, 3);
+  Bot.run(10);
+  Bot.stop();
+  Bot.record("phase");
+  Bot.waitUntil(rest("flip"), 900, "the first flip to settle");
+  Bot.dir(1);
+  for (let i = 0; i < 300 && !(G.p.g === -1 && G.p.onGround); i++) Bot.tick();
+  Bot.expect(G.p.g === -1 && G.p.onGround, "on the ceiling road");
+  for (let i = 0; i < 300 && Bot.px() < 280; i++) Bot.tick();
+  Bot.dir(0);
+  Bot.run(20);
+  Bot.stop();
+  Bot.record("flip2");
+  Bot.waitUntil(() => rest("flip")() && rest("phase")(), 900, "the first flip and the phase to settle");
+  Bot.dir(1);
+  for (let i = 0; i < 700 && !(G.p.onGround && G.p.g === 1 && Bot.px() > 330); i++) Bot.tick();
+  Bot.dir(0);
+  Bot.expect(G.p.onGround && Bot.px() > 330, "across the first pit and the glass");
+  Bot.walkTo(352, 3);
+  Bot.run(10);
+  Bot.stop();
+  Bot.waitUntil(() => rest("flip")() && rest("phase")() && rest("flip2")(), 1200, "all three to settle");
+  Bot.dir(1);
+  for (let i = 0; i < 1200 && !G.won; i++) Bot.tick();
+  Bot.dir(0);
+  Bot.expect(G.won, "across both pits and out");
+};
