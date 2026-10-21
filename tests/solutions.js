@@ -349,10 +349,9 @@ SOLUTIONS["SUNKEN GATE"] = () => {
   Bot.walkTo(570);
 };
 
-SOLUTIONS["GATEHOUSE"] = () => {
-  // slots: shade, glow. The shade hangs in the air beside the ledge as a step. The glow is recorded climbing it and resting
-  // by the gate. Both are needed again on the real run.
-  Bot.record("shade");
+SOLUTIONS["LANTERN RISE"] = () => {
+  // One glow does both jobs: hung in mid air beside the ledge it is the step up, and its light opens the gate.
+  Bot.record("glow");
   Bot.walkTo(256);
   Bot.jumpKey(true);
   Bot.dir(1);
@@ -366,22 +365,13 @@ SOLUTIONS["GATEHOUSE"] = () => {
   Bot.jumpKey(false);
   Bot.dir(0);
   Bot.stop();
-  const climb = () => {
-    Bot.waitUntil(() => G.echoes.shade.restT > 30 && (!G.echoes.glow || G.echoes.glow.restT > 30), 900, "the echoes to settle");
-    Bot.walkTo(240);
-    Bot.jumpTo(G.echoes.shade.x + PW / 2, 24);
-    Bot.expect(G.p.stand === G.echoes.shade, "standing on the step");
-    Bot.jumpTo(330, 24);
-    Bot.expect(G.p.onGround && G.p.y < 190, "up on the ledge");
-  };
-  Bot.record("glow");
-  climb();
-  Bot.walkTo(390);
-  Bot.run(6);
-  Bot.stop();
-  climb();
-  Bot.walkTo(380);
-  Bot.waitUntil(() => G.L.gates.every((x) => x.open), 900, "the gate to open");
+  Bot.waitUntil(() => G.echoes.glow.restT > 30, 900, "the glow to settle");
+  Bot.walkTo(240);
+  Bot.jumpTo(G.echoes.glow.x + PW / 2, 24);
+  Bot.expect(G.p.stand === G.echoes.glow, "standing on the glow");
+  Bot.jumpTo(290, 24);
+  Bot.expect(G.p.onGround && G.p.y < 190, "up on the ledge");
+  Bot.waitUntil(() => G.L.gates.every((x) => x.open), 600, "the gate to open");
   Bot.walkTo(570);
 };
 
