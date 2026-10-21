@@ -97,19 +97,6 @@ def(0, "TWIN PLATES", {
   g.set(5, 9, "L").set(13, 6, "L").set(25, 9, "L");
 });
 
-def(0, "STEP UP", {
-  echoes: ["shade", "shade"], recMax: 10,
-  hint: "THE LEDGE IS TOO HIGH TO JUMP. A FROZEN JUMP IS A STEP, AND AN ECHO CAN HOLD THE PLATE UP THERE.",
-}, (g) => {
-  g.base();
-  g.set(2, 14, "@");
-  g.fill(10, 11, 14, 14, "#");
-  g.set(12, 10, "a");
-  g.fill(18, 1, 18, 8, "#").fill(18, 9, 18, 14, "A");
-  g.fill(28, 13, 28, 14, "X");
-  g.set(5, 9, "L").set(16, 8, "L").set(24, 9, "L");
-});
-
 def(0, "STAIRCASE", {
   echoes: ["shade", "shade", "shade"], recMax: 12,
   hint: "ONE STEP IN THE AIR IS NOT ENOUGH FOR THIS LEDGE. BUILD THE STAIRS FROM YOUR OWN JUMPS, THEN LEAVE SOMEONE ON THE PLATE.",
@@ -209,10 +196,10 @@ def(1, "UNDER GLASS", {
 }, (g) => {
   g.base();
   g.set(2, 14, "@");
-  g.fill(14, 16, 18, 16, ".");
-  g.fill(15, 15, 17, 15, "%");
-  g.set(16, 16, "a");
-  g.set(17, 16, "o");
+  g.fill(5, 16, 9, 16, ".");
+  g.fill(6, 15, 8, 15, "%");
+  g.set(7, 16, "a");
+  g.set(8, 16, "o");
   g.fill(23, 1, 23, 8, "#");
   g.fill(23, 9, 23, 14, "A");
   g.fill(28, 13, 28, 14, "X");
@@ -450,20 +437,6 @@ def(3, "APEX", {
   g.set(6, 9, "L").set(20, 9, "L").set(25, 9, "L");
 });
 
-def(3, "WAYPOINT", {
-  echoes: ["phase", "shade"], recMax: 24, swap: true,
-  hint: "A SWAP DOES NOT CARE ABOUT WALLS. AND A WALL IS ONLY IN THE WAY WHILE IT IS THERE.",
-}, (g) => {
-  g.base();
-  g.set(2, 14, "@");
-  g.fill(11, 8, 27, 8, "#");
-  g.fill(11, 9, 12, 14, "%");
-  g.fill(27, 9, 27, 14, "#");
-  g.fill(22, 9, 23, 14, "%");
-  g.fill(25, 13, 25, 14, "X");
-  g.set(5, 9, "L").set(16, 12, "L");
-});
-
 def(3, "UPSIDE DOWN", {
   echoes: ["flip"], recMax: 10, swap: true,
   hint: "THE FLOOR IS DEATH ALL THE WAY ACROSS AND ONE ZONE ONLY REACHES SO FAR. WHEREVER YOU SWAP FROM, THE ZONE GOES THERE, AND THE DOOR WANTS SOMETHING LEFT ON ITS PLATE.",
@@ -629,7 +602,6 @@ const PAR = {
   "BREEZE": { t: 15, r: 1 },
   "GALLOP": { t: 35, r: 3 },
   "LEAPFROG": { t: 25, r: 1 },
-  "WAYPOINT": { t: 35, r: 3 },
   "AFTERIMAGE": { t: 55, r: 4 },
   "CHORUS": { t: 100, r: 6 },
   "SAIL": { t: 25, r: 2 },
@@ -638,7 +610,6 @@ const PAR = {
   "UPSIDE DOWN": { t: 22, r: 1 },
   "NIGHT TRAIN": { t: 50, r: 2 },
   "THREE PANES": { t: 32, r: 3 },
-  "STEP UP": { t: 30, r: 2 },
   "GLASS CEILING": { t: 35, r: 2 },
   "UP AND OVER": { t: 40, r: 3 },
   "STAIRCASE": { t: 45, r: 3 },

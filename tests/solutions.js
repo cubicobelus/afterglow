@@ -142,31 +142,31 @@ SOLUTIONS["GLASS WALL"] = () => {
 // 8 UNDER GLASS
 SOLUTIONS["UNDER GLASS"] = () => {
   Bot.record("phase");
-  Bot.walkTo(330);
+  Bot.walkTo(150);
   Bot.run(6);
   Bot.stop();
   // The hatch dissolves once the phase echo is there; drop in and stand on the plate.
-  Bot.walkTo(330, 3);
+  Bot.walkTo(150, 3);
   Bot.waitUntil(echoDone("phase"), 600, "phase echo to settle");
   Bot.record("shade");
-  Bot.walkTo(330, 3);
+  Bot.walkTo(150, 3);
   Bot.waitUntil(() => G.p.onGround && G.p.y > 320, 160, "player to drop into the vault");
-  Bot.walkTo(330, 3);
+  Bot.walkTo(150, 3);
   Bot.expect(G.L.plates[0].pressed, "plate pressed in the vault");
   Bot.run(6);
   Bot.stop();
-  Bot.walkTo(270);
+  Bot.walkTo(90);
   Bot.waitUntil(() => G.L.doorOpen.a && echoDone("phase")() && echoDone("shade")(), 900, "door open");
   // Drop into the vault for the lantern, then climb back out to the left through the open hatch.
   Bot.dir(1);
-  for (let i = 0; i < 200 && !(G.p.onGround && G.p.y > 320 && Bot.px() > 362); i++) Bot.tick();
+  for (let i = 0; i < 200 && !(G.p.onGround && G.p.y > 320 && Bot.px() > 182); i++) Bot.tick();
   Bot.dir(0);
   Bot.expect(G.lanternsGot === 1, "the lantern in the vault");
-  Bot.walkTo(330);
-  Bot.jumpTo(285, 24);
-  Bot.walkTo(290);
-  Bot.jumpTo(375, 24);
-  Bot.walkTo(520);
+  Bot.walkTo(150);
+  Bot.jumpTo(105, 24);
+  Bot.walkTo(110);
+  Bot.jumpTo(195, 24);
+  Bot.walkTo(400);
   Bot.walkTo(570);
 };
 
@@ -324,11 +324,11 @@ SOLUTIONS["SUNKEN GATE"] = () => {
     Bot.jumpTo(305, 24); // platform D
   };
   Bot.record("glow");
-  climb(true);
+  climb(false);
   Bot.walkTo(362);
   Bot.run(6);
   Bot.stop();
-  climb(false);
+  climb(true); // a lantern only counts on a real run, so it is picked up here, not while recording
   Bot.walkTo(366);
   Bot.waitUntil(() => G.L.gates.every((x) => x.open), 600, "the gate to open");
   Bot.walkTo(570);
@@ -568,38 +568,6 @@ SOLUTIONS["BREEZE"] = () => {
   Bot.stop();
   crossWithWind(335);
   Bot.walkTo(570);
-};
-
-SOLUTIONS["WAYPOINT"] = () => {
-  // slots: shade, phase (swap on). The exit is in a room inside a sealed building: crystal wall, then another crystal wall.
-  // One phase opens only one of them, but a swap works through walls, even while recording.
-  // The phase opens the front, a shade walks in and waits inside, then the phase is recorded again: during that
-  // recording you swap to the shade (so you are inside the building) and walk to the inner wall.
-  const rest = (k) => () => G.echoes[k] && G.echoes[k].restT > 30;
-  Bot.record("phase");
-  Bot.walkTo(205);
-  Bot.run(6);
-  Bot.stop();
-  Bot.record("shade");
-  Bot.walkTo(205);
-  Bot.waitUntil(rest("phase"), 900, "the front wall to give way");
-  Bot.walkTo(330);
-  Bot.run(6);
-  Bot.stop();
-  Bot.record("phase");
-  Bot.waitUntil(rest("shade"), 900, "the shade to settle inside");
-  Bot.select("shade");
-  Bot.swap();
-  Bot.expect(Bot.px() > 280 && Bot.px() < 540, "inside the building");
-  Bot.walkTo(430);
-  Bot.run(6);
-  Bot.stop();
-  Bot.waitUntil(() => rest("shade")() && rest("phase")(), 900, "the echoes to settle");
-  Bot.select("shade");
-  Bot.swap();
-  Bot.expect(Bot.px() > 280 && Bot.px() < 540, "inside the building again");
-  Bot.walkTo(430);
-  Bot.walkTo(510);
 };
 
 SOLUTIONS["SAIL"] = () => {
@@ -1149,43 +1117,6 @@ SOLUTIONS["THREE PANES"] = () => {
   Bot.stop();
   Bot.waitUntil(() => rest("phase")() && rest("phase2")(), 900, "all three walls to give way");
   Bot.walkTo(590);
-};
-
-SOLUTIONS["STEP UP"] = () => {
-  // slots: shade, shade2. The first shade is recorded in mid-jump against the block, a step in the air.
-  // The second climbs it, walks onto the ledge and stands on the plate.
-  Bot.record("shade");
-  Bot.walkTo(176);
-  Bot.jumpKey(true);
-  Bot.dir(1);
-  let found = false;
-  for (let i = 0; i < 90; i++) {
-    Bot.tick();
-    const h = 300 - Bot.feet();
-    if (i > 8 && G.p.vy > 0 && h <= 44 && h >= 28) { found = true; break; }
-  }
-  Bot.expect(found, "a hover window beside the block");
-  Bot.jumpKey(false);
-  Bot.dir(0);
-  Bot.stop();
-  Bot.record("shade2");
-  Bot.waitUntil(() => !G.echoes.shade.moving, 600, "the step to settle");
-  const step = G.echoes.shade;
-  Bot.walkTo(160);
-  Bot.jumpTo(step.x + PW / 2, 24);
-  Bot.expect(G.p.stand === step, "standing on the step");
-  Bot.jumpTo(250, 24);
-  Bot.expect(G.p.onGround && G.p.y < 210, "up on the ledge");
-  Bot.walkTo(250);
-  Bot.run(6);
-  Bot.stop();
-  Bot.waitUntil(() => !G.echoes.shade.moving && !G.echoes.shade2.moving, 900, "the echoes to settle");
-  Bot.walkTo(160);
-  Bot.jumpTo(step.x + PW / 2, 24);
-  Bot.jumpTo(280, 24);
-  Bot.walkTo(335);
-  Bot.waitUntil(() => G.L.doorOpen.a, 300, "the door to open");
-  Bot.walkTo(570);
 };
 
 SOLUTIONS["GLASS CEILING"] = () => {

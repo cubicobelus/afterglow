@@ -18,7 +18,7 @@ const App = (() => {
   // ---------------------------------------------------------------- save
   const SAVE_KEY = "afterglow.save";
   const SETTINGS_KEY = "afterglow.settings";
-  const SAVE_VERSION = 6;
+  const SAVE_VERSION = 7;
   let save = { done: [], best: {}, stars: {}, lanterns: {}, seen: {} };
   let hadSave = false;
   try {
@@ -53,6 +53,11 @@ const App = (() => {
         "FERRY", "LIFT", "TRAMPOLINE", "SKYHOOK", "TWO STAGES", "FERRY LIGHT", "SLUICE", "STACKED SPRINGS", "SLINGSHOT", "PUMP ROOM",
         "LEAPFROG", "SECOND WIND", "STAY BEHIND", "APEX", "WAYPOINT", "UPSIDE DOWN", "WATCHTOWER", "GLASS CEILING", "TWO BANKS", "NIGHT TRAIN",
         "BREEZE", "STONE AND SAIL", "SAIL", "GALLOP", "CLOCKWORK", "UP AND OVER", "TWO UPDRAFTS", "AFTERIMAGE", "CHORUS"],
+      6: ["FIRST STEPS", "THE PLATE", "STEPPING STONE", "TWIN PLATES", "STEP UP", "STAIRCASE", "LAMPLIGHT", "SUNKEN GATE", "RELAY", "SWITCHBOARD",
+        "GLASS WALL", "UNDER GLASS", "UPDRAFT", "CEILING PLATE", "GHOST GLASS", "THREE PANES", "HALL OF MIRRORS",
+        "FERRY", "TRAMPOLINE", "SKYHOOK", "TWO STAGES", "FERRY LIGHT", "SLUICE", "STAGECOACH", "SLINGSHOT", "PUMP ROOM",
+        "LEAPFROG", "STAY BEHIND", "APEX", "WAYPOINT", "UPSIDE DOWN", "GLASS CEILING", "NIGHT TRAIN",
+        "BREEZE", "SAIL", "GALLOP", "WEATHERVANE", "UP AND OVER", "AFTERIMAGE", "CHORUS"],
     };
     // Same name but a different puzzle now: the old result no longer applies.
     const REDESIGNED = {
@@ -61,6 +66,7 @@ const App = (() => {
       3: { "SAIL": true, "SWITCHBOARD": true },
       4: { "SAIL": true, "SWITCHBOARD": true },
       5: { "SWITCHBOARD": true },
+      6: {},
     };
     // The level is the same but its lantern moved, so the old pickup no longer counts.
     const LANTERN_MOVED = { "TRAMPOLINE": true, "SUNKEN GATE": true };

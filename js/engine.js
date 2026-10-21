@@ -714,8 +714,9 @@ function tick() {
     if (!lit && overlap({ x: p.x + 2, y: p.y + 2, w: PW - 4, h: PH - 4 }, th)) { kill(); updateParticles(); return; }
   }
   const pcx = p.x + PW / 2, pcy = p.y + PH / 2;
+  // A lantern only counts on a real run, not while an echo is being recorded.
   for (const ln of L.lanterns) {
-    if (!ln.got && Math.abs(pcx - ln.x) < 11 && Math.abs(pcy - ln.y) < 13) {
+    if (!G.rec && !ln.got && Math.abs(pcx - ln.x) < 11 && Math.abs(pcy - ln.y) < 13) {
       ln.got = true;
       G.lanternsGot++;
       burst(ln.x, ln.y, 18, "#ffe08a", 90, 0.8, 2, -30);

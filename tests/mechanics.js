@@ -68,6 +68,18 @@ mech("lantern pickup", () => {
   ensure(G.lanternsGot === 1 && G.L.lanterns[0].got, "lantern collected");
 });
 
+mech("a lantern is not collected while an echo is being recorded", () => {
+  Bot.load(tiny({ echoes: ["shade"], recMax: 8 }, (g) => { g.base(); g.set(2, 14, "@"); g.set(8, 14, "o"); }));
+  Bot.record(0);
+  Bot.walkTo(190);
+  Bot.run(3);
+  ensure(G.lanternsGot === 0 && !G.L.lanterns[0].got, "no lantern while recording");
+  Bot.stop();
+  Bot.walkTo(190);
+  Bot.run(3);
+  ensure(G.lanternsGot === 1 && G.L.lanterns[0].got, "lantern collected on the real run");
+});
+
 mech("tide: ping-pongs along its path and carries the player", () => {
   Bot.load(tiny({ echoes: ["tide"], recMax: 8 }, (g) => { g.base(); g.set(2, 14, "@"); }));
   Bot.record(0);
