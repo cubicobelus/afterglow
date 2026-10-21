@@ -322,7 +322,7 @@ def(1, "HALL OF MIRRORS", {
 
 def(1, "SKYLIGHT", {
   bonus: 20, echoes: ["phase", "flip", "flip"], recMax: 20,
-  hint: "THE GLASS IS HIGH ABOVE THE FLOOR. AN ECHO CAN HANG IN THE AIR. THE HIGHER IT HANGS, THE HIGHER ITS FIELD REACHES.",
+  hint: "A FLIP ON THE FLOOR CANNOT LIFT YOU HIGH ENOUGH. RECORD THE PHASE AT THE TOP OF A JUMP UNDER THE GLASS, THEN A FLIP PART WAY UP A JUMP. A SECOND FLIP FOR THE ROAD ABOVE.",
 }, (g) => {
   g.base();
   g.set(2, 14, "@");
@@ -330,7 +330,8 @@ def(1, "SKYLIGHT", {
   g.fill(10, 2, 16, 8, ".");
   g.fill(17, 7, 29, 8, ".");
   g.fill(14, 9, 16, 9, "%");
-  g.fill(20, 9, 23, 9, ".");
+  g.fill(20, 9, 23, 9, "^");
+  g.fill(20, 10, 23, 10, "#");
   g.fill(28, 7, 28, 8, "X");
   g.set(5, 8, "L").set(12, 4, "L");
 });
