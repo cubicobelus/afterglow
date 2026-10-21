@@ -231,6 +231,21 @@ def(1, "THREE PANES", {
   g.set(4, 9, "L").set(12, 9, "L").set(22, 9, "L");
 });
 
+def(1, "GHOST GLASS", {
+  echoes: ["phase", "shade"], recMax: 10,
+  hint: "TWO WALLS OF GLASS AND ONE PHASE. AN ECHO IS ONLY A MEMORY.",
+}, (g) => {
+  g.base();
+  g.set(7, 14, "@");
+  g.fill(3, 1, 4, 14, "%");
+  g.set(1, 14, "a");
+  g.fill(12, 1, 13, 14, "%");
+  g.fill(20, 1, 20, 8, "#");
+  g.fill(20, 9, 20, 14, "A");
+  g.fill(27, 13, 27, 14, "X");
+  g.set(9, 8, "L").set(16, 8, "L").set(24, 8, "L").set(1, 9, "L");
+});
+
 def(1, "OVERHEAD", {
   unlock: "flip", echoes: ["flip"], recMax: 8,
   hint: "RECORD AT THE EDGE OF THE PIT. THEN STEP INTO THE FLIP ZONE, FALL UPWARD AND WALK THE CEILING ACROSS.",
@@ -258,21 +273,6 @@ def(1, "CEILING PLATE", {
   g.set(5, 9, "L").set(26, 9, "L");
 });
 
-def(1, "GHOST GLASS", {
-  echoes: ["phase", "shade"], recMax: 10,
-  hint: "TWO WALLS OF GLASS AND ONE PHASE. AN ECHO IS ONLY A MEMORY.",
-}, (g) => {
-  g.base();
-  g.set(7, 14, "@");
-  g.fill(3, 1, 4, 14, "%");
-  g.set(1, 14, "a");
-  g.fill(12, 1, 13, 14, "%");
-  g.fill(20, 1, 20, 8, "#");
-  g.fill(20, 9, 20, 14, "A");
-  g.fill(27, 13, 27, 14, "X");
-  g.set(9, 8, "L").set(16, 8, "L").set(24, 8, "L").set(1, 9, "L");
-});
-
 def(1, "LOOKING GLASS", {
   echoes: ["phase", "flip"], recMax: 14,
   hint: "THE ROAD ACROSS IS ON THE CEILING, AND A WALL OF GLASS WAITS AT THE FAR EDGE. AN ECHO CAN STAND ON THE CEILING TOO.",
@@ -280,27 +280,24 @@ def(1, "LOOKING GLASS", {
   g.base();
   g.set(2, 14, "@");
   g.pit(12, 15);
-  g.fill(8, 1, 20, 12, "#");
+  g.fill(8, 1, 30, 12, "#");
   g.fill(16, 13, 16, 14, "%");
   g.fill(28, 13, 28, 14, "X");
-  g.set(5, 8, "L").set(24, 8, "L");
+  g.set(5, 8, "L");
 });
 
-def(1, "HANGING GLASS", {
-  echoes: ["flip", "phase", "shade"], recMax: 14,
-  hint: "A PANE OF GLASS HANGS ACROSS THE CEILING ROAD. AND ANOTHER WALL WAITS BEYOND THE DOOR.",
+def(1, "HALF OPEN", {
+  echoes: ["phase"], recMax: 10,
+  hint: "THE ROOM ABOVE IS TOO HIGH TO JUMP INTO. OPEN ONLY PART OF THE GLASS. WHAT IS LEFT IS A STEP.",
 }, (g) => {
   g.base();
   g.set(2, 14, "@");
-  g.fill(8, 1, 23, 10, "#");
-  g.fill(13, 11, 13, 12, "%");
-  g.set(15, 14, "#");
-  g.set(14, 11, "1");
-  g.set(15, 13, "a");
-  g.fill(23, 11, 23, 14, "A");
-  g.fill(26, 1, 26, 14, "%");
-  g.fill(29, 13, 29, 14, "X");
-  g.set(5, 9, "L").set(27, 9, "L");
+  g.fill(8, 1, 30, 12, "#");
+  g.fill(10, 5, 29, 8, ".");
+  g.fill(14, 9, 16, 11, ".");
+  g.fill(14, 12, 16, 12, "%");
+  g.fill(27, 7, 27, 8, "X");
+  g.set(5, 8, "L").set(12, 6, "L");
 });
 
 def(1, "HALL OF MIRRORS", {
@@ -321,18 +318,20 @@ def(1, "HALL OF MIRRORS", {
 });
 
 def(1, "LONG GALLERY", {
-  bonus: 20, echoes: ["phase", "flip", "flip"], recMax: 20,
-  hint: "TWO PITS AND A WALL OF GLASS UNDER ONE LOW CEILING. THE SECOND ROAD STARTS WHERE THE FIRST ONE ENDS.",
+  bonus: 20, echoes: ["phase", "phase", "flip", "flip"], recMax: 24,
+  hint: "TWO PITS, A WALL OF GLASS AND A PLUG UNDER ONE LOW CEILING. EACH ROAD STARTS WHERE THE LAST ONE ENDS.",
 }, (g) => {
   g.base();
   g.set(2, 14, "@");
   g.pit(12, 15).pit(18, 21);
-  g.fill(8, 1, 27, 12, "#");
+  g.fill(8, 1, 30, 12, "#");
   g.fill(16, 13, 16, 14, "%");
-  g.fill(29, 13, 29, 14, "X");
-  g.set(5, 8, "L").set(30, 8, "L");
+  g.fill(22, 5, 30, 8, ".");
+  g.fill(25, 9, 27, 11, ".");
+  g.fill(25, 12, 27, 12, "%");
+  g.fill(29, 7, 29, 8, "X");
+  g.set(5, 8, "L");
 });
-
 
 // ================================================================ tier 3: the tideworks
 def(2, "FERRY", {
@@ -650,8 +649,8 @@ const PAR = {
   "GHOST GLASS": { t: 20, r: 3 },
   "HALL OF MIRRORS": { t: 50, r: 4 },
   "LOOKING GLASS": { t: 30, r: 2 },
-  "HANGING GLASS": { t: 75, r: 4 },
-  "LONG GALLERY": { t: 45, r: 3 },
+  "HALF OPEN": { t: 25, r: 1 },
+  "LONG GALLERY": { t: 75, r: 4 },
   "FERRY": { t: 25, r: 1 },
   "TRAMPOLINE": { t: 20, r: 1 },
   "SKYHOOK": { t: 20, r: 1 },

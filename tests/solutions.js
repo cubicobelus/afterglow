@@ -1442,9 +1442,46 @@ SOLUTIONS["HANGING GLASS"] = () => {
   Bot.walkTo(590);
 };
 
+SOLUTIONS["HALF OPEN"] = () => {
+  // One phase, placed off to one side of the plug: it opens part of the glass and the rest is the second step.
+  const rest = (k) => () => G.echoes[k] && G.echoes[k].restT > 30;
+  Bot.record("phase");
+  Bot.walkTo(255, 3);
+  Bot.dir(1);
+  for (let i = 0; i < 300 && Bot.px() < 270; i++) Bot.tick();
+  Bot.dir(0);
+  Bot.run(10);
+  Bot.stop();
+  Bot.waitUntil(rest("phase"), 900, "the phase echo to settle");
+  Bot.walkTo(270, 3);
+  Bot.dir(1);
+  for (let i = 0; i < 300 && Bot.px() < 286; i++) Bot.tick();
+  Bot.dir(0);
+  // First jump through the opening onto the leftover glass, second jump out of the shaft.
+  for (let rep = 0; rep < 3 && !(G.p.onGround && G.p.y < 175); rep++) {
+    Bot.jumpKey(true);
+    for (let i = 0; i < 45; i++) { Bot.dir(i > 14 ? 1 : 0); Bot.tick(); }
+    Bot.jumpKey(false);
+    for (let i = 0; i < 40; i++) { Bot.dir(1); Bot.tick(); }
+  }
+  Bot.dir(0);
+  Bot.expect(G.p.y < 175, "up in the room");
+  Bot.walkTo(Bot.px() + 1);
+  // Cross the shaft in the room floor and reach the door.
+  Bot.dir(1);
+  for (let i = 0; i < 600 && !G.won; i++) {
+    if (G.p.onGround && Bot.px() > 330 && Bot.px() < 345) Bot.jumpKey(true); else if (G.p.onGround) Bot.jumpKey(false);
+    Bot.tick();
+  }
+  Bot.jumpKey(false);
+  Bot.dir(0);
+  Bot.expect(G.won, "at the door");
+};
+
 SOLUTIONS["LONG GALLERY"] = () => {
-  // slots: phase, flip, flip2. Same trick as Looking Glass, then a second road: the first flip carries you over the first pit and
-  // the phase (recorded on that ceiling road) opens the glass; the second flip is recorded at the lip of the second pit.
+  // slots: phase, phase2, flip, flip2. Looking Glass first: the flip carries you over the first pit and the phase (recorded on that
+  // ceiling road) opens the glass. The second flip is recorded at the lip of the second pit. The second phase is then placed beside
+  // the plug at the end, so that it opens only part of it, and the rest is the step up to the room with the door.
   const rest = (k) => () => G.echoes[k] && G.echoes[k].restT > 30;
   Bot.record("flip");
   Bot.walkTo(228, 3);
@@ -1468,9 +1505,33 @@ SOLUTIONS["LONG GALLERY"] = () => {
   Bot.walkTo(352, 3);
   Bot.run(10);
   Bot.stop();
-  Bot.waitUntil(() => rest("flip")() && rest("phase")() && rest("flip2")(), 1200, "all three to settle");
+  Bot.record("phase2");
+  Bot.waitUntil(() => rest("flip")() && rest("phase")() && rest("flip2")(), 1200, "three echoes to settle");
   Bot.dir(1);
-  for (let i = 0; i < 1200 && !G.won; i++) Bot.tick();
+  for (let i = 0; i < 1200 && !(G.p.onGround && G.p.g === 1 && Bot.px() > 470); i++) Bot.tick();
   Bot.dir(0);
-  Bot.expect(G.won, "across both pits and out");
+  Bot.expect(G.p.onGround && Bot.px() > 470, "across both pits");
+  Bot.walkTo(490, 3);
+  Bot.run(10);
+  Bot.stop();
+  Bot.waitUntil(() => rest("flip")() && rest("phase")() && rest("flip2")() && rest("phase2")(), 1500, "all four to settle");
+  Bot.dir(1);
+  for (let i = 0; i < 1200 && !(G.p.onGround && G.p.g === 1 && Bot.px() > 470); i++) Bot.tick();
+  Bot.walkTo(518, 3);
+  for (let rep = 0; rep < 3 && !(G.p.onGround && G.p.y < 175); rep++) {
+    Bot.jumpKey(true);
+    for (let i = 0; i < 45; i++) { Bot.dir(i > 14 ? 1 : 0); Bot.tick(); }
+    Bot.jumpKey(false);
+    for (let i = 0; i < 40; i++) { Bot.dir(1); Bot.tick(); }
+  }
+  Bot.dir(0);
+  Bot.expect(G.p.y < 175, "up in the room");
+  Bot.dir(1);
+  for (let i = 0; i < 600 && !G.won; i++) {
+    if (G.p.onGround && Bot.px() > 550 && Bot.px() < 565) Bot.jumpKey(true); else if (G.p.onGround) Bot.jumpKey(false);
+    Bot.tick();
+  }
+  Bot.jumpKey(false);
+  Bot.dir(0);
+  Bot.expect(G.won, "at the door");
 };
