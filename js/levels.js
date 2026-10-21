@@ -747,7 +747,7 @@ def(9, "FOUNDATION TEMP", {
   g.set(4, 9, "L").set(12, 5, "L").set(19, 7, "L").set(26, 8, "L");
 });
 
-// ================================================================ the lab: one room per new echo
+// ================================================================ the lab: one room per new echo (the benched ones last)
 def(10, "CALM", {
   lab: true, unlock: "calm", echoes: ["calm"], recMax: 8,
   hint: "A VENT BLOWS ACROSS THE GAP. RECORD A CALM BY THE EDGE: IT SILENCES THE WIND AROUND IT.",
@@ -772,15 +772,15 @@ def(10, "MIRROR", {
   g.set(5, 9, "L").set(25, 9, "L");
 });
 
-def(10, "FLOAT", {
-  lab: true, unlock: "float", echoes: ["float"], recMax: 8,
-  hint: "THE LEDGE IS A LITTLE HIGHER THAN A JUMP. GRAVITY IS WEAK INSIDE THE RING.",
+def(10, "VINE", {
+  lab: true, unlock: "vine", echoes: ["vine"], recMax: 8,
+  hint: "RECORD A VINE AT THE FOOT OF THE WALL AND WAIT. HOLD JUMP TO CLIMB IT. LET GO AND YOU SLIDE.",
 }, (g) => {
   g.base();
   g.set(2, 14, "@");
-  g.fill(20, 10, 30, 14, "#");
-  g.fill(28, 8, 28, 9, "X");
-  g.set(5, 8, "L").set(14, 6, "L");
+  g.fill(20, 9, 30, 14, "#");
+  g.fill(28, 7, 28, 8, "X");
+  g.set(5, 8, "L").set(14, 5, "L");
 });
 
 def(10, "PULL", {
@@ -794,9 +794,69 @@ def(10, "PULL", {
   g.set(5, 8, "L").set(13, 5, "L").set(24, 8, "L");
 });
 
+def(10, "BEAM", {
+  lab: true, unlock: "beam", echoes: ["beam"], recMax: 8,
+  hint: "THE THORNS WITHER IN LIGHT. A BEAM LIGHTS EVERYTHING ALONG ITS LENGTH. STAND FACING THE THORNS AND RECORD.",
+}, (g) => {
+  g.base();
+  g.set(2, 14, "@");
+  g.fill(8, 14, 20, 14, "t");
+  g.fill(28, 13, 28, 14, "X");
+  g.set(5, 8, "L").set(24, 8, "L");
+});
+
+def(10, "REFLECTOR", {
+  lab: true, unlock: "reflector", echoes: ["reflector"], recMax: 8,
+  hint: "A BEAM FALLS FROM THE CEILING AND THE GATE WANTS LIGHT. STAND IN THE BEAM AND RECORD A REFLECTOR: FACING LEFT IT TURNS THE BEAM TO THE RIGHT.",
+}, (g) => {
+  g.base();
+  g.set(2, 14, "@");
+  g.set(20, 1, "s");
+  g.fill(24, 1, 24, 12, "#").fill(24, 13, 24, 14, "G");
+  g.fill(28, 13, 28, 14, "X");
+  g.set(5, 8, "L").set(14, 6, "L");
+});
+
+def(10, "FORK", {
+  lab: true, unlock: "fork", echoes: ["fork"], recMax: 14,
+  hint: "THE DOOR NEEDS BOTH PLATES. STAND ON THE FIRST FOR A WHILE, THEN WALK TO THE SECOND AND STAY. YOUR TWIN FOLLOWS A FEW SECONDS LATER.",
+}, (g) => {
+  g.base();
+  g.set(2, 14, "@");
+  g.set(8, 14, "a").set(11, 14, "a");
+  g.fill(16, 1, 16, 8, "#").fill(16, 9, 16, 14, "A");
+  g.fill(28, 13, 28, 14, "X");
+  g.set(5, 8, "L").set(22, 8, "L");
+});
+
+def(10, "SHIFT", {
+  lab: true, unlock: "shift", echoes: ["shift"], recMax: 8,
+  hint: "THE GOLD BLOCK AND THE DARK BRIDGE ARE THE SAME ROOM SEEN FROM TWO SIDES. INSIDE THE RING GOLD VANISHES AND DARK APPEARS. RECORD INSIDE THE TUNNEL.",
+}, (g) => {
+  g.base();
+  g.set(2, 14, "@");
+  g.fill(8, 1, 20, 12, "#");
+  g.fill(9, 15, 12, 17, ".");
+  g.fill(9, 15, 12, 15, "*");
+  g.fill(13, 13, 13, 14, "+");
+  g.fill(28, 13, 28, 14, "X");
+  g.set(5, 8, "L").set(25, 8, "L");
+});
+
+def(10, "FLOAT", {
+  lab: true, benched: true, unlock: "float", echoes: ["float"], recMax: 8,
+  hint: "BENCHED. THE LEDGE IS A LITTLE HIGHER THAN A JUMP. GRAVITY IS WEAK INSIDE THE RING.",
+}, (g) => {
+  g.base();
+  g.set(2, 14, "@");
+  g.fill(20, 10, 30, 14, "#");
+  g.fill(28, 8, 28, 9, "X");
+  g.set(5, 8, "L").set(14, 6, "L");
+});
+
 def(10, "SLOW", {
-  lab: true, unlock: "slow", echoes: ["tide", "slow"], recMax: 14,
-  hint: "THE DOOR OPENS ONLY WHILE THE TIDE PASSES OVER THE PLATE, AND IT IS FAR TOO THICK TO CROSS IN THAT TIME. A SLOW RING MAKES THE TIDE LINGER.",
+  lab: true, benched: true, unlock: "slow", echoes: ["tide", "slow"], recMax: 14,
+  hint: "BENCHED. THE DOOR OPENS ONLY WHILE THE TIDE PASSES OVER THE PLATE, AND IT IS FAR TOO THICK TO CROSS IN THAT TIME. A SLOW RING MAKES THE TIDE LINGER.",
 }, (g) => {
   g.base();
   g.set(2, 14, "@");
@@ -807,8 +867,8 @@ def(10, "SLOW", {
 });
 
 def(10, "SHRINK", {
-  lab: true, unlock: "shrink", echoes: ["shrink"], recMax: 8,
-  hint: "THE TUNNEL IS HALF A TILE HIGH. YOU ARE HALF SIZE INSIDE THE RING, AND STAY SMALL UNTIL THERE IS ROOM TO GROW.",
+  lab: true, benched: true, unlock: "shrink", echoes: ["shrink"], recMax: 8,
+  hint: "BENCHED. THE TUNNEL IS HALF A TILE HIGH. YOU ARE HALF SIZE INSIDE THE RING, AND STAY SMALL UNTIL THERE IS ROOM TO GROW.",
 }, (g) => {
   g.base();
   g.set(2, 14, "@");
@@ -816,17 +876,6 @@ def(10, "SHRINK", {
   g.fill(12, 14, 20, 14, "-");
   g.fill(28, 13, 28, 14, "X");
   g.set(5, 8, "L").set(25, 8, "L");
-});
-
-def(10, "VINE", {
-  lab: true, unlock: "vine", echoes: ["vine"], recMax: 8,
-  hint: "RECORD A VINE AT THE FOOT OF THE WALL AND WAIT. HOLD JUMP TO CLIMB IT. LET GO AND YOU SLIDE.",
-}, (g) => {
-  g.base();
-  g.set(2, 14, "@");
-  g.fill(20, 9, 30, 14, "#");
-  g.fill(28, 7, 28, 8, "X");
-  g.set(5, 8, "L").set(14, 5, "L");
 });
 
 // Par for the two bonus stars: finish under par.t seconds, and use no more than par.r recordings.

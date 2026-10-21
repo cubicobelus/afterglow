@@ -21,6 +21,9 @@ const PULL_R = 96, PULL_VX = 220, PULL_K = 36, PULL_C = 9, PULL_G = 0.15; // dra
 const SLOW_R = 88, SLOW_RATE = 0.3;       // other echoes replay slowly inside it
 const SHRINK_R = 64, SHRINK_K = 0.5;      // you become half size inside it
 const VINE_H = 120, VINE_UP = 100, VINE_DOWN = 60; // a column that grows up from the echo; hold jump to climb
+const BEAM_W = 5, BEAM_BOUNCES = 8;       // half thickness of a light beam, and how many mirrors it can turn on
+const SHIFT_R = 110;                      // inside this ring the level shows its other side
+const FORK_DELAY = 150;                   // a fork echo has a twin that follows this many ticks later
 
 const KINDS = {
   shade: { name: "SHADE", color: "#8fb4ff", blurb: "HOLDS PLATES AND IS SOLID TO STAND ON." },
@@ -37,10 +40,14 @@ const KINDS = {
   slow: { name: "SLOW", color: "#7f98ff", blurb: "OTHER ECHOES MOVE AT HALF SPEED INSIDE ITS RING." },
   shrink: { name: "SHRINK", color: "#f7f09a", blurb: "YOU ARE HALF SIZE INSIDE ITS RING. SMALL GAPS OPEN." },
   vine: { name: "VINE", color: "#4fd68a", blurb: "GROWS A COLUMN UPWARD WHEN IT STOPS. HOLD JUMP TO CLIMB IT, LET GO TO SLIDE." },
+  beam: { name: "BEAM", color: "#f4ff7a", blurb: "SHOOTS A RAY OF LIGHT THE WAY IT FACED UNTIL IT HITS A WALL OR ANOTHER ECHO. IT OPENS GATES, WITHERS THORNS AND LIGHTS PLANKS ALL ALONG ITS LENGTH." },
+  reflector: { name: "REFLECTOR", color: "#cfe7ff", blurb: "A MIRROR. FACING RIGHT IT IS A SLASH, FACING LEFT A BACKSLASH. A BEAM THAT HITS IT TURNS A CORNER, WHETHER IT CAME FROM AN ECHO OR FROM THE WALL." },
+  fork: { name: "FORK", color: "#8fd0ff", blurb: "ONE RECORDING MAKES TWO ECHOES: THE FIRST, AND A TWIN THAT REPEATS IT A FEW SECONDS LATER." },
+  shift: { name: "SHIFT", color: "#8b5cff", blurb: "INSIDE ITS RING THE ROOM SHOWS ITS OTHER SIDE: GOLD BLOCKS VANISH AND DARK BLOCKS APPEAR." },
 };
 // Slots always appear in this order, whatever order a level lists its echoes in, so the numbers on the keys
 // never spell out the order you should record in.
-const KIND_ORDER = ["shade", "glow", "phase", "flip", "tide", "spring", "gust", "calm", "mirror", "float", "pull", "slow", "shrink", "vine"];
+const KIND_ORDER = ["shade", "glow", "phase", "flip", "tide", "spring", "gust", "calm", "mirror", "float", "pull", "slow", "shrink", "vine", "beam", "reflector", "fork", "shift"];
 const PLATE_COLORS = { a: "#4fd1ff", b: "#ffb347", c: "#ff6fae", d: "#9cff6f" };
 
 // Settings the player can change (the UI loads and saves these).
@@ -114,7 +121,7 @@ function rectDist2(px, py, r) {
 // ---------------------------------------------------------------- world state
 const G = {
   L: null, t: 0, p: null, echoes: {}, rec: null, sel: 0,
-  lights: [], flips: [], phases: [], winds: [], calms: [], floats: [], pulls: [], slows: [], shrinks: [], vines: [],
+  lights: [], flips: [], phases: [], winds: [], calms: [], floats: [], pulls: [], slows: [], shrinks: [], vines: [], shifts: [], beamRects: [], beams: [],
   dead: false, deadT: 0, won: false, winT: 0,
   deaths: 0, time: 0, timing: false, recCount: 0, swapCd: 0, lanternsGot: 0, notice: null,
   particles: [], shake: 0, onWin: null,
@@ -144,7 +151,7 @@ function parseLevel(which) {
     idx, def, name: def.name, chapter: def.chapter, dark: !!def.dark,
     echoes: (def.echoes || []).slice().sort((a, b) => KIND_ORDER.indexOf(a) - KIND_ORDER.indexOf(b)), recMax: def.recMax || 10, swap: !!def.swap, hint: def.hint || "",
     rows, walls: [], doorTiles: [], plates: [], planks: [], crystals: [], spikes: [], thorns: [], lamps: [],
-    oneways: [], gates: [], lanterns: [], halves: [], vents: [],
+    oneways: [], gates: [], lanterns: [], halves: [], vents: [], emitters: [], shiftL: [], shiftD: [],
     spawn: { x: 40, y: 100 }, exit: null, doorOpen: {}, hasDoor: {}, hasLamp: {},
   };
   // A level may list a kind more than once. The first slot of a kind is keyed by its name, later ones as name2, name3.
@@ -169,6 +176,9 @@ function parseLevel(which) {
       if (c >= COLS) continue;
       if (ch === "%") L.crystals.push({ x, y });
       else if (ch === "~") L.planks.push({ x, y });
+      else if (ch === "e" || ch === "w" || ch === "n" || ch === "s") L.emitters.push({ x: x + 10, y: y + 10, dx: ch === "e" ? 1 : ch === "w" ? -1 : 0, dy: ch === "s" ? 1 : ch === "n" ? -1 : 0, tx: c, ty: r });
+      else if (ch === "+") L.shiftL.push({ x, y });
+      else if (ch === "*") L.shiftD.push({ x, y });
       else if (ch === "<" || ch === ">") L.vents.push({ x: x + 10, y: y + 10, dir: ch === ">" ? 1 : -1, tx: c, ty: r });
       else if (ch === "_") { L.walls.push({ x, y: y + 10, w: TILE, h: 10 }); L.halves.push({ x, y: y + 10, top: false }); }
       else if (ch === "-") { L.walls.push({ x, y, w: TILE, h: 10 }); L.halves.push({ x, y, top: true }); }
@@ -246,6 +256,9 @@ function litRect(r) {
   for (const l of G.lights) {
     if (rectDist2(l.x, l.y, r) <= l.r * l.r && !calmedAt(r.x + r.w / 2, r.y + r.h / 2)) return true;
   }
+  for (const b of G.beamRects) {
+    if (r.x < b.x + b.w && r.x + r.w > b.x && r.y < b.y + b.h && r.y + r.h > b.y && !calmedAt(r.x + r.w / 2, r.y + r.h / 2)) return true;
+  }
   return false;
 }
 
@@ -253,6 +266,9 @@ function litPoint(x, y) {
   for (const l of G.lights) {
     const dx = x - l.x, dy = y - l.y;
     if (dx * dx + dy * dy <= l.r * l.r && !calmedAt(x, y)) return true;
+  }
+  for (const b of G.beamRects) {
+    if (x >= b.x && x <= b.x + b.w && y >= b.y && y <= b.y + b.h && !calmedAt(x, y)) return true;
   }
   return false;
 }
@@ -262,6 +278,65 @@ function inPhase(r) {
     if (rectDist2(f.x, f.y, r) <= f.r * f.r && !calmedAt(r.x + r.w / 2, r.y + r.h / 2)) return true;
   }
   return false;
+}
+
+// A cell of a gold or dark block is "shifted" when it lies inside a shift ring and outside every calm ring.
+function shiftedCell(r) {
+  for (const f of G.shifts) {
+    if (rectDist2(f.x, f.y, r) <= f.r * f.r && !calmedAt(r.x + r.w / 2, r.y + r.h / 2)) return true;
+  }
+  return false;
+}
+
+// A ray of light: runs along one axis until it meets a wall, a shut door or gate, or an echo, and turns a corner at each
+// reflector. Returns the thin rectangles it covers and the points it passes through.
+function traceBeam(x, y, dx, dy, skip, reflectors) {
+  const L = G.L, rects = [], pts = [{ x, y }];
+  let sx = x, sy = y, lastRef = -1;
+  const blocked = (px, py) => {
+    const c = Math.floor(px / TILE), r = Math.floor(py / TILE);
+    if (c < 0 || c >= COLS || r < 0 || r >= ROWS) return true;
+    const ch = L.rows[r][c];
+    if (ch === "#") return true;
+    if (ch === "G") return true;
+    if (ch >= "A" && ch <= "D" && !L.doorOpen[ch.toLowerCase()]) return true;
+    for (const h of L.halves) if (px >= h.x && px < h.x + TILE && py >= h.y && py < h.y + 10) return true;
+    for (const k in G.echoes) {
+      const e = G.echoes[k];
+      if (e === skip || e.kind === "reflector") continue;
+      if (px >= e.x && px <= e.x + PW && py >= e.y && py <= e.y + PH) return true;
+    }
+    return false;
+  };
+  const flush = (ex, ey) => {
+    rects.push({ x: Math.min(sx, ex) - BEAM_W, y: Math.min(sy, ey) - BEAM_W, w: Math.abs(ex - sx) + 2 * BEAM_W, h: Math.abs(ey - sy) + 2 * BEAM_W });
+    pts.push({ x: ex, y: ey });
+  };
+  let bounces = 0;
+  for (let step = 0; step < 400; step++) {
+    // did we run into a reflector (a 16 by 16 box around its centre)?
+    let hit = -1;
+    for (let i = 0; i < reflectors.length; i++) {
+      if (i === lastRef) continue;
+      if (Math.abs(x - reflectors[i].x) <= 8 && Math.abs(y - reflectors[i].y) <= 8) { hit = i; break; }
+    }
+    if (hit >= 0) {
+      const rf = reflectors[hit];
+      flush(rf.x, rf.y);
+      sx = x = rf.x; sy = y = rf.y;
+      // a slash turns (dx, dy) into (-dy, -dx); a backslash into (dy, dx)
+      if (rf.face >= 0) { const ndx = -dy, ndy = -dx; dx = ndx; dy = ndy; } else { const ndx = dy, ndy = dx; dx = ndx; dy = ndy; }
+      lastRef = hit;
+      if (++bounces > BEAM_BOUNCES) break;
+      x += dx * 2; y += dy * 2;
+      continue;
+    }
+    if (lastRef >= 0 && (Math.abs(x - reflectors[lastRef].x) > 9 || Math.abs(y - reflectors[lastRef].y) > 9)) lastRef = -1;
+    if (blocked(x + dx * 2, y + dy * 2)) { flush(x + dx * 3, y + dy * 3); return { rects, pts }; }
+    x += dx * 2; y += dy * 2;
+  }
+  flush(x, y);
+  return { rects, pts };
 }
 
 function computeFields() {
@@ -277,6 +352,9 @@ function computeFields() {
   G.slows = [];
   G.shrinks = [];
   G.vines = [];
+  G.shifts = [];
+  G.beamRects = [];
+  G.beams = [];
   // Echo powers switch on only once the echo has come to rest, growing in over a short ramp.
   const power = (echo) => (echo.moving ? 0 : Math.min(1, (echo.restT + 1) / RAMP));
   // A calm echo silences every other power inside its ring (calm itself is not silenced).
@@ -298,6 +376,7 @@ function computeFields() {
     else if (e.kind === "pull") G.pulls.push({ x: cx, y: cy, r: PULL_R * pw });
     else if (e.kind === "slow") G.slows.push({ x: cx, y: cy, r: SLOW_R * pw });
     else if (e.kind === "shrink") G.shrinks.push({ x: cx, y: cy, r: SHRINK_R * pw });
+    else if (e.kind === "shift") G.shifts.push({ x: cx, y: cy, r: SHIFT_R * pw });
     else if (e.kind === "vine" && e.restT > 12) {
       // the column grows from the feet of the echo, and stops under a ceiling
       const base = e.y + PH, grown = Math.min(VINE_H, (e.restT - 12) * 1.3);
@@ -308,6 +387,20 @@ function computeFields() {
       G.vines.push({ x: cx, base, top, echo: e });
     }
   }
+  // Light beams: from beam echoes at rest and from emitters in the walls, bent by reflector echoes at rest.
+  const reflectors = [];
+  for (const k in G.echoes) {
+    const e = G.echoes[k];
+    if (e.kind === "reflector" && !e.moving && !calmed(e.x + PW / 2, e.y + PH / 2)) reflectors.push({ x: e.x + PW / 2, y: e.y + PH / 2, face: e.face });
+  }
+  const addBeam = (b) => { G.beams.push(b); for (const r of b.rects) G.beamRects.push(r); };
+  for (const k in G.echoes) {
+    const e = G.echoes[k];
+    if (e.kind !== "beam" || e.moving || e.restT < 6 || calmed(e.x + PW / 2, e.y + PH / 2)) continue;
+    const d = e.face >= 0 ? 1 : -1;
+    addBeam(traceBeam(e.x + PW / 2 + d * 8, e.y + PH / 2, d, 0, e, reflectors));
+  }
+  for (const em of L.emitters) addBeam(traceBeam(em.x + em.dx * 10, em.y + em.dy * 10, em.dx, em.dy, null, reflectors));
   for (const v of L.vents) G.winds.push({ x: v.x, y: v.y, r: GUST_R, dir: v.dir, vent: true });
   for (const gt of L.gates) gt.open = litRect(gt);
 }
@@ -384,15 +477,17 @@ function cancelRec() {
   if (!r) return;
   G.rec = null;
   if (r.prev) G.echoes[r.key] = r.prev;
+  if (r.prevTwin) G.echoes[r.key + "~"] = r.prevTwin;
 }
 
 function startRec() {
   const L = G.L;
   const kind = L.echoes[G.sel], key = L.slotKeys[G.sel];
   if (!kind) return;
-  const prev = G.echoes[key];
+  const prev = G.echoes[key], prevTwin = G.echoes[key + "~"];
   delete G.echoes[key];
-  G.rec = { kind, key, trace: [], prev };
+  delete G.echoes[key + "~"];
+  G.rec = { kind, key, trace: [], prev, prevTwin };
   restartAttempt();
   SFX("recStart");
 }
@@ -411,6 +506,7 @@ function stopRec() {
   G.rec = null;
   if (r.kind === "tide" && r.trace.length >= MIN_REC && travelled(r.trace) < TIDE_MIN_TRAVEL) {
     if (r.prev) G.echoes[r.key] = r.prev;
+    if (r.prevTwin) G.echoes[r.key + "~"] = r.prevTwin;
     G.notice = { text: "A TIDE HAS TO TRAVEL", t: 150 };
     SFX("nope");
     restartAttempt();
@@ -418,12 +514,19 @@ function stopRec() {
   }
   if (r.trace.length >= MIN_REC) {
     G.echoes[r.key] = makeEcho(r.kind, r.trace, r.key);
+    // A fork has a twin: the same recording, started FORK_DELAY ticks later.
+    if (r.kind === "fork") {
+      const wait = [];
+      for (let i = 0; i < FORK_DELAY; i++) wait.push(r.trace[0]);
+      G.echoes[r.key + "~"] = makeEcho("fork", wait.concat(r.trace), r.key + "~");
+    }
     G.recCount++;
     SFX("recStop", r.kind);
     const s0 = G.L.spawn;
     burst(s0.x + PW / 2, s0.y + PH / 2, 16, KINDS[r.kind].color, 80, 0.6, 2, -20);
   } else {
     if (r.prev) G.echoes[r.key] = r.prev;
+    if (r.prevTwin) G.echoes[r.key + "~"] = r.prevTwin;
     SFX("cancel");
   }
   restartAttempt();
@@ -433,6 +536,7 @@ function clearSelected() {
   const key = G.L.slotKeys[G.sel];
   if (key && G.echoes[key] && !G.rec) {
     delete G.echoes[key];
+    delete G.echoes[key + "~"];
     SFX("cancel");
     restartAttempt();
   }
@@ -496,6 +600,21 @@ function buildSolids(p, withEchoes, g) {
       for (let i = 0; i < 5; i++) {
         const s = { x: pl.x + i * 4, y: pl.y, w: 4, h: 6 };
         if (litRect(s)) out.push(s);
+      }
+    }
+  }
+  // Gold blocks are solid unless a shift ring is on them; dark blocks only exist inside one. Like crystal, they come in cells and
+  // crush whatever they form around.
+  for (const list of [L.shiftL, L.shiftD]) {
+    const dark = list === L.shiftD;
+    for (const c of list) {
+      if (c.x > p.x - pad - TILE && c.x < p.x + p.w + pad && c.y > p.y - pad - TILE && c.y < p.y + p.h + pad) {
+        for (let cy = 0; cy < 5; cy++) {
+          for (let cx = 0; cx < 5; cx++) {
+            const s = { x: c.x + cx * 4, y: c.y + cy * 4, w: 4, h: 4, crystal: true };
+            if (shiftedCell(s) === dark) out.push(s);
+          }
+        }
       }
     }
   }

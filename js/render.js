@@ -70,6 +70,10 @@ const Render = (() => {
     slow: ["#####", ".###.", "..#..", ".###.", "#####"],
     shrink: [".....", ".###.", ".#.#.", ".###.", "....."],
     vine: ["..#..", ".#...", "..#..", ".#...", "..#.."],
+    beam: ["#....", "#.###", "#####", "#.###", "#...."],
+    reflector: ["....#", "...#.", "..#..", ".#...", "#...."],
+    fork: ["#...#", "#...#", ".#.#.", "..#..", "..#.."],
+    shift: ["##...", "###..", "#.#.#", "..###", "...##"],
   };
 
   // ------------------------------------------------------------ baking
@@ -1020,6 +1024,31 @@ const Render = (() => {
         ctx.fillRect(Math.round(z.x + Math.cos(a) * z.r * f), Math.round(z.y + Math.sin(a) * z.r * f), 1, 1);
       }
     }
+    for (const z of G.shifts) {
+      ring(ctx, z, KINDS.shift.color, [4, 3], t * 0.15);
+      for (let i = 0; i < 10; i++) {
+        const a = (i / 10) * TAU - t * 0.01;
+        ctx.fillStyle = (i % 2 ? "rgba(255,230,150,0.7)" : "rgba(150,110,255,0.8)");
+        ctx.fillRect(Math.round(z.x + Math.cos(a) * z.r), Math.round(z.y + Math.sin(a) * z.r), 2, 2);
+      }
+    }
+    for (const b of G.beams) {
+      // a beam of light: a wide soft band, a bright core, and a flare where it ends
+      ctx.save();
+      ctx.globalCompositeOperation = "lighter";
+      for (const r of b.rects) {
+        ctx.fillStyle = "rgba(244,255,122,0.14)";
+        ctx.fillRect(r.x - 2, r.y - 2, r.w + 4, r.h + 4);
+        ctx.fillStyle = "rgba(255,255,200,0.55)";
+        const horizontal = r.w > r.h;
+        if (horizontal) ctx.fillRect(r.x + BEAM_W, r.y + BEAM_W - 1, r.w - 2 * BEAM_W, 2);
+        else ctx.fillRect(r.x + BEAM_W - 1, r.y + BEAM_W, 2, r.h - 2 * BEAM_W);
+      }
+      const end = b.pts[b.pts.length - 1];
+      glowAt(ctx, end.x, end.y, 14, "#f4ff7a", 0.35);
+      for (let i = 1; i < b.pts.length - 1; i++) glowAt(ctx, b.pts[i].x, b.pts[i].y, 10, "#ffffff", 0.3);
+      ctx.restore();
+    }
     for (const v of G.vines) {
       // a climbing stem with leaves along it, growing from the feet of the echo
       const h = v.base - v.top;
@@ -1035,6 +1064,49 @@ const Render = (() => {
       ctx.fillStyle = "#d9ffe6";
       ctx.fillRect(Math.round(v.x) - 1, Math.round(v.top) - 1, 2, 2);
     }
+  }
+
+  // Gold blocks and dark blocks. Each is drawn in 4 pixel cells like the crystal, so the edge of a shift ring cuts them cleanly.
+  function drawShiftBlocks(ctx, L, t) {
+    const draw = (list, dark) => {
+      for (const c of list) {
+        for (let cy = 0; cy < 5; cy++) {
+          for (let cx = 0; cx < 5; cx++) {
+            const cell = { x: c.x + cx * 4, y: c.y + cy * 4, w: 4, h: 4 };
+            const solid = shiftedCell(cell) === dark;
+            const v = hash(c.x / 20 * 5 + cx, c.y / 20 * 3 + cy);
+            if (solid) {
+              ctx.fillStyle = dark ? (v > 0.5 ? "#3a2a6e" : "#2d2058") : (v > 0.5 ? "#d9bf78" : "#c8ad62");
+              ctx.fillRect(cell.x, cell.y, 4, 4);
+              if (cy === 0) { ctx.fillStyle = dark ? "#8b5cff" : "#fff0b8"; ctx.fillRect(cell.x, cell.y, 4, 1); }
+            } else {
+              // where it is not, a faint outline says where it is, or would be
+              ctx.fillStyle = dark ? "rgba(139,92,255,0.12)" : "rgba(255,225,140,0.1)";
+              if (cx === 0 || cx === 4 || cy === 0 || cy === 4) ctx.fillRect(cell.x, cell.y, 4, 4);
+            }
+          }
+        }
+      }
+    };
+    draw(L.shiftL, false);
+    draw(L.shiftD, true);
+  }
+
+  // A light emitter in the wall: a small turret with a bright mouth where the beam leaves.
+  function drawEmitter(ctx, em, t) {
+    ctx.fillStyle = "#232834";
+    ctx.fillRect(em.x - 8, em.y - 8, 16, 16);
+    ctx.fillStyle = "#4a5266";
+    ctx.fillRect(em.x - 8, em.y - 8, 16, 1);
+    ctx.fillStyle = "#11141c";
+    ctx.fillRect(em.x - 6, em.y - 6, 12, 12);
+    const pulse = 0.6 + 0.4 * Math.sin(t * 0.15);
+    ctx.fillStyle = "rgba(255,247,170," + pulse + ")";
+    ctx.fillRect(em.x - 2 + em.dx * 5, em.y - 2 + em.dy * 5, 4, 4);
+    ctx.save();
+    ctx.globalCompositeOperation = "lighter";
+    glowAt(ctx, em.x + em.dx * 8, em.y + em.dy * 8, 14, "#f4ff7a", 0.3);
+    ctx.restore();
   }
 
   // A wind vent: a small grille with chevrons that point the way it blows.
@@ -1133,7 +1205,8 @@ const Render = (() => {
     ctx.globalCompositeOperation = "lighter";
     glowAt(ctx, e.x + PW / 2, e.y + (e.g < 0 ? PH + 2 : -3), 16, k.color, 0.28);
     ctx.restore();
-    if (G.L.dupKinds.has(e.kind)) {
+    if (e.kind === "reflector") drawMirrorSlash(ctx, e.x + PW / 2, e.y + PH / 2, e.face >= 0, e.moving ? 0.5 : 1);
+    if (G.L.dupKinds.has(e.kind) && G.L.slotKeys.indexOf(e.key) >= 0) {
       // several echoes of one kind: number them like the slots in the bar
       Font.draw(ctx, String(G.L.slotKeys.indexOf(e.key) + 1), e.x + PW / 2, e.y - 24, { scale: 1, color: k.color, align: "center", shadow: null });
     }
@@ -1143,8 +1216,40 @@ const Render = (() => {
   }
 
   // While recording, a dashed ring shows how far the echo's power will reach where you stop.
+  function drawRecPreview(ctx, t) {
+    const p = G.p, k = KINDS[G.rec.kind];
+    const cx = p.x + p.w / 2, cy = p.y + p.h / 2, d = p.face >= 0 ? 1 : -1;
+    if (G.rec.kind === "beam") {
+      ctx.save();
+      ctx.strokeStyle = rgba(k.color, 0.35 + 0.1 * Math.sin(t * 0.2));
+      ctx.setLineDash([3, 4]);
+      ctx.lineDashOffset = -t * 0.5 * d;
+      ctx.beginPath(); ctx.moveTo(cx + d * 8, cy); ctx.lineTo(cx + d * 140, cy); ctx.stroke();
+      ctx.restore();
+    } else if (G.rec.kind === "reflector") {
+      drawMirrorSlash(ctx, cx, cy, d >= 0, 0.5);
+    }
+  }
+
+  // The mirror of a reflector: a slash when it faces right, a backslash when it faces left.
+  function drawMirrorSlash(ctx, cx, cy, slash, a) {
+    ctx.save();
+    ctx.globalAlpha *= a;
+    ctx.strokeStyle = "#e8f3ff";
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    if (slash) { ctx.moveTo(cx - 8, cy + 8); ctx.lineTo(cx + 8, cy - 8); } else { ctx.moveTo(cx - 8, cy - 8); ctx.lineTo(cx + 8, cy + 8); }
+    ctx.stroke();
+    ctx.strokeStyle = "rgba(160,215,255,0.6)";
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    if (slash) { ctx.moveTo(cx - 7, cy + 9); ctx.lineTo(cx + 9, cy - 7); } else { ctx.moveTo(cx - 9, cy - 7); ctx.lineTo(cx + 7, cy + 9); }
+    ctx.stroke();
+    ctx.restore();
+  }
+
   function drawRecRing(ctx, t) {
-    const r = { glow: GLOW_R, phase: PHASE_R, flip: FLIP_R, gust: GUST_R, calm: CALM_R, float: FLOAT_R, pull: PULL_R, slow: SLOW_R, shrink: SHRINK_R }[G.rec.kind];
+    const r = { glow: GLOW_R, phase: PHASE_R, flip: FLIP_R, gust: GUST_R, calm: CALM_R, float: FLOAT_R, pull: PULL_R, slow: SLOW_R, shrink: SHRINK_R, shift: SHIFT_R }[G.rec.kind];
     if (!r) return;
     const p = G.p, k = KINDS[G.rec.kind];
     const cx = p.x + PW / 2, cy = p.y + PH / 2;
@@ -1172,7 +1277,7 @@ const Render = (() => {
   function drawPlayer(ctx, t) {
     const p = G.p;
     if (G.dead) return;
-    if (G.rec) drawRecRing(ctx, t);
+    if (G.rec) { drawRecRing(ctx, t); drawRecPreview(ctx, t); }
     let look = Object.assign({}, PLAYER_LOOK);
     if (G.rec) {
       const k = KINDS[G.rec.kind];
@@ -1289,12 +1394,14 @@ const Render = (() => {
     drawPedestal(ctx, L, t);
     for (const pl of L.plates) drawPlate(ctx, pl, t);
     drawCrystals(ctx, L, t);
+    drawShiftBlocks(ctx, L, t);
     drawPlanks(ctx, L, t);
     drawThorns(ctx, L, t);
     const lampOn = (l) => !l.switchId || !!L.doorOpen[l.switchId];
     for (const lamp of L.lamps) drawLamp(ctx, lamp, t, L.dark, lampOn(lamp));
     drawExit(ctx, L, t);
     for (const v of L.vents) drawVent(ctx, v, t);
+    for (const em of L.emitters) drawEmitter(ctx, em, t);
     for (const d of L.doorTiles) drawDoorTile(ctx, d, !!L.doorOpen[d.id], t, L);
     for (const gt of L.gates) drawGate(ctx, gt, t);
     for (const ln of L.lanterns) drawLantern(ctx, ln, t);

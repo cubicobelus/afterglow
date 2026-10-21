@@ -1771,3 +1771,59 @@ SOLUTIONS["VINE"] = () => {
   Bot.dir(0);
   Bot.expect(G.won, "up the vine and to the door");
 };
+
+SOLUTIONS["BEAM"] = () => {
+  // A beam recorded facing the thorns lights the whole bed.
+  Bot.record("beam");
+  Bot.walkTo(130, 3);
+  Bot.run(10);
+  Bot.stop();
+  Bot.waitUntil(() => G.echoes.beam.restT > 30, 900, "the beam to settle");
+  Bot.walkTo(130, 3);
+  Bot.dir(1);
+  for (let i = 0; i < 700 && !G.won; i++) { Bot.tick(); if (G.dead) Bot.fail("died on the thorns"); }
+  Bot.dir(0);
+  Bot.expect(G.won, "across the thorns");
+};
+SOLUTIONS["REFLECTOR"] = () => {
+  // Stand in the beam from the ceiling facing left (a backslash) and it turns toward the gate.
+  Bot.record("reflector");
+  Bot.walkTo(424, 3);
+  Bot.dir(-1);
+  for (let i = 0; i < 100 && Bot.px() > 411; i++) Bot.tick();
+  Bot.dir(0);
+  Bot.run(10);
+  Bot.stop();
+  Bot.waitUntil(() => G.echoes.reflector.restT > 30, 900, "the reflector to settle");
+  Bot.waitUntil(() => G.L.gates.some((g) => g.open), 300, "the gate to open");
+  Bot.walkTo(570);
+};
+SOLUTIONS["FORK"] = () => {
+  // Stay on the first plate, then go to the second and stay. The twin repeats it later, so for a while both plates are held.
+  Bot.record("fork");
+  Bot.walkTo(170, 3);
+  Bot.run(240);
+  Bot.walkTo(230, 3);
+  Bot.run(10);
+  Bot.stop();
+  Bot.walkTo(300, 3);
+  for (let i = 0; i < 1500 && Bot.px() < 350; i++) {
+    if (G.L.doorOpen.a) Bot.dir(1); else Bot.dir(Bot.px() > 304 ? -1 : 0);
+    Bot.tick();
+    if (G.dead) Bot.fail("crushed by the door");
+  }
+  Bot.expect(Bot.px() > 350, "through the door");
+  Bot.walkTo(570);
+};
+SOLUTIONS["SHIFT"] = () => {
+  // A shift ring inside the tunnel: the dark bridge appears and the gold block vanishes.
+  Bot.record("shift");
+  Bot.walkTo(170, 3);
+  Bot.run(10);
+  Bot.stop();
+  Bot.waitUntil(() => G.echoes.shift.restT > 30, 900, "the shift ring to settle");
+  Bot.dir(1);
+  for (let i = 0; i < 700 && !G.won; i++) { Bot.tick(); if (G.dead) Bot.fail("fell off the bridge"); }
+  Bot.dir(0);
+  Bot.expect(G.won, "across the bridge and through the block");
+};

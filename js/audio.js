@@ -12,7 +12,7 @@ const Sfx = (() => {
     [0, 2, 4, 7, 9], [0, 3, 5, 7, 10], [0, 2, 4, 7, 11], [0, 1, 5, 7, 8], [0, 2, 4, 7, 9]];
   const ROOTS = [45, 43, 41, 38, 48, 50, 40, 47, 36, 43];
   const CHORDS = [0, 5, 3, 7];
-  const KIND_NOTE = { shade: 67, glow: 72, phase: 70, flip: 65, tide: 62, spring: 69, gust: 74, calm: 60, mirror: 71, float: 76, pull: 59, slow: 64, shrink: 79, vine: 66 };
+  const KIND_NOTE = { shade: 67, glow: 72, phase: 70, flip: 65, tide: 62, spring: 69, gust: 74, calm: 60, mirror: 71, float: 76, pull: 59, slow: 64, shrink: 79, vine: 66, beam: 75, reflector: 73, fork: 68, shift: 63 };
 
   function ensure() {
     if (ac) return true;
