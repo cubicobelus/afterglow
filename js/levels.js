@@ -144,16 +144,16 @@ def(0, "SUNKEN GATE", {
   g.set(1, 10, "L").set(27, 3, "L");
 });
 
-def(0, "LANTERN RISE", {
-  echoes: ["glow"], recMax: 10, dark: true,
-  hint: "THE LEDGE IS A LITTLE TOO HIGH, AND ITS GATE OPENS ONLY WHILE LIGHT FALLS ON IT. LIGHT CAN HANG IN THE AIR.",
+def(0, "GATEHOUSE", {
+  echoes: ["shade", "glow"], recMax: 14, dark: true,
+  hint: "THE LEDGE IS TOO HIGH, AND THE GATE OPENS ONLY WHILE LIGHT FALLS ON IT. A STEP FIRST, THEN THE LIGHT.",
 }, (g) => {
   g.base();
   g.set(2, 14, "@");
   g.fill(14, 10, 30, 14, "#");
-  g.fill(15, 1, 15, 7, "#").fill(15, 8, 15, 9, "G");
+  g.fill(21, 1, 21, 6, "#").fill(21, 7, 21, 9, "G");
   g.fill(28, 8, 28, 9, "X");
-  g.set(2, 8, "L").set(21, 6, "L").set(29, 5, "L");
+  g.set(2, 8, "L").set(29, 5, "L");
 });
 
 def(0, "RELAY", {
@@ -625,7 +625,7 @@ const PAR = {
   "GLASS CEILING": { t: 35, r: 2 },
   "UP AND OVER": { t: 40, r: 3 },
   "STAIRCASE": { t: 45, r: 3 },
-  "LANTERN RISE": { t: 25, r: 1 },
+  "GATEHOUSE": { t: 40, r: 2 },
   "STAGECOACH": { t: 35, r: 3 },
   "WEATHERVANE": { t: 20, r: 3 },
 };
