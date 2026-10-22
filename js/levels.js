@@ -1020,6 +1020,22 @@ def(6, "SALVAGE", {
   g.set(4, 8, "L").set(10, 5, "L").set(17, 4, "L").set(25, 8, "L");
 });
 
+def(6, "DOCKSIDE", {
+  bonus: 20, echoes: ["pull", "shade"], recMax: 60,
+  hint: "A PLATFORM, A WELL AND A LIFT, IN THAT ORDER. THE LIFT STOPS FAR BELOW THE LEDGE: AN ECHO HUNG AT THE TOP OF ITS TRAVEL IS THE STEP THAT REACHES IT.",
+}, (g) => {
+  g.base();
+  g.set(2, 14, "@");
+  g.pit(7, 13);
+  g.mover(6, 15, 11, 15, 3, { sp: 40, dwell: 60 });
+  g.pit(16, 21);
+  g.mover(24, 15, 24, 8, 3, { sp: 40, dwell: 90 });
+  g.fill(28, 4, 30, 14, "#");
+  g.fill(29, 2, 29, 3, "X");
+  g.set(4, 8, "L").set(10, 5, "L").set(17, 4, "L").set(25, 3, "L");
+});
+
+// ================================================================ tier 8: the garden (vine, mushrooms, roots)
 def(7, "SPROUT", {
   unlock: "vine", echoes: ["vine"], recMax: 8,
   hint: "RECORD A VINE AT THE FOOT OF THE WALL AND WAIT. HOLD JUMP TO CLIMB IT. LET GO AND YOU SLIDE.",
@@ -1129,6 +1145,19 @@ def(7, "ESCALATOR", {
   g.fill(21, 4, 30, 14, "#");
   g.fill(28, 2, 28, 3, "X");
   g.set(5, 8, "L").set(12, 5, "L").set(24, 2, "L");
+});
+
+def(7, "CANOPY", {
+  bonus: 20, echoes: ["vine", "gust"], recMax: 40,
+  hint: "THE MUSHROOM THROWS YOU TO THE TOP OF A BOUNCE, AND A VINE HUNG THERE REACHES THE SHELF. THE GAP ON THE SHELF IS A LITTLE TOO WIDE FOR A JUMP: THE WIND CAN HELP, IF YOU RECORD IT FROM UP THERE.",
+}, (g) => {
+  g.base();
+  g.set(2, 14, "@");
+  g.set(6, 14, "m");
+  g.fill(11, 3, 18, 14, "#");
+  g.fill(24, 7, 30, 14, "#");
+  g.fill(28, 5, 28, 6, "X");
+  g.set(4, 8, "L").set(8, 3, "L").set(21, 3, "L");
 });
 
 // ================================================================ tier 9: the trench (fork, blades, timed doors; dark)
@@ -1258,6 +1287,19 @@ def(8, "DEEP END", {
   g.set(4, 10, "L").set(14, 10, "L").set(24, 8, "L");
 });
 
+def(8, "FOUR CORNERS", {
+  bonus: 20, echoes: ["fork", "fork"], recMax: 30, dark: true,
+  hint: "FOUR PLATES AND ONE DOOR. EACH FORK CAN BE IN TWO PLACES, BUT ONLY WHILE ITS TWIN IS STILL A FEW SECONDS BEHIND IT. LINE THE TWO UP.",
+}, (g) => {
+  g.base();
+  g.set(2, 14, "@");
+  g.set(4, 14, "a").set(7, 14, "a").set(10, 14, "a").set(13, 14, "a");
+  g.fill(18, 1, 18, 8, "#").fill(18, 9, 18, 14, "A");
+  g.fill(28, 13, 28, 14, "X");
+  g.set(5, 10, "L").set(12, 10, "L").set(23, 8, "L");
+});
+
+// ================================================================ tier 10: the foundation (shift, then everything)
 def(9, "THRESHOLD", {
   unlock: "shift", echoes: ["shift"], recMax: 8,
   hint: "THE GOLD BLOCK AND THE DARK BRIDGE ARE THE SAME ROOM SEEN FROM TWO SIDES. INSIDE THE RING GOLD VANISHES AND DARK APPEARS. RECORD INSIDE THE TUNNEL.",

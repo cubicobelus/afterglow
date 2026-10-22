@@ -1171,3 +1171,146 @@ SOLUTIONS["PULSE"] = () => {
   Bot.dir(0);
   Bot.expect(G.won, "through the door, the thorns and the gate");
 };
+SOLUTIONS["CANOPY"] = () => {
+  // Bounce from the spawn onto the mushroom, record the vine at the top of the bounce and climb it to the shelf; record the gust on the shelf at its
+  // edge, facing the far side; then do it all again and let the wind carry the last jump.
+  const bounceUp = () => {
+    Bot.dir(1);
+    Bot.jumpKey(true);
+    let bounced = false;
+    for (let i = 0; i < 400; i++) {
+      if (G.p.vy < -600) bounced = true;
+      if (bounced && G.p.vy > -30) return true;
+      Bot.tick();
+      if (G.dead) Bot.fail("fell");
+    }
+    return false;
+  };
+  const climbToShelf = () => {
+    const vx = G.vines[0].x;
+    Bot.waitUntil(() => G.vines.length && G.vines[0].top <= 25, 900, "the vine to grow");
+    Bot.dir(1);
+    Bot.jumpKey(true);
+    let bounced = false;
+    for (let i = 0; i < 400; i++) {
+      if (G.p.vy < -600) bounced = true;
+      if (bounced) Bot.dir(Math.abs(vx - Bot.px()) < 4 ? 0 : Math.sign(vx - Bot.px()));
+      if (bounced && Bot.feet() <= 62) Bot.dir(1);
+      Bot.tick();
+      if (G.dead) Bot.fail("fell");
+      if (bounced && G.p.onGround && Bot.feet() <= 61) break;
+    }
+    Bot.jumpKey(false);
+    Bot.dir(0);
+    Bot.expect(G.p.onGround && Bot.feet() <= 61, "up on the shelf");
+  };
+  Bot.record("vine");
+  Bot.expect(bounceUp(), "the top of the bounce");
+  Bot.jumpKey(false);
+  Bot.dir(0);
+  Bot.stop();
+  Bot.record("gust");
+  settleAll();
+  climbToShelf();
+  Bot.walkTo(366, 3);
+  Bot.dir(1);
+  Bot.jumpKey(true);
+  for (let i = 0; i < 60; i++) {
+    if (i === 24) Bot.jumpKey(false);
+    if (i > 10 && G.p.vy > 0 && Bot.feet() >= 74) { Bot.jumpKey(false); Bot.dir(0); Bot.stop(); break; }
+    Bot.tick();
+    if (G.dead) Bot.fail("fell");
+  }
+  settleAll();
+  climbToShelf();
+  Bot.walkTo(366, 3);
+  Bot.dir(1);
+  Bot.jumpKey(true);
+  for (let i = 0; i < 160; i++) {
+    if (i === 24) Bot.jumpKey(false);
+    Bot.tick();
+    if (G.dead) Bot.fail("fell in the gap");
+    if (i > 20 && G.p.onGround) break;
+  }
+  Bot.jumpKey(false);
+  Bot.dir(0);
+  Bot.expect(G.p.onGround && Bot.px() > 474 && Bot.feet() <= 141, "across the gap");
+  Bot.walkTo(572);
+};
+SOLUTIONS["FOUR CORNERS"] = () => {
+  // Two forks, each standing on its first plate for a long while and then moving to its second; the windows overlap for a little over a second.
+  Bot.record("fork");
+  Bot.walkTo(90, 3);
+  Bot.run(170);
+  Bot.walkTo(150, 3);
+  Bot.run(20);
+  Bot.stop();
+  Bot.record("fork2");
+  Bot.walkTo(210, 3);
+  Bot.run(170);
+  Bot.walkTo(270, 3);
+  Bot.run(20);
+  Bot.stop();
+  Bot.walkTo(346, 3);
+  Bot.waitUntil(() => G.L.doorOpen.a, 1500, "the door to open");
+  Bot.walkTo(572);
+};
+SOLUTIONS["FOUR CORNERS"] = () => {
+  // Two forks, each standing on its first plate for a long while and then moving to its second; the windows overlap for a little over a second.
+  Bot.record("fork");
+  Bot.walkTo(90, 3);
+  Bot.run(170);
+  Bot.walkTo(150, 3);
+  Bot.run(20);
+  Bot.stop();
+  Bot.record("fork2");
+  Bot.walkTo(210, 3);
+  Bot.run(170);
+  Bot.walkTo(270, 3);
+  Bot.run(20);
+  Bot.stop();
+  Bot.walkTo(346, 3);
+  Bot.waitUntil(() => G.L.doorOpen.a, 1500, "the door to open");
+  Bot.walkTo(572);
+};
+// A lift (the second mover): stand at its foot, step on while it waits at the bottom, and ride to the top.
+const boardLift = (footX, onX) => {
+  const m = G.L.movers[1];
+  Bot.walkTo(footX, 4);
+  Bot.waitUntil(() => { const k = G.t % m.cycle; return k >= 4 && k < 40; }, 1500, "the lift to wait at the bottom");
+  Bot.walkTo(onX, 3);
+  Bot.waitUntil(() => (G.t % m.cycle) >= m.dwell + m.travel + 20, 900, "the lift to reach the top");
+};
+const stHoist = (key, footX, onX, shadeAbove, ledgeX) => ({
+  key,
+  place() {
+    boardLift(footX, onX);
+    Bot.jumpKey(true);
+    let found = false;
+    for (let i = 0; i < 90; i++) {
+      Bot.tick();
+      if (G.dead) Bot.fail("fell");
+      const h = 160 - Bot.feet();
+      if (i > 8 && G.p.vy > 0 && h <= 44 && h >= 32) { found = true; break; }
+    }
+    Bot.expect(found, "a hover window above the lift");
+    Bot.jumpKey(false);
+    Bot.stop();
+  },
+  pass() {
+    settle(key, 30);
+    boardLift(footX, onX);
+    const e = G.echoes[key];
+    Bot.jumpTo(e.x + 6, 22);
+    Bot.expect(G.p.stand === e, "standing on the shade");
+    Bot.jumpTo(ledgeX, 26);
+    Bot.expect(G.won || (G.p.onGround && G.p.y + PH < 85), "up on the ledge");
+  },
+});
+SOLUTIONS["DOCKSIDE"] = () => {
+  runChain([
+    stFerry(),
+    stPull("pull", 320, 455),
+    stHoist("shade", 472, 528, 0, 582),
+  ], () => { if (!G.won) Bot.walkTo(592); });
+};
