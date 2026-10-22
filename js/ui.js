@@ -849,7 +849,7 @@ const App = (() => {
     }
     const L = G.L;
     // Hints pop up on their own only in the first tier and on levels that unlock an echo; elsewhere you ask for one.
-    const autoHint = !!L.def.unlock || L.chapter === 0;
+    const autoHint = !!L.def.unlock || !!L.def.autoHint || L.chapter === 0;
     const hintOn = A.hintForce > 0 || (autoHint && A.hintT > 90 && A.hintT < 90 + 720 && L.hint);
     if (hintOn && L.hint) {
       const lines = Font.wrap(L.hint, 380, 1);

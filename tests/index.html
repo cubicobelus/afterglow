@@ -51,7 +51,7 @@
     for (const id in L.hasDoor) if (!L.plates.some((p) => p.id === id)) problems.push("door " + id + " has no plate");
     for (const id in L.hasLamp) if (!L.plates.some((p) => p.id === id)) problems.push("switch lamp " + id + " has no plate");
     const kinds = new Set(L.echoes);
-    const anyLight = kinds.has("glow") || L.lamps.length > 0;
+    const anyLight = kinds.has("glow") || kinds.has("beam") || kinds.has("reflector") || L.emitters.length > 0 || L.lamps.length > 0;
     if (L.crystals.length && !kinds.has("phase")) problems.push("crystal without a phase echo");
     if (L.planks.length && !anyLight) problems.push("planks without any light");
     if (L.thorns.length && !anyLight) problems.push("thorns without any light");

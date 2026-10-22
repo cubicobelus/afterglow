@@ -1655,7 +1655,6 @@ const runAndJump = (xs, hold) => {
   Bot.dir(0);
   Bot.expect(G.won, "reached the door");
 };
-SOLUTIONS["SHALLOWS TEMP"] = () => runAndJump([168, 266, 428]);
 SOLUTIONS["WRECK TEMP"] = () => runAndJump([148, 268, 408]);
 SOLUTIONS["GARDEN TEMP"] = () => runAndJump([128, 328]);
 SOLUTIONS["TRENCH TEMP"] = () => runAndJump([168, 308]);

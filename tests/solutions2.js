@@ -144,3 +144,182 @@ SOLUTIONS["STEP THROUGH"] = () => {
   Bot.waitUntil(() => G.L.doorOpen.a, 300, "the door to open");
   Bot.walkTo(570);
 };
+
+// ================================================================ tier 6: the shallows (beam, reflector)
+SOLUTIONS["SHAFT"] = () => {
+  // A beam recorded facing the thorns lights the whole bed.
+  recWait("beam", 130, 10);
+  settle("beam", 30);
+  Bot.walkTo(130, 3);
+  Bot.dir(1);
+  for (let i = 0; i < 700 && !G.won; i++) { Bot.tick(); if (G.dead) Bot.fail("died on the thorns"); }
+  Bot.dir(0);
+  Bot.expect(G.won, "across the thorns");
+};
+SOLUTIONS["TURRET"] = () => {
+  // Stand in the beam from the ceiling facing left (a backslash) and it turns toward the gate.
+  Bot.record("reflector");
+  Bot.walkTo(424, 3);
+  Bot.dir(-1);
+  for (let i = 0; i < 100 && Bot.px() > 411; i++) Bot.tick();
+  Bot.dir(0);
+  Bot.run(10);
+  Bot.stop();
+  settle("reflector", 30);
+  Bot.waitUntil(() => G.L.gates.some((g) => g.open), 300, "the gate to open");
+  Bot.walkTo(570);
+};
+SOLUTIONS["WELLSPRING"] = () => {
+  // Ride the bubbles to the top of the column, drift onto the ledge and record the beam up there, facing the gate.
+  const rise = () => {
+    Bot.walkTo(170, 3);
+    Bot.waitUntil(() => G.p.y + PH < 185, 600, "to be lifted");
+    Bot.run(8);
+    Bot.dir(1);
+    for (let i = 0; i < 200 && !(G.p.onGround && G.p.y + PH < 190); i++) Bot.tick();
+    Bot.dir(0);
+    Bot.expect(G.p.onGround && G.p.y + PH < 190, "on the ledge");
+  };
+  Bot.record("beam");
+  rise();
+  Bot.walkTo(340, 3);
+  Bot.run(14);
+  Bot.stop();
+  rise();
+  Bot.walkTo(340, 3);
+  Bot.waitUntil(() => G.L.gates.some((g) => g.open), 900, "the gate to open");
+  Bot.walkTo(570);
+};
+SOLUTIONS["HATCH"] = () => {
+  // A beam along the floor, and a reflector facing right (a slash) under the hatch turns it up.
+  recWait("beam", 100, 10);
+  recWait("reflector", 290, 10);
+  settle("beam", 30);
+  settle("reflector", 30);
+  Bot.waitUntil(() => G.L.gates.some((g) => g.open), 300, "the hatch to open");
+  Bot.walkTo(290, 3);
+  Bot.jumpTo(336, 28);
+  Bot.expect(G.p.onGround && G.p.y + PH < 245, "up through the hatch");
+  Bot.walkTo(570);
+};
+SOLUTIONS["GRAZE"] = () => {
+  // Hang the beam in the air at the height of the planks (about 50 px up), left of the ledge, facing the bridge.
+  hoverAt("beam", 82, 43, 55);
+  settle("beam", 30);
+  Bot.walkTo(92, 3);
+  Bot.jumpTo(128, 24);
+  Bot.expect(G.p.onGround && G.p.y + PH < 265, "on the ledge");
+  Bot.jumpTo(172, 14);
+  Bot.expect(G.p.onGround && G.p.y + PH < 245, "up on the planks");
+  Bot.walkTo(570);
+};
+SOLUTIONS["STAIRWELL"] = () => {
+  // Ride the bubbles to the ledge. The wall beam crosses it at the height of a standing reflector: facing right, it turns the beam up
+  // into the hatch.
+  const rise = () => {
+    Bot.walkTo(170, 3);
+    Bot.waitUntil(() => G.p.y + PH < 185, 600, "to be lifted");
+    Bot.run(8);
+    Bot.dir(1);
+    for (let i = 0; i < 200 && !(G.p.onGround && G.p.y + PH < 190); i++) Bot.tick();
+    Bot.dir(0);
+    Bot.expect(G.p.onGround && G.p.y + PH < 190, "on the ledge");
+  };
+  Bot.record("reflector");
+  rise();
+  Bot.walkTo(450, 3);
+  Bot.run(12);
+  Bot.stop();
+  rise();
+  Bot.walkTo(450, 3);
+  Bot.waitUntil(() => G.L.gates.some((g) => g.open), 900, "the hatch to open");
+  Bot.jumpTo(472, 28);
+  Bot.expect(G.p.onGround && G.p.y + PH < 125, "up through the hatch");
+  Bot.walkTo(570);
+};
+SOLUTIONS["SURFACE LIGHT"] = () => {
+  // Ride the bubbles up the light shaft. At the top, face left and record a reflector: it turns the shaft toward the gate.
+  const rise = () => {
+    Bot.walkTo(170, 3);
+    Bot.waitUntil(() => G.p.y + PH < 185, 600, "to be lifted");
+    Bot.run(8);
+  };
+  Bot.record("reflector");
+  rise();
+  Bot.dir(-1);
+  Bot.run(2);
+  Bot.dir(0);
+  Bot.run(12);
+  Bot.stop();
+  rise();
+  Bot.waitUntil(() => G.L.gates.every((g) => g.open), 900, "the gate to open");
+  Bot.dir(1);
+  for (let i = 0; i < 160 && Bot.px() < 232; i++) Bot.tick();
+  Bot.dir(0);
+  Bot.walkTo(570);
+};
+
+// Hang an echo in the air above a surface whose top is at baseY, at x (a player centre): jump straight up and stop recording on the way
+// down, when the feet are between lo and hi pixels above that surface. Starts from where the player stands (no walking).
+const hoverHere = (slot, lo, hi, baseY) => {
+  Bot.record(slot);
+  Bot.dir(0);
+  Bot.jumpKey(true);
+  let found = false;
+  for (let i = 0; i < 90; i++) {
+    Bot.tick();
+    if (G.dead) Bot.fail("died while hovering");
+    const h = baseY - Bot.feet();
+    if (i > 8 && G.p.vy > 0 && h <= hi && h >= lo) { found = true; break; }
+  }
+  Bot.expect(found, "a hover window");
+  Bot.jumpKey(false);
+  Bot.stop();
+};
+
+SOLUTIONS["TWO TIERS"] = () => {
+  // Beam one hangs beside the first bridge. Beam two is recorded standing on the middle block, hung at the height of the second bridge.
+  hoverAt("beam", 82, 43, 55);
+  settle("beam", 30);
+  const toMiddle = () => {
+    Bot.walkTo(92, 3);
+    Bot.jumpTo(128, 24);
+    Bot.jumpTo(172, 14);
+    Bot.walkTo(318, 3);
+  };
+  Bot.record("beam2");
+  settle("beam", 30);
+  toMiddle();
+  Bot.walkTo(314, 3);
+  Bot.jumpKey(true);
+  let found = false;
+  for (let i = 0; i < 90; i++) {
+    Bot.tick();
+    if (G.dead) Bot.fail("died while hovering");
+    const h = 240 - Bot.feet();
+    if (i > 8 && G.p.vy > 0 && h <= 36 && h >= 22) { found = true; break; }
+  }
+  Bot.expect(found, "a hover window above the middle block");
+  Bot.jumpKey(false);
+  Bot.stop();
+  settle("beam", 30);
+  settle("beam2", 30);
+  toMiddle();
+  Bot.jumpTo(352, 24);
+  Bot.expect(G.p.onGround && G.p.y + PH < 205, "up on the second bridge");
+  Bot.walkTo(570);
+};
+SOLUTIONS["OPEN DOOR"] = () => {
+  // The beam stands on the plate facing the door: it holds the door open, and its light goes through to the thorns.
+  recWait("beam", 150, 12);
+  settle("beam", 30);
+  Bot.waitUntil(() => G.L.doorOpen.a, 300, "the door to open");
+  Bot.walkTo(240, 3);
+  Bot.dir(1);
+  for (let i = 0; i < 700 && !G.won; i++) { Bot.tick(); if (G.dead) Bot.fail("died on the thorns"); }
+  Bot.dir(0);
+  Bot.expect(G.won, "across the thorns");
+};
+
+// The lab room for the calm is the same room as Still Air.
+SOLUTIONS["CALM"] = SOLUTIONS["STILL AIR"];

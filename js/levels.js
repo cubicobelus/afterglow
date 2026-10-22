@@ -751,17 +751,123 @@ def(4, "NIGHT TRAIN", {
 
 // ================================================================ tier 6 to 10: temporary levels, one per tier, to see the scenery
 // Each is a blank room: a floor, a few blocks, some lamps, a door of light. They are placeholders for the real levels.
-def(5, "SHALLOWS TEMP", {
-  temp: true, echoes: [], hint: "A BLANK ROOM TO SEE THE SCENERY OF THE SHALLOWS.",
+// ================================================================ tier 6: the shallows (beam, reflector)
+def(5, "SHAFT", {
+  unlock: "beam", echoes: ["beam"], recMax: 8,
+  hint: "THE THORNS WITHER IN LIGHT. A BEAM LIGHTS EVERYTHING ALONG ITS LENGTH. STAND FACING THE THORNS AND RECORD.",
 }, (g) => {
   g.base();
   g.set(2, 14, "@");
-  g.pit(9, 11);
-  g.fill(14, 12, 16, 14, "#");
-  g.fill(18, 10, 20, 10, "=");
-  g.fill(22, 13, 24, 14, "#");
+  g.fill(8, 14, 20, 14, "t");
   g.fill(28, 13, 28, 14, "X");
-  g.set(5, 8, "L").set(15, 6, "L").set(26, 8, "L");
+  g.set(5, 8, "L").set(24, 8, "L");
+});
+
+def(5, "TURRET", {
+  unlock: "reflector", echoes: ["reflector"], recMax: 8,
+  hint: "A BEAM FALLS FROM THE CEILING AND THE GATE WANTS LIGHT. STAND IN THE BEAM AND RECORD A REFLECTOR: FACING LEFT IT TURNS THE BEAM TO THE RIGHT.",
+}, (g) => {
+  g.base();
+  g.set(2, 14, "@");
+  g.set(20, 1, "s");
+  g.fill(24, 1, 24, 12, "#").fill(24, 13, 24, 14, "G");
+  g.fill(28, 13, 28, 14, "X");
+  g.set(5, 8, "L").set(14, 6, "L");
+});
+
+def(5, "WELLSPRING", {
+  autoHint: true, echoes: ["beam"], recMax: 14,
+  hint: "BUBBLES LIFT WHOEVER STANDS IN THEM, UP TO THE TOP OF THE COLUMN. THE GATE UP THERE WANTS LIGHT.",
+}, (g) => {
+  g.base();
+  g.set(2, 14, "@");
+  g.set(8, 14, "u");
+  g.fill(10, 9, 30, 14, "#");
+  g.fill(20, 1, 20, 6, "#").fill(20, 7, 20, 8, "G");
+  g.fill(28, 7, 28, 8, "X");
+  g.set(5, 7, "L");
+});
+
+def(5, "HATCH", {
+  echoes: ["beam", "reflector"], recMax: 14,
+  hint: "THE HATCH IN THE CEILING WANTS LIGHT, AND LIGHT TRAVELS IN STRAIGHT LINES. A MIRROR CAN TURN IT TO FACE UP.",
+}, (g) => {
+  g.base();
+  g.set(2, 14, "@");
+  g.fill(1, 12, 13, 12, "#").set(14, 12, "G").fill(15, 12, 30, 12, "#");
+  g.fill(28, 10, 28, 11, "X");
+  g.set(5, 8, "L");
+});
+
+def(5, "OPEN DOOR", {
+  echoes: ["beam"], recMax: 12,
+  hint: "THE THORNS NEED LIGHT, BUT THE DOOR IN THE WAY STOPS IT. AN ECHO HOLDS A PLATE AS WELL AS A LIGHT.",
+}, (g) => {
+  g.base();
+  g.set(2, 14, "@");
+  g.set(7, 14, "a");
+  g.fill(12, 1, 12, 8, "#").fill(12, 9, 12, 14, "A");
+  g.fill(14, 14, 22, 14, "t");
+  g.fill(28, 13, 28, 14, "X");
+  g.set(4, 8, "L").set(17, 7, "L").set(26, 8, "L");
+});
+
+def(5, "GRAZE", {
+  echoes: ["beam"], recMax: 14,
+  hint: "THE PLANKS ARE SOLID ONLY IN LIGHT, AND A BEAM LIGHTS ONLY WHAT IT TRAVELS THROUGH. HANG IT IN THE AIR AT THE HEIGHT OF THE BRIDGE.",
+}, (g) => {
+  g.base();
+  g.set(2, 14, "@");
+  g.pit(8, 21);
+  g.fill(5, 13, 7, 14, "#");
+  g.fill(8, 12, 21, 12, "~");
+  g.fill(22, 12, 30, 14, "#");
+  g.fill(28, 10, 28, 11, "X");
+  g.set(5, 4, "L").set(16, 3, "L").set(26, 4, "L");
+});
+
+def(5, "STAIRWELL", {
+  echoes: ["reflector"], recMax: 16,
+  hint: "A BEAM CROSSES THE ROOM HIGH UP FROM THE WALL. THE BUBBLES CARRY YOU UP TO IT. THE HATCH ABOVE THE LEDGE WANTS LIGHT.",
+}, (g) => {
+  g.base();
+  g.set(2, 14, "@");
+  g.set(1, 8, "e");
+  g.set(8, 14, "u");
+  g.fill(10, 9, 30, 14, "#");
+  g.fill(1, 6, 21, 6, "#").set(22, 6, "G").fill(23, 6, 30, 6, "#");
+  g.fill(28, 4, 28, 5, "X");
+  g.set(5, 3, "L");
+});
+
+def(5, "SURFACE LIGHT", {
+  echoes: ["reflector"], recMax: 16,
+  hint: "A SHAFT OF LIGHT FALLS FROM THE SURFACE, RIGHT DOWN THE BUBBLES. THE GATE IS AT THE TOP OF THE COLUMN. A MIRROR HUNG THERE CAN TURN THE LIGHT INTO IT.",
+}, (g) => {
+  g.base();
+  g.set(2, 14, "@");
+  g.set(8, 1, "s");
+  g.set(8, 14, "u");
+  g.fill(9, 9, 9, 14, "#");
+  g.fill(10, 1, 10, 7, "#").set(10, 8, "G").fill(10, 9, 10, 14, "#");
+  g.fill(28, 13, 28, 14, "X");
+  g.set(4, 4, "L");
+});
+
+def(5, "TWO TIERS", {
+  echoes: ["beam", "beam"], recMax: 24,
+  hint: "TWO BRIDGES AT TWO HEIGHTS, AND A BEAM LIGHTS ONLY ONE OF THEM. THE SECOND ONE HAS TO BE HUNG FROM WHERE THE FIRST ONE ENDS.",
+}, (g) => {
+  g.base();
+  g.set(2, 14, "@");
+  g.pit(8, 24);
+  g.fill(5, 13, 7, 14, "#");
+  g.fill(8, 12, 14, 12, "~");
+  g.fill(15, 12, 16, 14, "#");
+  g.fill(17, 10, 24, 10, "~");
+  g.fill(25, 10, 30, 14, "#");
+  g.fill(28, 8, 28, 9, "X");
+  g.set(5, 4, "L").set(16, 3, "L").set(27, 4, "L");
 });
 
 def(6, "WRECK TEMP", {
@@ -822,8 +928,8 @@ def(10, "CALM", {
 }, (g) => {
   g.base();
   g.set(2, 14, "@");
-  g.pit(10, 12);
-  g.set(11, 13, "<");
+  g.pit(10, 11);
+  g.set(13, 14, "<");
   g.fill(28, 13, 28, 14, "X");
   g.set(5, 8, "L").set(24, 8, "L");
 });
@@ -997,5 +1103,14 @@ const PAR = {
   "REFLECTION": { t: 15, r: 1 },
   "OTHER SIDE": { t: 25, r: 2 },
   "STEP THROUGH": { t: 15, r: 1 },
+  "SHAFT": { t: 20, r: 1 },
+  "TURRET": { t: 25, r: 1 },
+  "WELLSPRING": { t: 20, r: 1 },
+  "HATCH": { t: 25, r: 2 },
+  "OPEN DOOR": { t: 20, r: 1 },
+  "GRAZE": { t: 20, r: 1 },
+  "STAIRWELL": { t: 25, r: 1 },
+  "SURFACE LIGHT": { t: 20, r: 1 },
+  "TWO TIERS": { t: 35, r: 2 },
 };
 for (const l of LEVELS) l.par = PAR[l.name];
