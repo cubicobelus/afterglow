@@ -1127,6 +1127,171 @@ const Render = (() => {
     }
   }
 
+  // A column of rising bubbles over a grille in the floor. A calm ring over its base quiets it.
+  function drawUpdraft(ctx, d, t) {
+    const base = d.y + d.h, still = calmedAt(d.x + d.w / 2, base - 10);
+    const k = still ? 0.3 : 1;
+    ctx.save();
+    const g = ctx.createLinearGradient(0, d.y, 0, base);
+    g.addColorStop(0, "rgba(190,255,250,0)");
+    g.addColorStop(1, "rgba(190,255,250," + 0.13 * k + ")");
+    ctx.fillStyle = g;
+    ctx.fillRect(d.x, d.y, d.w, d.h);
+    ctx.strokeStyle = "rgba(210,255,250," + 0.28 * k + ")";
+    ctx.lineWidth = 1;
+    for (let i = 0; i < 9; i++) {
+      const lane = (i * 7) % 9, bx = d.x + 5 + lane * 3.7 + Math.sin(t * 0.07 + i * 1.7) * 2;
+      const span = d.h + 20, by = base - ((t * (0.9 + (i % 3) * 0.35) + i * 29) % span);
+      if (by < d.y - 4) continue;
+      const fade = Math.max(0, Math.min(1, (by - d.y) / 30));
+      ctx.globalAlpha = fade * k;
+      const r = 1 + (i % 3);
+      ctx.beginPath(); ctx.arc(Math.round(bx), Math.round(by), r, 0, TAU); ctx.stroke();
+    }
+    ctx.globalAlpha = 1;
+    ctx.fillStyle = "#1c2a30";
+    ctx.fillRect(d.x + 8, base - 4, d.w - 16, 4);
+    ctx.fillStyle = "#4c6a72";
+    ctx.fillRect(d.x + 8, base - 4, d.w - 16, 1);
+    ctx.fillStyle = "#0a1418";
+    for (let i = 0; i < 3; i++) ctx.fillRect(d.x + 11 + i * 6, base - 3, 3, 2);
+    ctx.restore();
+  }
+
+  // A platform on a track. It hangs from two short chains and its track is drawn faintly so you can see where it goes.
+  function drawMover(ctx, m, t, L) {
+    const pal = CHAPTERS[L.chapter].pal;
+    ctx.save();
+    ctx.strokeStyle = rgba(pal.wallHi, 0.16);
+    ctx.lineWidth = 1;
+    ctx.setLineDash([2, 4]);
+    ctx.beginPath(); ctx.moveTo(m.x0 + m.w / 2, m.y0 + 4); ctx.lineTo(m.x1 + m.w / 2, m.y1 + 4); ctx.stroke();
+    ctx.setLineDash([]);
+    const x = Math.round(m.x), y = Math.round(m.y);
+    ctx.fillStyle = rgba(pal.wallHi, 0.55);
+    for (const cx of [x + 5, x + m.w - 6]) for (let k = 1; k <= 3; k++) ctx.fillRect(cx, y - k * 4, 1, 2);
+    ctx.fillStyle = pal.wallLo;
+    ctx.fillRect(x, y + 2, m.w, m.h - 2);
+    ctx.fillStyle = pal.wallHi;
+    ctx.fillRect(x, y, m.w, 3);
+    ctx.fillStyle = tint(pal.wallHi, 0.4);
+    ctx.fillRect(x, y, m.w, 1);
+    ctx.fillStyle = pal.mortar;
+    for (let px = x + 10; px < x + m.w - 2; px += 20) ctx.fillRect(px, y + 3, 1, m.h - 3);
+    ctx.fillRect(x + 2, y + 3, 1, 1);
+    ctx.fillRect(x + m.w - 3, y + 3, 1, 1);
+    ctx.restore();
+  }
+
+  // A mushroom with a spotted cap that squashes when you land on it.
+  function drawMushroom(ctx, m, t) {
+    const cx = m.x + TILE / 2, base = m.ty * TILE + TILE;
+    const sq = m.bounceT > 0 ? Math.sin((m.bounceT / 14) * Math.PI) : 0;
+    const still = m.silenced;
+    ctx.save();
+    ctx.fillStyle = still ? "#8d8a86" : "#e8dcc4";
+    ctx.fillRect(cx - 2, m.y + 6, 4, base - m.y - 6);
+    ctx.fillStyle = still ? "#6e6b68" : "#c9bb9a";
+    ctx.fillRect(cx + 1, m.y + 6, 1, base - m.y - 6);
+    const capH = 8 - Math.round(sq * 3), capW = 18 + Math.round(sq * 3);
+    ctx.fillStyle = still ? "#7c6a72" : "#d6455d";
+    ctx.beginPath(); ctx.ellipse(cx, m.y + 8, capW / 2, capH, 0, Math.PI, 0); ctx.fill();
+    ctx.fillStyle = still ? "#9a8a92" : "#f26b80";
+    ctx.beginPath(); ctx.ellipse(cx - 2, m.y + 7, capW / 2 - 3, capH - 3, 0, Math.PI, 0); ctx.fill();
+    ctx.fillStyle = still ? "#c9c1c5" : "#fff1e6";
+    ctx.fillRect(cx - 5, m.y + 8 - Math.round(capH * 0.6), 2, 2);
+    ctx.fillRect(cx + 2, m.y + 8 - Math.round(capH * 0.45), 2, 2);
+    ctx.fillRect(cx - 1, m.y + 8 - Math.round(capH * 0.85), 1, 1);
+    ctx.restore();
+  }
+
+  // A ledge of roots. It shakes while it holds you and gives way; where it was, a faint outline waits for it to grow back.
+  function drawRoot(ctx, r, t) {
+    const grp = r.grp;
+    ctx.save();
+    if (r.goneT > 0) {
+      const back = r.goneT < 30 ? (30 - r.goneT) / 30 : 0;
+      ctx.fillStyle = "rgba(160,120,70," + (0.12 + 0.3 * back) + ")";
+      ctx.fillRect(r.x, r.y, TILE, 4);
+      ctx.restore();
+      return;
+    }
+    const shake = grp.standT > 6 ? Math.round(Math.sin(t * 1.9 + r.tx) * Math.min(1.5, (grp.standT - 6) / 12)) : 0;
+    const x = r.x + shake, y = r.y;
+    ctx.fillStyle = "#4a3320";
+    ctx.fillRect(x, y + 1, TILE, 5);
+    ctx.fillStyle = "#6e4e2c";
+    ctx.fillRect(x, y, TILE, 3);
+    ctx.fillStyle = "#9a7444";
+    ctx.fillRect(x, y, TILE, 1);
+    ctx.fillStyle = "#2f2014";
+    ctx.fillRect(x + 3 + (r.tx % 3), y + 3, 5, 1);
+    ctx.fillRect(x + 12, y + 4, 4, 1);
+    ctx.fillStyle = "#3f6b3a";
+    if (hash(r.tx, r.ty) > 0.4) ctx.fillRect(x + 5, y - 1, 3, 1);
+    ctx.fillStyle = "#4a3320";
+    ctx.fillRect(x + 4, y + 6, 1, 3 + (r.tx % 3));
+    ctx.fillRect(x + 13, y + 6, 1, 2 + (r.ty % 3));
+    ctx.restore();
+  }
+
+  // A door that opens and shuts on a clock: T starts shut (amber), U starts open (blue). It flickers just before it changes.
+  function drawTimed(ctx, d, t) {
+    const shut = timedShut(d.kind), cyc = G.t % TIMED_P, half = TIMED_P / 2;
+    const left = cyc < half ? half - cyc : TIMED_P - cyc;
+    const warn = left < 28 && Math.floor(left / 4) % 2 === 0;
+    const col = d.kind === "T" ? "#ffb347" : "#6fd0ff";
+    ctx.save();
+    const on = shut !== warn; // flickers to its next state just before the change
+    if (on) {
+      ctx.fillStyle = rgba(col, 0.22);
+      ctx.fillRect(d.x, d.y, TILE, TILE);
+      ctx.fillStyle = rgba(col, 0.9);
+      ctx.fillRect(d.x + 2, d.y, 3, TILE);
+      ctx.fillRect(d.x + 8, d.y, 3, TILE);
+      ctx.fillRect(d.x + 14, d.y, 3, TILE);
+      ctx.fillStyle = "rgba(255,255,255,0.45)";
+      ctx.fillRect(d.x + 2, d.y, 1, TILE);
+      ctx.fillRect(d.x + 8, d.y, 1, TILE);
+      ctx.fillRect(d.x + 14, d.y, 1, TILE);
+      ctx.globalCompositeOperation = "lighter";
+      glowAt(ctx, d.x + 10, d.y + 10, 16, col, 0.16);
+    } else {
+      ctx.fillStyle = rgba(col, 0.18);
+      ctx.fillRect(d.x + 3, d.y + 1, 1, 3); ctx.fillRect(d.x + 9, d.y + 1, 1, 3); ctx.fillRect(d.x + 15, d.y + 1, 1, 3);
+      ctx.fillRect(d.x + 3, d.y + 16, 1, 3); ctx.fillRect(d.x + 9, d.y + 16, 1, 3); ctx.fillRect(d.x + 15, d.y + 16, 1, 3);
+    }
+    ctx.restore();
+  }
+
+  // A blade turning about a hub. It glows at the tips so it can be seen in the dark.
+  function drawBlade(ctx, b, t) {
+    const a = bladeAngle(b), ca = Math.cos(a), sa = Math.sin(a);
+    ctx.save();
+    ctx.lineCap = "butt";
+    ctx.strokeStyle = "rgba(20,24,34,0.9)";
+    ctx.lineWidth = 7;
+    ctx.beginPath(); ctx.moveTo(b.x - ca * b.len, b.y - sa * b.len); ctx.lineTo(b.x + ca * b.len, b.y + sa * b.len); ctx.stroke();
+    ctx.strokeStyle = "#aab4c6";
+    ctx.lineWidth = 3;
+    ctx.beginPath(); ctx.moveTo(b.x - ca * b.len, b.y - sa * b.len); ctx.lineTo(b.x + ca * b.len, b.y + sa * b.len); ctx.stroke();
+    ctx.strokeStyle = "#eef3ff";
+    ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(b.x - ca * b.len, b.y - sa * b.len); ctx.lineTo(b.x + ca * b.len, b.y + sa * b.len); ctx.stroke();
+    ctx.fillStyle = "#ff5d7a";
+    for (const s of [-1, 1]) {
+      const ex = b.x + ca * b.len * s, ey = b.y + sa * b.len * s;
+      ctx.fillRect(Math.round(ex) - 2, Math.round(ey) - 2, 4, 4);
+    }
+    ctx.fillStyle = "#2b3040";
+    ctx.beginPath(); ctx.arc(b.x, b.y, 5, 0, TAU); ctx.fill();
+    ctx.fillStyle = "#7d889e";
+    ctx.beginPath(); ctx.arc(b.x, b.y, 2, 0, TAU); ctx.fill();
+    ctx.globalCompositeOperation = "lighter";
+    for (const s of [-1, 1]) glowAt(ctx, b.x + ca * b.len * s, b.y + sa * b.len * s, 12, "#ff5d7a", 0.28);
+    ctx.restore();
+  }
+
   // A small rune plate under the spawn point. Echoes fade in here at the start of every attempt.
   function drawPedestal(ctx, L, t) {
     const pal = CHAPTERS[L.chapter].pal, ped = L.ped, sp = L.spawn;
@@ -1404,6 +1569,10 @@ const Render = (() => {
     for (const em of L.emitters) drawEmitter(ctx, em, t);
     for (const d of L.doorTiles) drawDoorTile(ctx, d, !!L.doorOpen[d.id], t, L);
     for (const gt of L.gates) drawGate(ctx, gt, t);
+    for (const d of L.updrafts) drawUpdraft(ctx, d, t);
+    for (const r of L.roots) drawRoot(ctx, r, t);
+    for (const m of L.mushrooms) drawMushroom(ctx, m, t);
+    for (const m of L.movers) drawMover(ctx, m, t, L);
     for (const ln of L.lanterns) drawLantern(ctx, ln, t);
     if (L.dark) {
       drawDarkness(ctx, L, t);
@@ -1414,6 +1583,9 @@ const Render = (() => {
       for (const l of L.lamps) if (lampOn(l)) glowAt(ctx, l.x, l.y, 46, "#ffb860", 0.16);
       ctx.restore();
     }
+    // Hazards that shine by themselves are drawn over the darkness.
+    for (const d of L.timed) drawTimed(ctx, d, t);
+    for (const b of L.blades) drawBlade(ctx, b, t);
     drawZones(ctx, t);
     for (const k in G.echoes) drawEcho(ctx, G.echoes[k], t);
     drawPlayer(ctx, t);

@@ -316,3 +316,76 @@ mech("a tide that stays put is refused, so it cannot stand in for a shade", () =
   Bot.stop();
   ensure(G.echoes.tide, "a tide that travelled is kept");
 });
+
+// ---------------------------------------------------------------- level pieces of the later tiers
+mech("a bubble draft lifts the player to the top of its column and holds them there", () => {
+  Bot.load(tiny({ echoes: [] }, (g) => { g.base(); g.set(2, 14, "@"); g.set(8, 14, "u"); }));
+  Bot.walkTo(170);
+  Bot.run(120);
+  ensure(!G.dead, "died in the draft");
+  const top = 300 - DRAFT_H;
+  ensure(G.p.y + PH < top + 24 && G.p.y + PH > top - 14, "should hover near the top of the column, feet at " + (G.p.y + PH).toFixed(1));
+});
+
+mech("a calm ring silences a bubble draft for whatever is inside it", () => {
+  Bot.load(tiny({ echoes: ["calm"], recMax: 8 }, (g) => { g.base(); g.set(2, 14, "@"); g.set(8, 14, "u"); }));
+  Bot.record(0);
+  Bot.walkTo(150);
+  Bot.run(10);
+  Bot.stop();
+  Bot.waitUntil(() => G.echoes.calm.restT > 40, 900, "the calm to settle");
+  Bot.walkTo(170);
+  Bot.run(60);
+  ensure(G.p.onGround, "the calm should keep the draft from lifting the player");
+});
+
+mech("a moving platform carries the player along its path", () => {
+  Bot.load(tiny({ echoes: [] }, (g) => { g.base(); g.set(2, 14, "@"); g.mover(7, 13, 17, 13, 3, { sp: 50, dwell: 30 }); }));
+  G.p.x = 160; G.p.y = 236; G.p.vy = 0;
+  Bot.run(10);
+  ensure(G.p.stand && G.p.stand.kind === "mover", "should land on the platform");
+  const x0 = G.p.x;
+  Bot.run(150);
+  ensure(G.p.stand && G.p.stand.kind === "mover", "should still be riding it");
+  ensure(G.p.x - x0 > 60, "should have been carried right, moved " + (G.p.x - x0).toFixed(1));
+});
+
+mech("a mushroom throws the player up when they land on it", () => {
+  Bot.load(tiny({ echoes: [] }, (g) => { g.base(); g.set(2, 14, "@"); g.set(8, 14, "m"); }));
+  G.p.x = 164; G.p.y = 230; G.p.vy = 0;
+  let best = 1e9, bounced = false;
+  for (let i = 0; i < 120; i++) { Bot.tick(); if (G.p.vy < -300) bounced = true; if (bounced) best = Math.min(best, G.p.y); }
+  ensure(bounced && best < 170, "should be thrown well above a jump, top of the arc at y " + best.toFixed(1));
+});
+
+mech("a root ledge gives way underfoot and grows back", () => {
+  Bot.load(tiny({ echoes: [] }, (g) => { g.base(); g.set(2, 14, "@"); g.fill(8, 12, 10, 12, "r"); }));
+  G.p.x = 176; G.p.y = 224; G.p.vy = 0;
+  Bot.run(ROOT_T - 10);
+  ensure(G.p.onGround && G.L.roots[0].goneT === 0, "should still hold shortly after");
+  Bot.run(30);
+  ensure(G.L.roots.some((r) => r.goneT > 0) && !G.p.onGround || G.p.y > 230, "should have given way");
+  Bot.run(ROOT_GONE + 10);
+  ensure(G.L.roots.every((r) => r.goneT === 0), "should have grown back");
+});
+
+mech("a timed door is shut for half of every cycle and crushes whoever stays in it", () => {
+  Bot.load(tiny({ echoes: [] }, (g) => { g.base(); g.set(2, 14, "@"); g.fill(15, 11, 15, 14, "T"); g.fill(15, 1, 15, 10, "#"); }));
+  Bot.walkTo(260);
+  Bot.dir(1);
+  Bot.run(40);
+  ensure(Bot.px() < 295, "the door starts shut");
+  Bot.dir(0);
+  while (G.t < TIMED_P / 2 + 4) Bot.tick();
+  Bot.dir(1);
+  Bot.run(30);
+  ensure(Bot.px() > 304, "the door is open in the second half of the cycle, at " + Bot.px().toFixed(1));
+});
+
+mech("a rotating blade kills the player that stands in its path", () => {
+  Bot.load(tiny({ echoes: [] }, (g) => { g.base(); g.set(2, 14, "@"); g.blade(10, 13, 40, 2.5, 0); }));
+  G.p.x = 190; G.p.y = 284;
+  let dead = false;
+  for (let i = 0; i < 300 && !dead; i++) { Bot.tick(); dead = G.dead; }
+  ensure(dead, "a blade sweeping through the spot should kill");
+});

@@ -530,6 +530,34 @@ def(3, "SAIL", {
   g.set(5, 8, "L").set(15, 5, "L").set(26, 8, "L");
 });
 
+def(3, "STILL AIR", {
+  unlock: "calm", echoes: ["calm"], recMax: 8,
+  hint: "THE VENT BLOWS ALL THE TIME AND PUSHES ANYONE IN THE AIR BACK. A CALM SILENCES EVERY POWER INSIDE ITS RING. RECORD ONE BY THE GAP.",
+}, (g) => {
+  g.base();
+  g.set(2, 14, "@");
+  g.pit(10, 11);
+  g.set(13, 14, "<");
+  g.fill(28, 13, 28, 14, "X");
+  g.set(5, 8, "L").set(17, 7, "L").set(25, 8, "L");
+});
+
+def(3, "SLACK WATER", {
+  echoes: ["shade", "calm"], recMax: 16,
+  hint: "A VENT GUARDS EACH GAP AND THERE IS ONE CALM. AN ECHO THAT WALKS ACROSS CAN CARRY YOU WITH IT, IF YOU CATCH IT AT THE START.",
+}, (g) => {
+  g.base();
+  g.set(2, 14, "@");
+  g.pit(6, 7);
+  g.set(9, 14, "<");
+  g.set(11, 14, "a");
+  g.pit(15, 16);
+  g.set(18, 14, "<");
+  g.fill(23, 1, 23, 8, "#").fill(23, 9, 23, 14, "A");
+  g.fill(28, 13, 28, 14, "X");
+  g.set(4, 8, "L").set(12, 7, "L").set(20, 8, "L").set(26, 8, "L");
+});
+
 def(3, "GALLOP", {
   echoes: ["shade", "gust"], recMax: 24,
   hint: "A GUST THAT CARRIES YOU CAN STILL BLOW WHEN IT STOPS. THE SHADE ONLY HAS TO BE A STEP WHILE YOU RECORD.",
@@ -602,7 +630,34 @@ def(3, "CHORUS", {
 });
 
 // ================================================================ tier 5: the mirror
-// Swap (Q) is on in every level of this tier and nowhere else.
+// The puppet comes first (it needs no swap). Swap (Q) is on in the levels that show the swap sign, which are the ones after Other Side.
+def(4, "REFLECTION", {
+  unlock: "mirror", echoes: ["mirror"], recMax: 8,
+  hint: "THE PLATE IS IN A ROOM YOU CANNOT ENTER. YOUR PUPPET STARTS ON THE OTHER SIDE OF THE ROOM AND WALKS THE OPPOSITE WAY.",
+}, (g) => {
+  g.base();
+  g.set(3, 14, "@");
+  g.fill(24, 1, 24, 14, "#");
+  g.set(26, 14, "a");
+  g.fill(13, 1, 13, 8, "#").fill(13, 9, 13, 14, "A");
+  g.fill(19, 13, 19, 14, "X");
+  g.set(6, 8, "L").set(17, 7, "L").set(27, 8, "L");
+});
+
+def(4, "OTHER SIDE", {
+  echoes: ["shade", "mirror"], recMax: 24,
+  hint: "THE PLATE IS ON TOP OF THE FAR BLOCK, WHICH YOU CANNOT REACH. WHEREVER YOU STAND, YOUR PUPPET STANDS ON THE OTHER SIDE OF THE ROOM AT THE SAME HEIGHT.",
+}, (g) => {
+  g.base();
+  g.set(3, 14, "@");
+  g.fill(6, 10, 9, 14, "#");
+  g.fill(22, 10, 25, 14, "#");
+  g.set(24, 9, "a");
+  g.fill(12, 1, 12, 8, "#").fill(12, 9, 12, 14, "A");
+  g.fill(18, 13, 18, 14, "X");
+  g.set(4, 7, "L").set(15, 6, "L").set(28, 8, "L");
+});
+
 def(4, "LEAPFROG", {
   unlock: "swap", echoes: ["glow"], recMax: 8, dark: true, swap: true,
   hint: "THE BRIDGE IS LONGER THAN ONE LIGHT. WALK TO THE EDGE OF THE LIGHT, THEN PRESS Q.",
@@ -665,6 +720,19 @@ def(4, "GLASS CEILING", {
   g.fill(14, 12, 14, 14, "%");
   g.fill(29, 13, 29, 14, "X");
   g.set(4, 12, "L").set(26, 12, "L");
+});
+
+def(4, "STEP THROUGH", {
+  echoes: ["mirror"], recMax: 12, swap: true,
+  hint: "THE WALL GOES ALL THE WAY UP, AND YOUR PUPPET IS ON THE OTHER SIDE OF IT. WHAT YOU SWAP WITH TAKES YOUR PLACE, AND STAYS THERE.",
+}, (g) => {
+  g.base();
+  g.set(3, 14, "@");
+  g.fill(15, 1, 16, 14, "#");
+  g.set(8, 14, "a");
+  g.fill(24, 1, 24, 8, "#").fill(24, 9, 24, 14, "A");
+  g.fill(28, 13, 28, 14, "X");
+  g.set(5, 8, "L").set(11, 8, "L").set(20, 8, "L").set(27, 8, "L");
 });
 
 def(4, "NIGHT TRAIN", {
@@ -924,5 +992,10 @@ const PAR = {
   "GATEHOUSE": { t: 40, r: 2 },
   "STAGECOACH": { t: 35, r: 3 },
   "WEATHERVANE": { t: 20, r: 3 },
+  "STILL AIR": { t: 20, r: 1 },
+  "SLACK WATER": { t: 35, r: 3 },
+  "REFLECTION": { t: 15, r: 1 },
+  "OTHER SIDE": { t: 25, r: 2 },
+  "STEP THROUGH": { t: 15, r: 1 },
 };
 for (const l of LEVELS) l.par = PAR[l.name];

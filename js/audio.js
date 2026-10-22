@@ -98,6 +98,7 @@ const Sfx = (() => {
     ok() { tone(880, 0.09, "square", 0.05); tone(1320, 0.1, "square", 0.04, 1, 0.06); },
     card() { [0, 7, 12].forEach((n, i) => tone(mtof(57 + n), 1.2, "sine", 0.07, 1, i * 0.18)); },
     spring() { tone(200, 0.26, "sine", 0.13, 3.4); tone(420, 0.2, "triangle", 0.06, 2, 0.05); },
+    crumble() { noise(0.3, 0.12, 500); tone(110, 0.25, "sawtooth", 0.04, 0.5); },
     lantern() { [0, 7, 12, 19].forEach((n, i) => tone(mtof(76 + n), 0.55, "sine", 0.07, 1, i * 0.06)); },
   };
 

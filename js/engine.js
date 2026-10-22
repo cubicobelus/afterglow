@@ -24,6 +24,12 @@ const VINE_H = 120, VINE_UP = 100, VINE_DOWN = 60; // a column that grows up fro
 const BEAM_W = 5, BEAM_BOUNCES = 8;       // half thickness of a light beam, and how many mirrors it can turn on
 const SHIFT_R = 110;                      // inside this ring the level shows its other side
 const FORK_DELAY = 150;                   // a fork echo has a twin that follows this many ticks later
+// Things the level itself does (no echo needed): see the later tiers.
+const DRAFT_V = 130, DRAFT_ACC = 2600, DRAFT_W = 40, DRAFT_H = 140; // a column of bubbles that lifts you
+const ROOT_T = 40, ROOT_GONE = 180;       // a root ledge crumbles after this long underfoot and grows back after this long
+const TIMED_P = 300;                      // a timed door is shut for half of every cycle of this many ticks
+const MOVER_H = 8;                        // thickness of a moving platform (one way, like a ledge)
+const BLADE_R = 3;                        // half thickness of a rotating blade
 
 const KINDS = {
   shade: { name: "SHADE", color: "#8fb4ff", blurb: "HOLDS PLATES AND IS SOLID TO STAND ON." },
@@ -121,7 +127,7 @@ function rectDist2(px, py, r) {
 // ---------------------------------------------------------------- world state
 const G = {
   L: null, t: 0, p: null, echoes: {}, rec: null, sel: 0,
-  lights: [], flips: [], phases: [], winds: [], calms: [], floats: [], pulls: [], slows: [], shrinks: [], vines: [], shifts: [], beamRects: [], beams: [],
+  lights: [], flips: [], phases: [], winds: [], drafts: [], calms: [], floats: [], pulls: [], slows: [], shrinks: [], vines: [], shifts: [], beamRects: [], beams: [],
   dead: false, deadT: 0, won: false, winT: 0,
   deaths: 0, time: 0, timing: false, recCount: 0, swapCd: 0, lanternsGot: 0, notice: null,
   particles: [], shake: 0, onWin: null,
@@ -130,6 +136,13 @@ const G = {
 function makeGrid() {
   const a = Array.from({ length: ROWS }, () => Array(COLS).fill("."));
   const g = {
+    // Moving platforms and rotating blades are listed beside the tiles. A platform is w tiles wide and its top edge runs
+    // between tile (c0, r0) and tile (c1, r1); o.sp is its speed in px/s, o.dwell the ticks it waits at each end and o.ph
+    // how far into its cycle it starts. A blade turns about the centre of tile (c, r); len is its half length in px,
+    // turns the revolutions per 10 seconds (negative the other way) and ph the starting angle in quarter turns.
+    movers: [], blades: [],
+    mover(c0, r0, c1, r1, w, o) { g.movers.push(Object.assign({ c0, r0, c1, r1, w, sp: 40, dwell: 40, ph: 0 }, o)); return g; },
+    blade(c, r, len, turns, ph) { g.blades.push({ c, r, len, turns: turns || 2.5, ph: ph || 0 }); return g; },
     set(c, r, ch) { if (c >= 0 && c < COLS && r >= 0 && r < ROWS) a[r][c] = ch; return g; },
     fill(c0, r0, c1, r1, ch) { for (let r = r0; r <= r1; r++) for (let c = c0; c <= c1; c++) g.set(c, r, ch); return g; },
     // Walls on three sides, a ceiling and a floor three rows thick (surface at row 15).
@@ -152,6 +165,7 @@ function parseLevel(which) {
     echoes: (def.echoes || []).slice().sort((a, b) => KIND_ORDER.indexOf(a) - KIND_ORDER.indexOf(b)), recMax: def.recMax || 10, swap: !!def.swap, hint: def.hint || "",
     rows, walls: [], doorTiles: [], plates: [], planks: [], crystals: [], spikes: [], thorns: [], lamps: [],
     oneways: [], gates: [], lanterns: [], halves: [], vents: [], emitters: [], shiftL: [], shiftD: [],
+    updrafts: [], mushrooms: [], roots: [], timed: [], movers: [], blades: [],
     spawn: { x: 40, y: 100 }, exit: null, doorOpen: {}, hasDoor: {}, hasLamp: {},
   };
   // A level may list a kind more than once. The first slot of a kind is keyed by its name, later ones as name2, name3.
@@ -180,6 +194,10 @@ function parseLevel(which) {
       else if (ch === "+") L.shiftL.push({ x, y });
       else if (ch === "*") L.shiftD.push({ x, y });
       else if (ch === "<" || ch === ">") L.vents.push({ x: x + 10, y: y + 10, dir: ch === ">" ? 1 : -1, tx: c, ty: r });
+      else if (ch === "u") L.updrafts.push({ x: x + TILE / 2 - DRAFT_W / 2, y: y + TILE - DRAFT_H, w: DRAFT_W, h: DRAFT_H, tx: c, ty: r });
+      else if (ch === "m") L.mushrooms.push({ kind: "spring", fixed: true, x, y: y + 6, w: TILE, h: MOVER_H, tx: c, ty: r, restT: 99, silenced: false, dx: 0, dy: 0, bounceT: 0 });
+      else if (ch === "r") L.roots.push({ kind: "root", x, y, w: TILE, h: 6, tx: c, ty: r, dx: 0, dy: 0, goneT: 0, grp: null });
+      else if (ch === "T" || ch === "U") L.timed.push({ x, y, w: TILE, h: TILE, door: true, tx: c, ty: r, kind: ch });
       else if (ch === "_") { L.walls.push({ x, y: y + 10, w: TILE, h: 10 }); L.halves.push({ x, y: y + 10, top: false }); }
       else if (ch === "-") { L.walls.push({ x, y, w: TILE, h: 10 }); L.halves.push({ x, y, top: true }); }
       else if (ch === "^") L.spikes.push({ x: x + 3, y: y + 11, w: 14, h: 9, dir: 1, tx: c, ty: r });
@@ -213,7 +231,48 @@ function parseLevel(which) {
   }
   if (ex1 > 0) L.exit = { x: ex0, y: ey0, w: ex1 - ex0, h: ey1 - ey0 };
   if (L.ped) L.walls.push(L.ped);
+  // Neighbouring root tiles are one ledge: they give way together.
+  for (const r of L.roots) {
+    const left = L.roots.find((q) => q.ty === r.ty && q.tx === r.tx - 1);
+    r.grp = left ? left.grp : { members: [], standT: 0 };
+    r.grp.members.push(r);
+  }
+  L.movers = g.movers.map((m) => {
+    const x0 = m.c0 * TILE, y0 = m.r0 * TILE, x1 = m.c1 * TILE, y1 = m.r1 * TILE;
+    const travel = Math.max(1, Math.round(Math.hypot(x1 - x0, y1 - y0) / m.sp * 60));
+    return { kind: "mover", x: x0, y: y0, px: x0, py: y0, w: m.w * TILE, h: MOVER_H, dx: 0, dy: 0, x0, y0, x1, y1, travel, dwell: m.dwell, cycle: 2 * (travel + m.dwell), ph: m.ph };
+  });
+  L.blades = g.blades.map((b) => ({ x: b.c * TILE + TILE / 2, y: b.r * TILE + TILE / 2, len: b.len, w: b.turns * Math.PI * 2 / 600, a0: b.ph * Math.PI / 2, tx: b.c, ty: b.r }));
   return L;
+}
+
+// Where a moving platform is, a given number of ticks into the attempt: it waits at one end, glides to the other, waits, and back.
+function moverAt(m, t) {
+  const k = (t + m.ph) % m.cycle;
+  let s;
+  if (k < m.dwell) s = 0;
+  else if (k < m.dwell + m.travel) s = (k - m.dwell) / m.travel;
+  else if (k < 2 * m.dwell + m.travel) s = 1;
+  else s = 1 - (k - 2 * m.dwell - m.travel) / m.travel;
+  return { x: m.x0 + (m.x1 - m.x0) * s, y: m.y0 + (m.y1 - m.y0) * s };
+}
+
+// A timed door (T or U) is shut for half of every cycle; T starts shut and U starts open.
+function timedShut(kind, t) {
+  const first = (t === undefined ? G.t : t) % TIMED_P < TIMED_P / 2;
+  return kind === "T" ? first : !first;
+}
+
+function bladeAngle(b) { return b.a0 + b.w * G.t; }
+
+function bladeHit(b, p) {
+  const a = bladeAngle(b), ca = Math.cos(a), sa = Math.sin(a);
+  const x0 = p.x + 2 - BLADE_R, y0 = p.y + 2 - BLADE_R, x1 = p.x + p.w - 2 + BLADE_R, y1 = p.y + p.h - 2 + BLADE_R;
+  for (let d = -b.len; d <= b.len; d += 4) {
+    const x = b.x + ca * d, y = b.y + sa * d;
+    if (x >= x0 && x <= x1 && y >= y0 && y <= y1) return true;
+  }
+  return false;
 }
 
 // ---------------------------------------------------------------- particles
@@ -250,7 +309,7 @@ function calmedAt(x, y) {
   for (const c of G.calms) if ((x - c.x) * (x - c.x) + (y - c.y) * (y - c.y) <= c.r * c.r) return true;
   return false;
 }
-const NO_ZONES = { flips: [], winds: [], floats: [], pulls: [], shrinks: [], vines: [] };
+const NO_ZONES = { flips: [], winds: [], drafts: [], floats: [], pulls: [], shrinks: [], vines: [] };
 
 function litRect(r) {
   for (const l of G.lights) {
@@ -300,6 +359,7 @@ function traceBeam(x, y, dx, dy, skip, reflectors) {
     if (ch === "#") return true;
     if (ch === "G") return true;
     if (ch >= "A" && ch <= "D" && !L.doorOpen[ch.toLowerCase()]) return true;
+    if ((ch === "T" || ch === "U") && timedShut(ch)) return true;
     for (const h of L.halves) if (px >= h.x && px < h.x + TILE && py >= h.y && py < h.y + 10) return true;
     for (const k in G.echoes) {
       const e = G.echoes[k];
@@ -402,6 +462,8 @@ function computeFields() {
   }
   for (const em of L.emitters) addBeam(traceBeam(em.x + em.dx * 10, em.y + em.dy * 10, em.dx, em.dy, null, reflectors));
   for (const v of L.vents) G.winds.push({ x: v.x, y: v.y, r: GUST_R, dir: v.dir, vent: true });
+  G.drafts = L.updrafts;
+  for (const m of L.mushrooms) m.silenced = calmed(m.x + TILE / 2, m.y);
   for (const gt of L.gates) gt.open = litRect(gt);
 }
 
@@ -469,7 +531,22 @@ function restartAttempt() {
   G.deadT = 0;
   G.p = { x: s.x, y: s.y, w: PW, h: PH, vx: 0, vy: 0, windV: 0, pullV: 0, onGround: false, face: 1, coy: 0, buf: 0, jumping: false, stand: null, g: 1, sq: 0 };
   placeEchoes();
+  for (const m of L.movers) { const q = moverAt(m, 0); m.x = m.px = q.x; m.y = m.py = q.y; m.dx = m.dy = 0; }
+  for (const r of L.roots) { r.grp.standT = 0; r.goneT = 0; }
   computeFields();
+}
+
+// Moving platforms follow the clock of the attempt, so they are in the same place on every attempt and an echo recorded on
+// one is still on it when it replays.
+function updateMovers() {
+  const L = G.L;
+  for (const m of L.movers) {
+    m.px = m.x; m.py = m.y;
+    const q = moverAt(m, G.t);
+    m.x = q.x; m.y = q.y;
+    m.dx = m.x - m.px; m.dy = m.y - m.py;
+  }
+  for (const m of L.mushrooms) if (m.bounceT > 0) m.bounceT--;
 }
 
 function cancelRec() {
@@ -589,9 +666,17 @@ function buildSolids(p, withEchoes, g) {
   for (const w of L.walls) out.push(w);
   for (const d of L.doorTiles) if (!L.doorOpen[d.id]) out.push(d);
   for (const gt of L.gates) if (!gt.open) out.push(gt);
+  for (const d of L.timed) if (timedShut(d.kind)) out.push(d);
   if (g !== undefined) {
     for (const o of L.oneways) {
       if (g > 0 ? p.y + p.h <= o.y + 4 : p.y >= o.y + o.h - 4) out.push(o);
+    }
+    // Moving platforms, mushrooms and roots are one way like a ledge, and the player rides what they stand on.
+    for (const list of [L.movers, L.mushrooms, L.roots]) {
+      for (const m of list) {
+        if (m.goneT > 0) continue;
+        if (g > 0 ? p.y + p.h <= m.y + 4 : p.y >= m.y + m.h - 4) out.push({ x: m.x, y: m.y, w: m.w, h: m.h, ow: true, src: m });
+      }
     }
   }
   const pad = 36;
@@ -740,6 +825,8 @@ function stepPlayer() {
   if (floating) gr *= FLOAT_G;
   if (pulled) gr *= PULL_G;
   p.vy += gr * g * DT;
+  // A draft of bubbles lifts you toward the top of its column (a jump inside it still goes as high as it would).
+  if (Z.drafts.some((d) => cx >= d.x && cx <= d.x + d.w && cy >= d.y && cy <= d.y + d.h) && p.vy > -DRAFT_V) p.vy = Math.max(-DRAFT_V, p.vy - DRAFT_ACC * DT);
   for (const z of Z.pulls) {
     if (!inZone(z, cx, cy)) continue;
     // a spring toward the centre height, with damping, so you settle there instead of swinging through
@@ -925,12 +1012,29 @@ function tick() {
   handleActions();
   if (G.dead) return;
   updateEchoes();
+  updateMovers();
   computeFields();
   updatePlates();
   stepPlayer();
   if (G.dead) { updateParticles(); return; }
 
   const p = G.p;
+  // A root ledge gives way once you have stood on it for a while, and grows back later.
+  for (const r of L.roots) if (r.goneT > 0) r.goneT--;
+  for (const r of L.roots) {
+    const grp = r.grp;
+    if (grp.members[0] !== r || r.goneT > 0) continue;
+    if (p.stand && grp.members.includes(p.stand)) {
+      if (++grp.standT >= ROOT_T) {
+        grp.standT = 0;
+        for (const q of grp.members) { q.goneT = ROOT_GONE; burst(q.x + TILE / 2, q.y + 4, 6, "#7a5a36", 50, 0.5, 2, 160); }
+        SFX("crumble");
+      }
+    } else if (grp.standT > 0) grp.standT--;
+  }
+  for (const b of L.blades) {
+    if (bladeHit(b, p)) { kill(); updateParticles(); return; }
+  }
   if (p.y > H + 24 || p.y + p.h < -24) { kill(); updateParticles(); return; }
   for (const sp of L.spikes) {
     if (overlap({ x: p.x + 2, y: p.y + 2, w: p.w - 4, h: p.h - 4 }, sp)) { kill(); updateParticles(); return; }

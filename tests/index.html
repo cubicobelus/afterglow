@@ -15,6 +15,7 @@
 <script src="../js/engine.js"></script>
 <script src="bot.js"></script>
 <script src="solutions.js"></script>
+<script src="solutions2.js"></script>
 <script src="mechanics.js"></script>
 <script>
   // Optional ?only=3 or ?only=3,5 to run a subset. Results are also in window.RESULTS.
@@ -35,7 +36,7 @@
   }
 
   // Structural checks on every level layout.
-  const VALID = new Set(".#%~^vtabcd1234ABCDL@X=G5678PQRSo_-<>ewns+*".split(""));
+  const VALID = new Set(".#%~^vtabcd1234ABCDL@X=G5678PQRSo_-<>ewns+*umrTU".split(""));
   for (let i = 0; i < LEVELS.length; i++) {
     const problems = [];
     const L = parseLevel(i);
