@@ -323,3 +323,174 @@ SOLUTIONS["OPEN DOOR"] = () => {
 
 // The lab room for the calm is the same room as Still Air.
 SOLUTIONS["CALM"] = SOLUTIONS["STILL AIR"];
+
+// ================================================================ tier 7: the wreck (pull, cargo platforms)
+SOLUTIONS["GRAPPLE"] = SOLUTIONS["PULL"];
+SOLUTIONS["THE LONG HAUL"] = () => {
+  // Ride the platform to its far end, jump off and stop recording at the top of the jump: the pull hangs there. Then ride and jump the
+  // same way: the pull catches you in mid air and holds you while you drift out toward the far bank.
+  const ride = () => {
+    Bot.walkTo(130, 4);
+    Bot.waitUntil(() => G.t > 190, 600, "the platform to reach the far end");
+  };
+  Bot.record("pull");
+  ride();
+  Bot.dir(1);
+  Bot.jumpKey(true);
+  for (let i = 0; i < 18; i++) { if (i === 22) Bot.jumpKey(false); Bot.tick(); if (G.dead) Bot.fail("fell"); }
+  Bot.jumpKey(false);
+  Bot.dir(0);
+  Bot.stop();
+  ride();
+  Bot.dir(1);
+  Bot.jumpKey(true);
+  for (let i = 0; i < 200; i++) {
+    if (i === 22) Bot.jumpKey(false);
+    Bot.tick();
+    if (G.dead) Bot.fail("fell into the pit");
+    if (i > 24 && G.p.onGround && Bot.px() > 370) break;
+  }
+  Bot.jumpKey(false);
+  Bot.dir(0);
+  Bot.expect(G.p.onGround && Bot.px() > 362, "across the pit");
+  Bot.walkTo(570);
+};
+SOLUTIONS["HOIST"] = () => {
+  // Ride the lift up and, while it waits at the top, jump and stop recording a shade 40 px above it. The lift goes back down but the shade
+  // stays: from the top of the lift you can step up onto it, and from it up onto the ledge.
+  const ride = () => {
+    Bot.walkTo(172, 4);
+    Bot.walkTo(208, 3);
+    Bot.waitUntil(() => G.t > 320, 800, "the lift to reach the top");
+  };
+  Bot.record("shade");
+  ride();
+  Bot.jumpKey(true);
+  let found = false;
+  for (let i = 0; i < 90; i++) {
+    Bot.tick();
+    if (G.dead) Bot.fail("fell");
+    const h = 160 - Bot.feet();
+    if (i > 8 && G.p.vy > 0 && h <= 44 && h >= 32) { found = true; break; }
+  }
+  Bot.expect(found, "a hover window above the lift");
+  Bot.jumpKey(false);
+  Bot.stop();
+  ride();
+  settle("shade", 30);
+  const e = G.echoes.shade;
+  Bot.jumpTo(e.x + 6, 22);
+  Bot.expect(G.p.stand === e, "standing on the shade");
+  Bot.jumpTo(262, 26);
+  Bot.expect(G.p.onGround && G.p.y + PH < 85, "up on the ledge");
+  Bot.walkTo(570);
+};
+SOLUTIONS["BOUNCE WELL"] = () => {
+  // A spring at the edge, a bounce held to the top, and a pull recorded at the top of the bounce: it holds you there while you drift
+  // over to the ledge.
+  const bounce = (stopAtApex) => {
+    settle("spring", 30);
+    Bot.walkTo(100, 3);
+    Bot.jumpKey(true);
+    let bounced = false;
+    for (let i = 0; i < 160; i++) {
+      if (!bounced && G.p.vy < -600) { bounced = true; Bot.dir(1); }
+      if (bounced && stopAtApex && G.p.vy > -30) { Bot.jumpKey(false); Bot.dir(0); Bot.stop(); return; }
+      Bot.tick();
+      if (G.dead) Bot.fail("fell");
+      if (bounced && !stopAtApex && i > 60 && G.p.onGround) break;
+    }
+    Bot.jumpKey(false);
+    Bot.dir(0);
+  };
+  recWait("spring", 100, 12);
+  Bot.record("pull");
+  bounce(true);
+  Bot.expect(G.echoes.pull, "the pull recorded");
+  bounce(false);
+  Bot.expect(G.p.onGround && Bot.px() > 250, "up on the ledge");
+  Bot.walkTo(570);
+};
+SOLUTIONS["SLOW BOAT"] = () => {
+  // Wait for the platform at the near end, ride it across, step off.
+  Bot.walkTo(150, 4);
+  Bot.waitUntil(() => G.t > 310, 800, "the platform to cross");
+  Bot.walkTo(570);
+};
+SOLUTIONS["CRANE"] = () => {
+  // Ride the platform over and walk to the plate on the far side; the shade stays there and holds the door back home.
+  Bot.record("shade");
+  Bot.walkTo(262, 4);
+  Bot.waitUntil(() => G.t > 250, 900, "the platform to cross");
+  Bot.walkTo(490, 3);
+  Bot.run(20);
+  Bot.stop();
+  Bot.waitUntil(() => G.L.doorOpen.a, 900, "the shade to reach the plate");
+  Bot.walkTo(44);
+};
+SOLUTIONS["WINDLASS"] = () => {
+  // The first pull hangs at the top of a jump from the edge. The second is recorded where the first one lets go of you: walk into the
+  // first well, which lifts you and carries you, drift out of it, and stop in mid air. Each well reaches about 96 px, together they reach
+  // the far bank.
+  Bot.record("pull");
+  Bot.walkTo(112, 3);
+  Bot.dir(1);
+  Bot.jumpKey(true);
+  for (let i = 0; i < 24; i++) { if (i === 22) Bot.jumpKey(false); Bot.tick(); }
+  Bot.jumpKey(false);
+  Bot.dir(0);
+  Bot.stop();
+  settle("pull", 30);
+  const A = G.echoes.pull;
+  const ax = A.x + 6, ay = A.y + 8;
+  Bot.record("pull2");
+  settle("pull", 30);
+  Bot.dir(1);
+  let stopped = false;
+  for (let i = 0; i < 600; i++) {
+    Bot.tick();
+    if (G.dead) Bot.fail("fell into the pit");
+    if (Bot.px() > ax && Math.hypot(Bot.px() - ax, G.p.y + 8 - ay) > 92) { stopped = true; break; }
+  }
+  Bot.expect(stopped, "to leave the first well");
+  Bot.dir(0);
+  Bot.stop();
+  settle("pull", 30);
+  settle("pull2", 30);
+  Bot.dir(1);
+  for (let i = 0; i < 900; i++) {
+    Bot.tick();
+    if (G.dead) Bot.fail("fell into the pit");
+    if (G.p.onGround && Bot.px() > 345) break;
+  }
+  Bot.dir(0);
+  Bot.expect(G.p.onGround && Bot.px() > 345, "across the pit");
+  Bot.walkTo(570);
+};
+SOLUTIONS["DELIVERY"] = () => {
+  // Ride the platform across and record the spring at the foot of the wall: it stays there. Then ride across again and bounce up the wall.
+  const cross = () => {
+    Bot.walkTo(150, 4);
+    Bot.waitUntil(() => G.t > 310, 900, "the platform to cross");
+  };
+  Bot.record("spring");
+  cross();
+  Bot.walkTo(452, 3);
+  Bot.run(12);
+  Bot.stop();
+  cross();
+  Bot.walkTo(452, 3);
+  settle("spring", 30);
+  Bot.jumpKey(true);
+  let bounced = false;
+  for (let i = 0; i < 200; i++) {
+    if (!bounced && G.p.vy < -600) { bounced = true; Bot.dir(1); }
+    Bot.tick();
+    if (G.dead) Bot.fail("fell");
+    if (bounced && i > 60 && G.p.onGround) break;
+  }
+  Bot.jumpKey(false);
+  Bot.dir(0);
+  Bot.expect(G.p.onGround && G.p.y + PH < 125, "up on the wall");
+  Bot.walkTo(570);
+};

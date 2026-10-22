@@ -870,6 +870,104 @@ def(5, "TWO TIERS", {
   g.set(5, 4, "L").set(16, 3, "L").set(27, 4, "L");
 });
 
+// ================================================================ tier 7: the wreck (pull, cargo platforms)
+def(6, "GRAPPLE", {
+  unlock: "pull", echoes: ["pull"], recMax: 8,
+  hint: "THE GAP IS TOO WIDE TO JUMP. RECORD A PULL IN THE AIR OVER THE MIDDLE: IT CATCHES YOU MID JUMP AND HOLDS YOU THERE.",
+}, (g) => {
+  g.base();
+  g.set(2, 14, "@");
+  g.pit(9, 14);
+  g.fill(28, 13, 28, 14, "X");
+  g.set(5, 8, "L").set(13, 5, "L").set(24, 8, "L");
+});
+
+def(6, "SLOW BOAT", {
+  autoHint: true, echoes: [],
+  hint: "THE CARGO PLATFORM RUNS BACK AND FORTH ON ITS OWN. HOP ON WHEN IT COMES, AND OFF WHEN IT ARRIVES.",
+}, (g) => {
+  g.base();
+  g.set(2, 14, "@");
+  g.pit(7, 16);
+  g.mover(6, 15, 14, 15, 3, { sp: 40, dwell: 60 });
+  g.fill(28, 13, 28, 14, "X");
+  g.set(4, 8, "L").set(12, 5, "L").set(23, 8, "L");
+});
+
+def(6, "CRANE", {
+  echoes: ["shade"], recMax: 20,
+  hint: "THE DOOR IS BACK HOME AND THE PLATE IS ACROSS THE WATER. SOMETHING THAT RODE THE PLATFORM OVER CAN STAY THERE.",
+}, (g) => {
+  g.base();
+  g.set(10, 14, "@");
+  g.fill(5, 1, 5, 8, "#").fill(5, 9, 5, 14, "A");
+  g.fill(2, 13, 2, 14, "X");
+  g.pit(13, 20);
+  g.mover(12, 15, 18, 15, 3, { sp: 40, dwell: 60 });
+  g.set(24, 14, "a");
+  g.set(8, 8, "L").set(16, 5, "L").set(26, 8, "L");
+});
+
+def(6, "DELIVERY", {
+  echoes: ["spring"], recMax: 24,
+  hint: "THE WALL OVER THERE IS TOO HIGH TO CLIMB, AND THE SPRING THAT WOULD THROW YOU UP IT HAS TO BE ON THE OTHER SIDE OF THE WATER.",
+}, (g) => {
+  g.base();
+  g.set(2, 14, "@");
+  g.pit(7, 16);
+  g.mover(6, 15, 14, 15, 3, { sp: 40, dwell: 60 });
+  g.fill(24, 6, 30, 14, "#");
+  g.fill(28, 4, 28, 5, "X");
+  g.set(4, 8, "L").set(12, 5, "L").set(21, 4, "L");
+});
+
+def(6, "HOIST", {
+  autoHint: true, echoes: ["shade"], recMax: 20,
+  hint: "THE LIFT STOPS A LONG WAY BELOW THE LEDGE. AN ECHO CAN HANG IN THE AIR WHERE THE LIFT TOOK YOU, LONG AFTER THE LIFT HAS GONE.",
+}, (g) => {
+  g.base();
+  g.set(2, 14, "@");
+  g.mover(8, 15, 8, 8, 3, { sp: 40, dwell: 90 });
+  g.fill(12, 4, 30, 14, "#");
+  g.fill(28, 2, 28, 3, "X");
+  g.set(4, 8, "L").set(7, 3, "L").set(22, 2, "L");
+});
+
+def(6, "THE LONG HAUL", {
+  autoHint: true, echoes: ["pull"], recMax: 20,
+  hint: "THE CARGO PLATFORM CARRIES YOU PART OF THE WAY. YOU CAN RECORD WHILE YOU RIDE IT. JUMP OFF AT THE FAR END AND STOP IN MID AIR.",
+}, (g) => {
+  g.base();
+  g.set(2, 14, "@");
+  g.pit(6, 17);
+  g.mover(5, 15, 9, 15, 3, { sp: 40, dwell: 60 });
+  g.fill(28, 13, 28, 14, "X");
+  g.set(4, 8, "L").set(12, 5, "L").set(24, 8, "L");
+});
+
+def(6, "BOUNCE WELL", {
+  echoes: ["spring", "pull"], recMax: 20,
+  hint: "THE SPRING THROWS YOU HIGH ENOUGH BUT NOT FAR ENOUGH. A PULL HUNG AT THE TOP OF THE BOUNCE WILL HOLD YOU THERE WHILE YOU DRIFT ACROSS.",
+}, (g) => {
+  g.base();
+  g.set(2, 14, "@");
+  g.pit(6, 11);
+  g.fill(12, 6, 30, 14, "#");
+  g.fill(28, 4, 28, 5, "X");
+  g.set(4, 8, "L").set(9, 4, "L").set(22, 3, "L");
+});
+
+def(6, "WINDLASS", {
+  echoes: ["pull", "pull"], recMax: 24,
+  hint: "ONE WELL REACHES ONLY HALF WAY. THE SECOND ONE HAS TO BE HUNG WHERE THE FIRST ONE LETS GO OF YOU.",
+}, (g) => {
+  g.base();
+  g.set(2, 14, "@");
+  g.pit(6, 16);
+  g.fill(28, 13, 28, 14, "X");
+  g.set(5, 8, "L").set(11, 4, "L").set(24, 8, "L");
+});
+
 def(6, "WRECK TEMP", {
   temp: true, echoes: [], hint: "A BLANK ROOM TO SEE THE SCENERY OF THE WRECK.",
 }, (g) => {
