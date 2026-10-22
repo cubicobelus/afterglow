@@ -1657,7 +1657,6 @@ const runAndJump = (xs, hold) => {
 };
 SOLUTIONS["WRECK TEMP"] = () => runAndJump([148, 268, 408]);
 SOLUTIONS["TRENCH TEMP"] = () => runAndJump([168, 308]);
-SOLUTIONS["FOUNDATION TEMP"] = () => runAndJump([128, 190, 308]);
 
 // ---------------------------------------------------------------- the lab: one room per new echo
 SOLUTIONS["CALM"] = () => {

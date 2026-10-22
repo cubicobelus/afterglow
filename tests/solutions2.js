@@ -872,3 +872,162 @@ SOLUTIONS["THE SPAN"] = () => {
   hop(450);
   Bot.walkTo(570);
 };
+SOLUTIONS["KEYSTONE"] = () => {
+  // Stand against the gold wall and record the ring: it opens the wall for as long as it stays. Then walk through and record a shade on the plate.
+  recWait("shift", 228, 12);
+  settle("shift", 30);
+  Bot.record("shade");
+  settle("shift", 30);
+  Bot.walkTo(310, 3);
+  Bot.run(14);
+  Bot.stop();
+  settle("shift", 30);
+  Bot.walkTo(570);
+};
+
+// Jump a gap from the current spot toward x (a player centre) holding the jump for `hold` ticks, and land.
+const leap = (x, hold) => Bot.jumpTo(x, hold === undefined ? 24 : hold);
+
+SOLUTIONS["ARCHWAY"] = () => {
+  // Calm at the vent gap, then the ring at the dark bridge (recorded after crossing the gap with the calm), then the shade on the plate.
+  recWait("calm", 130, 12);
+  Bot.record("shift");
+  settle("calm", 40);
+  Bot.walkTo(130, 3);
+  leap(198, 24);
+  walkThrough(250);
+  Bot.run(12);
+  Bot.stop();
+  Bot.record("shade");
+  settle("calm", 40);
+  settle("shift", 40);
+  Bot.walkTo(130, 3);
+  leap(198, 24);
+  walkThrough(250);
+  Bot.walkTo(420, 3);
+  Bot.run(12);
+  Bot.stop();
+  settle("calm", 40);
+  settle("shift", 40);
+  Bot.walkTo(130, 3);
+  leap(198, 24);
+  walkThrough(250);
+  Bot.walkTo(430, 3);
+  Bot.waitUntil(() => G.L.doorOpen.a, 900, "the door to open");
+  Bot.walkTo(570);
+};
+
+// ---------------------------------------------------------------- chains: levels made of stations in a row, each needing its own echo
+// A station has `key` (its echo slot), place() (go to where its echo is recorded, wait, stop recording) and pass() (get across it once its
+// echo is in place, ending on the far side). Echoes are recorded in order, each recording crossing the stations before it; then the whole route.
+// A replaying echo that is still walking cuts any beam it crosses and can be in the way, so wait for every echo to be at rest before crossing.
+const settleAll = () => Bot.waitUntil(() => Object.values(G.echoes).every((e) => !e.moving && e.restT > 30), 2400, "every echo to settle");
+const runChain = (stations, finish) => {
+  for (let k = 0; k < stations.length; k++) {
+    if (!stations[k].key) continue;
+    Bot.record(stations[k].key);
+    settleAll();
+    for (let j = 0; j < k; j++) stations[j].pass();
+    stations[k].place();
+  }
+  settleAll();
+  for (const st of stations) st.pass();
+  if (finish) finish();
+};
+
+const stThorns = (key, spotX, endX) => ({
+  key,
+  place() { Bot.walkTo(spotX, 3); Bot.run(12); Bot.stop(); },
+  pass() { settle(key, 40); Bot.walkTo(endX, 3); },
+});
+const stVent = (key, pitCol, afterX) => ({
+  key,
+  place() { Bot.walkTo(pitCol * 20 - 10, 3); Bot.run(12); Bot.stop(); },
+  pass() { settle(key, 40); Bot.walkTo(pitCol * 20 - 10, 3); leap((pitCol + 2) * 20 + 18, 24); walkThrough(afterX); },
+});
+const stBridge = (key, pitCol, afterX) => ({
+  key,
+  place() { Bot.walkTo(pitCol * 20 - 10, 3); Bot.run(12); Bot.stop(); },
+  pass() { settle(key, 40); Bot.walkTo(afterX, 3); },
+});
+const stPlate = (key, plateX, waitX) => ({
+  key,
+  place() { Bot.walkTo(plateX, 3); Bot.run(12); Bot.stop(); },
+  pass() { Bot.walkTo(waitX, 3); },
+});
+
+SOLUTIONS["LAMP HALL"] = () => {
+  // Light the thorns, calm the vent, hold the plate: each recording is made crossing what the earlier ones opened.
+  runChain([
+    stThorns("glow", 110, 250),
+    stVent("calm", 15, 400),
+    stPlate("shade", 450, 470),
+  ], () => {
+    Bot.waitUntil(() => G.L.doorOpen.a, 900, "the door to open");
+    Bot.walkTo(592);
+  });
+};
+const stCrystal = (key, spotX, afterX) => ({
+  key,
+  place() { Bot.walkTo(spotX, 3); Bot.run(12); Bot.stop(); },
+  pass() { settle(key, 40); Bot.walkTo(afterX, 3); },
+});
+SOLUTIONS["GILDED GLASS"] = () => {
+  // Open the glass, light the thorns with a beam (light passes through glass), bring up the bridge.
+  runChain([
+    stCrystal("phase", 110, 184),
+    stThorns("beam", 184, 372),
+    stBridge("shift", 19, 490),
+  ], () => Bot.walkTo(572));
+};
+const stPull = (key, edgeX, farX) => ({
+  key,
+  place() {
+    Bot.walkTo(edgeX - 6, 3);
+    Bot.dir(1);
+    Bot.jumpKey(true);
+    for (let i = 0; i < 28; i++) { if (i === 22) Bot.jumpKey(false); Bot.tick(); if (G.dead) Bot.fail("fell"); }
+    Bot.jumpKey(false);
+    Bot.dir(0);
+    Bot.stop();
+  },
+  pass() {
+    settle(key, 40);
+    Bot.dir(1);
+    for (let i = 0; i < 900; i++) {
+      Bot.tick();
+      if (G.dead) Bot.fail("fell into the pit");
+      if (G.p.onGround && Bot.px() > farX) break;
+    }
+    Bot.dir(0);
+  },
+});
+const stVine = (key, spotX, topY) => ({
+  key,
+  place() { Bot.walkTo(spotX, 3); Bot.run(12); Bot.stop(); },
+  pass() { climbVine(key, topY, 1); },
+});
+SOLUTIONS["UNDERTOW"] = () => {
+  runChain([
+    stPull("pull", 140, 275),
+    stVine("vine", 328, 180),
+    stPlate("shade", 450, 500),
+  ], () => {
+    Bot.waitUntil(() => G.L.doorOpen.a, 900, "the door to open");
+    Bot.walkTo(590);
+  });
+};
+const stBridge2 = (key, pitCol, afterX) => ({
+  key,
+  place() { walkThrough(pitCol * 20 - 10, 3); Bot.run(12); Bot.stop(); },
+  pass() { settle(key, 40); walkThrough(afterX); },
+});
+SOLUTIONS["THE FIRST LIGHT"] = () => {
+  // The whole tower in a row: calm for the vent, shift for the bridge, pull for the water, vine for the wall.
+  runChain([
+    stVent("calm", 6, 212),
+    stBridge2("shift", 12, 346),
+    stPull("pull", 360, 495),
+    stVine("vine", 528, 180),
+  ], () => Bot.walkTo(592));
+};

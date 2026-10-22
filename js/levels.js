@@ -1248,16 +1248,92 @@ def(9, "THE SPAN", {
   g.set(5, 8, "L").set(15, 5, "L").set(26, 8, "L");
 });
 
-def(9, "FOUNDATION TEMP", {
-  temp: true, echoes: [], hint: "A BLANK ROOM TO SEE THE SCENERY OF THE FOUNDATION.",
+def(9, "KEYSTONE", {
+  echoes: ["shift", "shade"], recMax: 20,
+  hint: "A WALL OF GOLD HIDES THE PLATE. THE RING THAT OPENS IT HAS TO BE RECORDED STANDING AGAINST THE WALL. AN ECHO CAN HOLD A PLATE BUT NOT THE WALL OPEN, SO THE WALL NEEDS ITS OWN.",
 }, (g) => {
   g.base();
   g.set(2, 14, "@");
-  g.fill(7, 12, 9, 14, "#");
-  g.fill(10, 10, 12, 14, "#");
-  g.fill(16, 12, 18, 14, "#");
+  g.fill(12, 1, 12, 14, "+");
+  g.set(15, 14, "a");
+  g.fill(21, 1, 21, 8, "#").fill(21, 9, 21, 14, "A");
   g.fill(28, 13, 28, 14, "X");
-  g.set(4, 9, "L").set(12, 5, "L").set(19, 7, "L").set(26, 8, "L");
+  g.set(5, 8, "L").set(16, 8, "L").set(25, 8, "L");
+});
+
+def(9, "ARCHWAY", {
+  echoes: ["shade", "calm", "shift"], recMax: 36,
+  hint: "THREE THINGS IN A ROW: A VENT, A DARK BRIDGE AND A DOOR WITH A PLATE. EACH ECHO HELPS YOU REACH WHERE THE NEXT ONE IS NEEDED.",
+}, (g) => {
+  g.base();
+  g.set(2, 14, "@");
+  g.pit(7, 8);
+  g.set(10, 14, "<");
+  g.fill(13, 15, 16, 17, ".");
+  g.fill(13, 15, 16, 15, "*");
+  g.set(21, 14, "a");
+  g.fill(25, 1, 25, 8, "#").fill(25, 9, 25, 14, "A");
+  g.fill(28, 13, 28, 14, "X");
+  g.set(4, 8, "L").set(11, 5, "L").set(19, 8, "L").set(27, 8, "L");
+});
+
+def(9, "LAMP HALL", {
+  echoes: ["shade", "glow", "calm"], recMax: 40, dark: true,
+  hint: "THORNS, A VENT AND A DOOR, IN THAT ORDER, AND AN ECHO FOR EACH. THE LIGHT HAS TO STAY CLEAR OF THE CALM: A CALM SILENCES LIGHT TOO.",
+}, (g) => {
+  g.base();
+  g.set(2, 14, "@");
+  g.fill(6, 14, 9, 14, "t");
+  g.pit(15, 16);
+  g.set(18, 14, "<");
+  g.set(22, 14, "a");
+  g.fill(26, 1, 26, 8, "#").fill(26, 9, 26, 14, "A");
+  g.fill(29, 13, 29, 14, "X");
+  g.set(4, 10, "L").set(13, 11, "L").set(21, 11, "L").set(28, 9, "L");
+});
+
+def(9, "GILDED GLASS", {
+  echoes: ["phase", "beam", "shift"], recMax: 40,
+  hint: "GLASS, THORNS AND A BRIDGE THAT ISN'T THERE. LIGHT GOES THROUGH GLASS, AND SO DO YOU, IF YOU OPEN IT FIRST.",
+}, (g) => {
+  g.base();
+  g.set(2, 14, "@");
+  g.fill(6, 1, 7, 14, "%");
+  g.fill(11, 14, 16, 14, "t");
+  g.fill(19, 15, 22, 17, ".");
+  g.fill(19, 15, 22, 15, "*");
+  g.fill(28, 13, 28, 14, "X");
+  g.set(4, 8, "L").set(12, 4, "L").set(24, 8, "L");
+});
+
+def(9, "UNDERTOW", {
+  echoes: ["shade", "pull", "vine"], recMax: 40,
+  hint: "A WELL TO CROSS THE WATER, A VINE TO CLIMB THE WALL, AND A PLATE UP THERE FOR THE DOOR. EACH ONE IS RECORDED CROSSING WHAT THE LAST ONE OPENED.",
+}, (g) => {
+  g.base();
+  g.set(2, 14, "@");
+  g.pit(7, 12);
+  g.fill(17, 9, 30, 14, "#");
+  g.set(22, 8, "a");
+  g.fill(26, 1, 26, 4, "#").fill(26, 5, 26, 8, "A");
+  g.fill(29, 7, 29, 8, "X");
+  g.set(4, 8, "L").set(10, 4, "L").set(14, 8, "L");
+});
+
+def(9, "THE FIRST LIGHT", {
+  echoes: ["calm", "pull", "vine", "shift"], recMax: 60,
+  hint: "EVERYTHING THE TOWER AND THE WATER TAUGHT YOU, IN ORDER: A VENT, A BRIDGE THAT IS NOT THERE, A WELL AND A WALL. EACH ECHO IS RECORDED CROSSING WHAT THE LAST ONE OPENED. THE LAMP IS AT THE TOP.",
+}, (g) => {
+  g.base();
+  g.set(2, 14, "@");
+  g.pit(6, 7);
+  g.set(9, 14, "<");
+  g.fill(12, 15, 15, 17, ".");
+  g.fill(12, 15, 15, 15, "*");
+  g.pit(18, 23);
+  g.fill(27, 9, 30, 14, "#");
+  g.fill(29, 7, 29, 8, "X");
+  g.set(4, 8, "L").set(10, 5, "L").set(16, 4, "L").set(24, 5, "L");
 });
 
 // ================================================================ the lab: one room per new echo (the benched ones last)
@@ -1468,5 +1544,21 @@ const PAR = {
   "TREETOP": { t: 20, r: 1 },
   "SPORE WIND": { t: 20, r: 1 },
   "ESCALATOR": { t: 45, r: 3 },
+  "PAIR": { t: 30, r: 1 },
+  "CLOSET": { t: 25, r: 1 },
+  "TURNSTILE": { t: 35, r: 1 },
+  "SLIDING DOORS": { t: 30, r: 1 },
+  "TRIPLE": { t: 25, r: 2 },
+  "THORN PAIR": { t: 35, r: 2 },
+  "CLOCK TOWER": { t: 30, r: 1 },
+  "THRESHOLD": { t: 20, r: 1 },
+  "NIGHT STAIRS": { t: 40, r: 2 },
+  "THE SPAN": { t: 25, r: 1 },
+  "KEYSTONE": { t: 30, r: 2 },
+  "ARCHWAY": { t: 45, r: 3 },
+  "LAMP HALL": { t: 50, r: 3 },
+  "GILDED GLASS": { t: 40, r: 3 },
+  "UNDERTOW": { t: 55, r: 3 },
+  "THE FIRST LIGHT": { t: 90, r: 4 },
 };
 for (const l of LEVELS) l.par = PAR[l.name];
