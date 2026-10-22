@@ -18,7 +18,7 @@ const App = (() => {
   // ---------------------------------------------------------------- save
   const SAVE_KEY = "afterglow.save";
   const SETTINGS_KEY = "afterglow.settings";
-  const SAVE_VERSION = 16;
+  const SAVE_VERSION = 17;
   let save = { done: [], best: {}, stars: {}, lanterns: {}, seen: {} };
   let hadSave = false;
   try {
@@ -103,6 +103,11 @@ const App = (() => {
         "FERRY", "TRAMPOLINE", "SKYHOOK", "TWO STAGES", "SLUICE", "STAGECOACH", "FERRY LIGHT", "SLINGSHOT", "PUMP ROOM", "LONG CROSSING",
         "LEAPFROG", "STAY BEHIND", "APEX", "UPSIDE DOWN", "GLASS CEILING", "NIGHT TRAIN",
         "BREEZE", "SAIL", "GALLOP", "WEATHERVANE", "UP AND OVER", "AFTERIMAGE", "CHORUS"],
+      16: ["FIRST STEPS", "THE PLATE", "STEPPING STONE", "TWIN PLATES", "STAIRCASE", "LAMPLIGHT", "SUNKEN GATE", "GATEHOUSE", "RELAY", "SWITCHBOARD",
+        "GLASS WALL", "UNDER GLASS", "THREE PANES", "GHOST GLASS", "OVERHEAD", "CEILING PLATE", "LOOKING GLASS", "HALF OPEN", "HALL OF MIRRORS",
+        "SKYLIGHT", "TRAMPOLINE", "SKYHOOK", "STAGECOACH", "SLINGSHOT", "FERRY", "TWO STAGES", "SLUICE", "FERRY LIGHT", "PUMP ROOM", "LONG CROSSING",
+        "BREEZE", "SAIL", "GALLOP", "WEATHERVANE", "UP AND OVER", "AFTERIMAGE", "CHORUS", "LEAPFROG", "STAY BEHIND", "APEX", "UPSIDE DOWN",
+        "GLASS CEILING", "NIGHT TRAIN", "SHALLOWS TEMP", "WRECK TEMP", "GARDEN TEMP", "TRENCH TEMP", "FOUNDATION TEMP"],
     };
     // Same name but a different puzzle now: the old result no longer applies.
     const REDESIGNED = {
@@ -121,6 +126,7 @@ const App = (() => {
       13: {},
       14: { "LOOKING GLASS": true, "SKYLIGHT": true },
       15: {},
+      16: {},
     };
     // The level is the same but its lantern moved, so the old pickup no longer counts.
     // Value: the save version in which the lantern moved; older saves lose that pickup.
@@ -207,7 +213,7 @@ const App = (() => {
   const A = {
     state: "title", T: 0, idx: 0, sel: 0, hits: [], settingsBack: "title",
     fade: 1, fadeTarget: 0, fadeCb: null, cards: [], cardT: 0, introT: 0, hintT: 0, hintForce: 0,
-    result: null, selLevel: 0, page: 0, syncSel: 0, endT: 0, rebind: null, resetArm: 0, toast: null,
+    result: null, selLevel: 0, page: 0, syncSel: 0, endT: 0, story: null, storyNext: -1, rebind: null, resetArm: 0, toast: null,
   };
 
   function fadeTo(cb) {
@@ -357,9 +363,10 @@ const App = (() => {
         { label: "LEVELS", act: goSelect },
       ];
     }
-    const nxt = mainNext(A.idx), last = nxt < 0;
+    const nxt = mainNext(A.idx), last = nxt < 0, inter = !last && LEVELS[A.idx].name === INTERLUDE.after;
+    const story = (spec, next) => fadeTo(() => { A.state = "ending"; A.story = spec; A.storyNext = next; A.endT = 0; Sfx.play("card"); });
     return [
-      { label: last ? "FINISH" : "NEXT LEVEL", act: () => { if (last) fadeTo(() => { A.state = "ending"; A.endT = 0; Sfx.play("card"); }); else startLevel(nxt); } },
+      { label: last ? "FINISH" : inter ? "CONTINUE" : "NEXT LEVEL", act: () => { if (last) story(ENDING, -1); else if (inter) story(INTERLUDE, nxt); else startLevel(nxt); } },
       { label: "RETRY", act: () => startLevel(A.idx) },
       { label: "LEVELS", act: goSelect },
     ];
@@ -562,7 +569,7 @@ const App = (() => {
       }
       case "ending": {
         A.endT++;
-        if (A.endT > 60 && Input.hitAny(["Enter", "Space", "Escape"])) goTitle();
+        if (A.endT > 60 && Input.hitAny(["Enter", "Space", "Escape"])) { if (A.story === INTERLUDE && A.storyNext >= 0) startLevel(A.storyNext); else goTitle(); }
         break;
       }
     }
@@ -760,7 +767,6 @@ const App = (() => {
           lock(x, y, "#3a4054");
         }
       };
-      if (CHAPTERS[t].planned && !tierKinds[t].length) Font.draw(ctx, "NEW ECHO ?", 12, y + 20, { scale: 1, color: "#6d7690", shadow: null });
       if (!tierLevels[t].length) { ghosts(); continue; }
       tierKinds[t].forEach((kind, k) => {
         if (Render.EMBLEMS[kind]) Render.slotIcon(ctx, 18 + k * 18, y + 26, kind, 0, true);
@@ -782,7 +788,6 @@ const App = (() => {
         if (LEVELS[i].swap) Render.drawSwapIcon(ctx, x + 9, y + th - 9, open ? "#ffffff" : "#4d5468");
         hits.push({ x, y, w: tw, h: th, level: i });
       });
-      if (CHAPTERS[t].planned) ghosts();
     }
     let line;
     if (!pageHasLevels(A.page)) {
@@ -813,6 +818,7 @@ const App = (() => {
       Font.draw(ctx, "TIER " + (c.tier + 1), W / 2, 90, { scale: 1, color: "#8d96ad", align: "center" });
       Font.draw(ctx, ch.name, W / 2, 112, { scale: 4, color: ch.pal.accent, align: "center" });
       Font.draw(ctx, ch.line, W / 2, 170, { scale: 1, color: "#d9deec", align: "center" });
+      (ch.story || []).forEach((l, i) => Font.draw(ctx, l, W / 2, 202 + i * 13, { scale: 1, color: "#9aa5c0", align: "center" }));
     } else {
       const info = c.kind === "swap" ? ABILITIES.swap : KINDS[c.kind];
       const color = info.color;
@@ -901,30 +907,32 @@ const App = (() => {
     }
     Font.draw(ctx, "TIME " + fmtTime(r.time) + "     ECHOES " + r.echoes + "     DEATHS " + r.deaths, W / 2, 152, { scale: 1, color: "#ffffff", align: "center" });
     if (r.newBest) Font.draw(ctx, "NEW BEST", W / 2, 168, { scale: 1, color: "#8fe39a", align: "center" });
+    let menuY = 212;
     if (lanternLevels[A.idx]) {
       Render.drawLanternIcon(ctx, W / 2 - 38, 187, r.lantern || !!save.lanterns[A.idx]);
       Font.draw(ctx, r.lantern ? "LANTERN FOUND" : save.lanterns[A.idx] ? "LANTERN HAD" : "LANTERN MISSED", W / 2 - 26, 183, { scale: 1, color: r.lantern ? "#ffd35a" : "#7c859b" });
+      // The keeper's diary line that this lantern holds.
+      if (def.diary && (r.lantern || save.lanterns[A.idx])) {
+        const lines = Font.wrap(def.diary, 440, 1);
+        lines.forEach((l, i) => Font.draw(ctx, l, W / 2, 199 + i * 10, { scale: 1, color: "#e8dcb0", align: "center" }));
+        menuY = 212 + lines.length * 10 + 4;
+      }
     }
-    menu(completeItems(), hits, W / 2, 212, 26);
+    menu(completeItems(), hits, W / 2, menuY, 26);
   }
 
   function drawEnding() {
     drawTitleScene();
     dim(0.55);
-    const lines = [
-      "THE LAMP BURNS AGAIN.",
-      "",
-      "THE BEACON SWEEPS THE DARK WATER,",
-      "AND EVERY ECHO YOU LEFT BEHIND",
-      "FADES INTO THE LIGHT.",
-      "",
-      "THEY WERE ALWAYS YOU.",
-    ];
+    const spec = A.story || ENDING, final = spec === ENDING;
     const a = Math.min(1, A.endT / 90);
     ctx.globalAlpha = a;
-    Font.draw(ctx, "THANK YOU FOR PLAYING", W / 2, 50, { scale: 3, color: "#ffe9a8", align: "center" });
-    lines.forEach((l, i) => Font.draw(ctx, l, W / 2, 110 + i * 14, { scale: 1, color: "#e5e9f5", align: "center" }));
-    Font.draw(ctx, "STARS " + totalStars() + "/" + (gameLevels * 3) + "   LANTERNS " + totalLanternsGot() + "/" + totalLanterns, W / 2, 230, { scale: 1, color: "#ffd35a", align: "center" });
+    Font.draw(ctx, spec.title, W / 2, 40, { scale: 3, color: "#ffe9a8", align: "center" });
+    spec.lines.forEach((l, i) => Font.draw(ctx, l, W / 2, 96 + i * 14, { scale: 1, color: "#e5e9f5", align: "center" }));
+    if (final) {
+      Font.draw(ctx, "THANK YOU FOR PLAYING", W / 2, 252, { scale: 1, color: "#ffe9a8", align: "center" });
+      Font.draw(ctx, "STARS " + totalStars() + "/" + (gameLevels * 3) + "   LANTERNS " + totalLanternsGot() + "/" + totalLanterns, W / 2, 268, { scale: 1, color: "#ffd35a", align: "center" });
+    }
     if (A.endT > 60 && Math.floor(A.T / 30) % 2 === 0) Font.draw(ctx, "PRESS ENTER", W / 2, H - 30, { scale: 1, color: "#9aa3bb", align: "center" });
     ctx.globalAlpha = 1;
   }
@@ -1020,7 +1028,7 @@ const App = (() => {
     // A click records and stops too, for keyboards that cannot register W, D and E together.
     if (A.state === "play" && e.button === 0) Input.pressed.Mouse0 = true;
     if (A.state === "chapter" && A.cardT > 30) nextCard();
-    if (A.state === "ending" && A.endT > 60) goTitle();
+    if (A.state === "ending" && A.endT > 60) { if (A.story === INTERLUDE && A.storyNext >= 0) startLevel(A.storyNext); else goTitle(); }
   });
 
   // ---------------------------------------------------------------- fullscreen

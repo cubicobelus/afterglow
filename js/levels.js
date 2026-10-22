@@ -4,61 +4,105 @@
 // Grid is 32 x 18 tiles (20px each). Floor surface is row 15, so spawn at row 14 stands on it.
 // Tiles: # wall, % crystal, ~ shadow plank, = one-way ledge (jump up through it), ^ v spikes, t thorns,
 // a-d floor plates, 1-4 ceiling plates, 5-8 light-sensor plates (a-d), A-D doors, G light gate,
-// L lamp, P-S lamps that burn only while plate a-d is held, o lantern, @ spawn, X exit.
+// L lamp, P-S lamps that burn only while plate a-d is held, o lantern, @ spawn, X exit, _ - half blocks, < > wind vents, u bubble draft,
+// e w n s light emitters, + gold block (gone inside a ring of shift), * dark block (only inside one), m mushroom, r root ledge, T U timed doors.
+// Moving platforms and rotating blades are added with g.mover and g.blade.
 // Each tier has its own scenery and teaches its echoes in turn, then mixes them.
 
 const TITLE = "AFTERGLOW";
 
+// Each tier has a name, one line, and a few lines of story for its card. The story: you are the flame of a drowned lighthouse and the echoes are the
+// keeper's memories. Page one climbs to the lamp, and lighting it costs the keeper's last memory (the interlude after the Mirror); page two is the
+// reflection of the tower in the water, going down to where the first light was lit.
 const CHAPTERS = [
   {
     name: "THE CELLAR", line: "SOMETHING REMEMBERS YOU.", theme: "cellar", mood: 0,
+    story: ["THE OIL WAS KEPT DOWN HERE.", "THE KEEPER COUNTED EVERY DROP."],
     pal: { bg1: "#0d1d2a", bg2: "#1b3a47", wall: "#33495b", wallHi: "#4d6f86", wallLo: "#1e2e3c", mortar: "#15232f", accent: "#7fd0c0", moss: "#4d8a5e" },
   },
   {
     name: "THE GALLERY", line: "EVERYTHING HERE IS A REFLECTION.", theme: "gallery", mood: 2,
+    story: ["THE KEEPER HUNG HIS PORTRAITS HERE.", "THEY LOOK BACK AT YOU."],
     pal: { bg1: "#160f2c", bg2: "#2f2558", wall: "#4b4474", wallHi: "#6e66a4", wallLo: "#2a2549", mortar: "#1b1735", accent: "#c78bff" },
   },
   {
     name: "THE TIDEWORKS", line: "THE WATER REMEMBERS EVERY ROUTE.", theme: "tideworks", mood: 1,
+    story: ["THE PUMPS STILL TURN.", "THE SEA CAME IN THE NIGHT THE LAMP WENT OUT."],
     pal: { bg1: "#06182a", bg2: "#0d4a5c", wall: "#3f5f70", wallHi: "#79a5b4", wallLo: "#243d4b", mortar: "#12212c", accent: "#7fe0e6" },
   },
   {
-    name: "THE BEACON", line: "RELIGHT THE LAMP.", theme: "beacon", mood: 4,
+    name: "THE BEACON", line: "THE WIND HAS BEEN WAITING FOR YOU.", theme: "beacon", mood: 4,
+    story: ["THE LAMP ROOM IS ABOVE.", "RELIGHT THE LAMP."],
     pal: { bg1: "#080c2a", bg2: "#243b70", wall: "#4b5b83", wallHi: "#7488b8", wallLo: "#2b3656", mortar: "#1d2740", accent: "#fff0b0" },
   },
   {
     name: "THE MIRROR", line: "STEP THROUGH. SOMETHING TAKES YOUR PLACE.", theme: "mirror", mood: 3,
+    story: ["THE LAMP BURNS ONLY THROUGH THE LENS.", "THE LENS KEEPS WHAT PASSES THROUGH IT."],
     pal: { bg1: "#210f1d", bg2: "#5a2a48", wall: "#74506c", wallHi: "#c08fb6", wallLo: "#412639", mortar: "#2a1426", accent: "#ff9fc8" },
   },
-  // Page two, the drowned half of the tower: planned, no levels yet (the level select shows them as empty rows).
-  // Each tier is meant to introduce one new echo. The theme names are placeholders until there is scenery for them.
+  // Page two, the drowned half of the tower seen in the water.
   {
-    name: "THE SHALLOWS", line: "THE SURFACE IS A CEILING NOW.", theme: "shallows", mood: 5, planned: true,
+    name: "THE SHALLOWS", line: "THE SURFACE IS A CEILING NOW.", theme: "shallows", mood: 5,
+    story: ["THE FLAME WENT THROUGH THE LENS", "AND INTO THE WATER BELOW."],
     pal: { bg1: "#06222c", bg2: "#14707a", wall: "#3d7480", wallHi: "#8fd0d4", wallLo: "#264b54", mortar: "#0d2f38", accent: "#7ff0e0" },
   },
   {
-    name: "THE WRECK", line: "SOMETHING BIGGER WENT DOWN HERE.", theme: "wreck", mood: 6, planned: true,
+    name: "THE WRECK", line: "SOMETHING BIGGER WENT DOWN HERE.", theme: "wreck", mood: 6,
+    story: ["THE KEEPER'S SHIP SANK WITH HIS LAST WATCH.", "ITS CARGO STILL MOVES."],
     pal: { bg1: "#1c120c", bg2: "#4a3320", wall: "#6b5440", wallHi: "#a8896a", wallLo: "#3d2e22", mortar: "#241810", accent: "#ffb067" },
   },
   {
-    name: "THE GARDEN", line: "NOTHING HERE STAYS WHERE YOU LEFT IT.", theme: "garden", mood: 7, planned: true,
+    name: "THE GARDEN", line: "NOTHING HERE STAYS WHERE YOU LEFT IT.", theme: "garden", mood: 7,
+    story: ["HE PLANTED IT FOR HIS DAUGHTER.", "IT GREW WITHOUT HIM."],
     pal: { bg1: "#06200f", bg2: "#1d5a2c", wall: "#3f6b48", wallHi: "#86c58f", wallLo: "#264a2e", mortar: "#0c2a14", accent: "#a6ff9a" },
   },
   {
-    name: "THE TRENCH", line: "THE LIGHT STOPS HERE.", theme: "trench", mood: 8, planned: true,
+    name: "THE TRENCH", line: "THE LIGHT STOPS HERE.", theme: "trench", mood: 8,
+    story: ["THE DEEPEST MEMORIES COME BACK LAST.", "THEY COME BACK LATE, AND TWICE."],
     pal: { bg1: "#02070a", bg2: "#06222a", wall: "#2b4650", wallHi: "#5f9aa8", wallLo: "#16282f", mortar: "#08161c", accent: "#4dffd8" },
   },
   {
-    name: "THE FOUNDATION", line: "WHERE THE FIRST LIGHT WAS LIT.", theme: "foundation", mood: 9, planned: true,
+    name: "THE FOUNDATION", line: "WHERE THE FIRST LIGHT WAS LIT.", theme: "foundation", mood: 9,
+    story: ["UNDER THE TOWER, BEFORE THE KEEPER.", "SOMEONE LIT IT FIRST."],
     pal: { bg1: "#1a1204", bg2: "#5c4310", wall: "#7a6a40", wallHi: "#d8c27a", wallLo: "#463a1c", mortar: "#2a1f08", accent: "#ffe27a" },
   },
-  // Not part of the game: a room per new echo, to try each one. Shows up on the last page of the level select when the dev
+  // Not part of the game: a room per echo, to try each one. Shows up on the last page of the level select when the dev
   // switch (backslash) has unlocked everything.
   {
     name: "THE LAB", line: "TRY THE NEW ECHOES.", theme: "lab", mood: 0, lab: true,
     pal: { bg1: "#10131f", bg2: "#1d2640", wall: "#445070", wallHi: "#7f8fb8", wallLo: "#262d45", mortar: "#161b2c", accent: "#9fe3ff" },
   },
 ];
+
+// Story screens. The interlude plays after the last level of The Mirror (the lamp is lit, and it costs the keeper his last memory); the ending plays
+// after the last level of the game.
+const INTERLUDE = {
+  after: "NIGHT TRAIN",
+  title: "THE LAMP BURNS AGAIN.",
+  lines: [
+    "THE BEAM SWEEPS THE DARK WATER.",
+    "THE KEEPER'S LAST MEMORY FADES INTO THE LIGHT.",
+    "",
+    "BUT THE FLAME IS NOT DONE.",
+    "THE LENS IS STILL OPEN, AND THE WATER BELOW IS A MIRROR.",
+    "IT STEPS THROUGH.",
+  ],
+};
+const ENDING = {
+  title: "THE FIRST LIGHT WAS YOURS.",
+  lines: [
+    "THE KEEPER NEVER LIT IT. HE ONLY KEPT IT.",
+    "",
+    "BEFORE THE TOWER, BEFORE THE SEA, THERE WAS A FLAME",
+    "AND A PLACE TO STAND, AND THE FIRST THING IT DID",
+    "WAS REMEMBER ITSELF. THAT WAS THE FIRST ECHO.",
+    "",
+    "EVERY ECHO YOU LEFT BEHIND WAS THAT SAME FLAME.",
+    "THE LAMP BURNS AGAIN, AND THIS TIME IT WILL NOT GO OUT.",
+    "",
+    "THEY WERE ALWAYS YOU.",
+  ],
+};
 
 // The level select shows five tiers per page.
 const PAGES = [{ name: "THE TOWER" }, { name: "THE REFLECTION" }, { name: "THE LAB", dev: true }];
@@ -772,8 +816,6 @@ def(4, "OVER THE WALL", {
   g.set(5, 8, "L").set(11, 4, "L").set(24, 3, "L");
 });
 
-// ================================================================ tier 6 to 10: temporary levels, one per tier, to see the scenery
-// Each is a blank room: a floor, a few blocks, some lamps, a door of light. They are placeholders for the real levels.
 // ================================================================ tier 6: the shallows (beam, reflector)
 def(5, "SHAFT", {
   unlock: "beam", echoes: ["beam"], recMax: 8,
@@ -1047,18 +1089,6 @@ def(7, "SPROUT", {
   g.set(5, 8, "L").set(14, 5, "L");
 });
 
-def(7, "SPORE LIFT", {
-  autoHint: true, echoes: ["shade"], recMax: 16,
-  hint: "THE MUSHROOM THROWS YOU HIGH. A STEP HUNG IN THE AIR AT THE END OF A BOUNCE IS HIGHER THAN ANYTHING YOU CAN JUMP TO.",
-}, (g) => {
-  g.base();
-  g.set(2, 14, "@");
-  g.set(6, 14, "m");
-  g.fill(14, 4, 30, 14, "#");
-  g.fill(28, 2, 28, 3, "X");
-  g.set(4, 8, "L").set(9, 3, "L").set(22, 2, "L");
-});
-
 def(7, "ROOTWALK", {
   autoHint: true, echoes: [],
   hint: "THE ROOT LEDGES GIVE WAY SOON AFTER YOU STAND ON THEM, AND GROW BACK LATER. KEEP MOVING.",
@@ -1074,16 +1104,16 @@ def(7, "ROOTWALK", {
   g.set(5, 8, "L").set(14, 5, "L").set(24, 8, "L");
 });
 
-def(7, "TWO VINES", {
-  echoes: ["vine", "vine"], recMax: 24,
-  hint: "THE WALL IS TWICE AS TALL AS A VINE. A VINE GROWS UP FROM WHEREVER ITS ECHO STANDS, SO THE SECOND ONE CAN START ON THE SHELF.",
+def(7, "SPORE LIFT", {
+  autoHint: true, echoes: ["shade"], recMax: 16,
+  hint: "THE MUSHROOM THROWS YOU HIGH. A STEP HUNG IN THE AIR AT THE END OF A BOUNCE IS HIGHER THAN ANYTHING YOU CAN JUMP TO.",
 }, (g) => {
   g.base();
   g.set(2, 14, "@");
-  g.fill(17, 9, 20, 14, "#");
-  g.fill(21, 4, 30, 14, "#");
+  g.set(6, 14, "m");
+  g.fill(14, 4, 30, 14, "#");
   g.fill(28, 2, 28, 3, "X");
-  g.set(5, 8, "L").set(12, 5, "L").set(24, 2, "L");
+  g.set(4, 8, "L").set(9, 3, "L").set(22, 2, "L");
 });
 
 def(7, "HANGING VINE", {
@@ -1098,16 +1128,29 @@ def(7, "HANGING VINE", {
   g.set(5, 8, "L").set(9, 4, "L").set(22, 3, "L");
 });
 
-def(7, "GREEN DARK", {
-  echoes: ["vine", "glow"], recMax: 24, dark: true,
-  hint: "THE THORNS ON THE LEDGE NEED LIGHT, AND THE LIGHT HAS TO BE UP THERE WITH THEM. A VINE IS THE ONLY WAY UP.",
+def(7, "SPORE WIND", {
+  echoes: ["gust"], recMax: 20,
+  hint: "THE MUSHROOM THROWS YOU HIGH BUT NOT FAR. A GUST HUNG AT THE TOP OF THE BOUNCE WILL BLOW YOU THE REST OF THE WAY.",
 }, (g) => {
   g.base();
   g.set(2, 14, "@");
-  g.fill(20, 9, 30, 14, "#");
-  g.fill(22, 8, 25, 8, "t");
+  g.set(6, 14, "m");
+  g.pit(8, 14);
+  g.fill(15, 9, 30, 14, "#");
   g.fill(28, 7, 28, 8, "X");
-  g.set(6, 6, "L");
+  g.set(4, 8, "L").set(11, 4, "L").set(22, 5, "L");
+});
+
+def(7, "TWO VINES", {
+  echoes: ["vine", "vine"], recMax: 24,
+  hint: "THE WALL IS TWICE AS TALL AS A VINE. A VINE GROWS UP FROM WHEREVER ITS ECHO STANDS, SO THE SECOND ONE CAN START ON THE SHELF.",
+}, (g) => {
+  g.base();
+  g.set(2, 14, "@");
+  g.fill(17, 9, 20, 14, "#");
+  g.fill(21, 4, 30, 14, "#");
+  g.fill(28, 2, 28, 3, "X");
+  g.set(5, 8, "L").set(12, 5, "L").set(24, 2, "L");
 });
 
 def(7, "TREETOP", {
@@ -1122,17 +1165,16 @@ def(7, "TREETOP", {
   g.set(4, 8, "L").set(8, 3, "L");
 });
 
-def(7, "SPORE WIND", {
-  echoes: ["gust"], recMax: 20,
-  hint: "THE MUSHROOM THROWS YOU HIGH BUT NOT FAR. A GUST HUNG AT THE TOP OF THE BOUNCE WILL BLOW YOU THE REST OF THE WAY.",
+def(7, "GREEN DARK", {
+  echoes: ["vine", "glow"], recMax: 24, dark: true,
+  hint: "THE THORNS ON THE LEDGE NEED LIGHT, AND THE LIGHT HAS TO BE UP THERE WITH THEM. A VINE IS THE ONLY WAY UP.",
 }, (g) => {
   g.base();
   g.set(2, 14, "@");
-  g.set(6, 14, "m");
-  g.pit(8, 14);
-  g.fill(15, 9, 30, 14, "#");
+  g.fill(20, 9, 30, 14, "#");
+  g.fill(22, 8, 25, 8, "t");
   g.fill(28, 7, 28, 8, "X");
-  g.set(4, 8, "L").set(11, 4, "L").set(22, 5, "L");
+  g.set(6, 6, "L");
 });
 
 def(7, "ESCALATOR", {
@@ -1187,6 +1229,22 @@ def(8, "CLOSET", {
   g.set(8, 10, "L").set(3, 12, "L").set(20, 10, "L");
 });
 
+def(8, "SLIDING DOORS", {
+  echoes: ["shade"], recMax: 16, dark: true,
+  hint: "T DOORS ARE SHUT FOR THE FIRST HALF OF EVERY FIVE SECONDS AND U DOORS FOR THE SECOND HALF. THE LAST DOOR WANTS A PLATE HELD, AND THE PLATE IS IN THE FIRST ROOM.",
+}, (g) => {
+  g.base();
+  g.set(2, 14, "@");
+  g.fill(6, 1, 26, 11, "#");
+  g.fill(9, 12, 9, 14, "T");
+  g.set(11, 14, "a");
+  g.fill(13, 12, 13, 14, "U");
+  g.fill(17, 12, 17, 14, "T");
+  g.fill(22, 12, 22, 14, "A");
+  g.fill(28, 13, 28, 14, "X");
+  g.set(3, 9, "L").set(11, 12, "L").set(19, 12, "L").set(24, 12, "L");
+});
+
 def(8, "TURNSTILE", {
   autoHint: true, echoes: ["fork"], recMax: 20, dark: true,
   hint: "THE BLADE TURNS IN THE TUNNEL AND YOU CAN ONLY PASS WHEN IT IS NEARLY LEVEL. THE DOOR OPENS ONLY WHILE BOTH PLATES ARE HELD, AND YOUR TWIN IS A FEW SECONDS BEHIND YOU.",
@@ -1202,20 +1260,16 @@ def(8, "TURNSTILE", {
   g.set(3, 9, "L").set(22, 10, "L").set(26, 8, "L");
 });
 
-def(8, "SLIDING DOORS", {
-  echoes: ["shade"], recMax: 16, dark: true,
-  hint: "T DOORS ARE SHUT FOR THE FIRST HALF OF EVERY FIVE SECONDS AND U DOORS FOR THE SECOND HALF. THE LAST DOOR WANTS A PLATE HELD, AND THE PLATE IS IN THE FIRST ROOM.",
+def(8, "THE GRINDER", {
+  echoes: ["vine"], recMax: 40, dark: true,
+  hint: "THE VINE GROWS AT THE FOOT OF THE WALL, AND THE BLADE SWEEPS THE VINE ON EVERY TURN. CLIMB WHILE IT IS ON THE FAR SIDE.",
 }, (g) => {
   g.base();
   g.set(2, 14, "@");
-  g.fill(6, 1, 26, 11, "#");
-  g.fill(9, 12, 9, 14, "T");
-  g.set(11, 14, "a");
-  g.fill(13, 12, 13, 14, "U");
-  g.fill(17, 12, 17, 14, "T");
-  g.fill(22, 12, 22, 14, "A");
-  g.fill(28, 13, 28, 14, "X");
-  g.set(3, 9, "L").set(11, 12, "L").set(19, 12, "L").set(24, 12, "L");
+  g.fill(18, 9, 30, 14, "#");
+  g.fill(28, 7, 28, 8, "X");
+  g.blade(15, 11, 40, 2.0, 0);
+  g.set(4, 10, "L").set(9, 9, "L").set(15, 14, "L").set(24, 6, "L");
 });
 
 def(8, "TRIPLE", {
@@ -1259,18 +1313,6 @@ def(8, "CLOCK TOWER", {
   g.fill(14, 13, 30, 14, "#");
   g.fill(16, 10, 16, 11, "X");
   g.set(4, 9, "L").set(12, 8, "L").set(24, 8, "L").set(3, 12, "L").set(8, 13, "L");
-});
-
-def(8, "THE GRINDER", {
-  echoes: ["vine"], recMax: 40, dark: true,
-  hint: "THE VINE GROWS AT THE FOOT OF THE WALL, AND THE BLADE SWEEPS THE VINE ON EVERY TURN. CLIMB WHILE IT IS ON THE FAR SIDE.",
-}, (g) => {
-  g.base();
-  g.set(2, 14, "@");
-  g.fill(18, 9, 30, 14, "#");
-  g.fill(28, 7, 28, 8, "X");
-  g.blade(15, 11, 40, 2.0, 0);
-  g.set(4, 10, "L").set(9, 9, "L").set(15, 14, "L").set(24, 6, "L");
 });
 
 def(8, "DEEP END", {
@@ -1679,3 +1721,17 @@ const PAR = {
   "GOLDEN HOUR": { t: 40, r: 2 },
 };
 for (const l of LEVELS) l.par = PAR[l.name];
+
+// The keeper's diary: each hidden lantern holds one line, shown on the level complete screen once the lantern has been found.
+const DIARY = {
+  "THE PLATE": "DAY ONE. THE LAMP NEEDS OIL AND I NEED A REASON TO CLIMB.",
+  "STEPPING STONE": "I COUNT THE BARRELS EVERY NIGHT. THEY NEVER COME OUT EVEN.",
+  "SUNKEN GATE": "SOMETHING FOLLOWS ME DOWN THE STAIRS. IT WALKS WHEN I WALK.",
+  "UNDER GLASS": "I HUNG MY MOTHER HERE. SHE WATCHES THE DOOR.",
+  "OVERHEAD": "THE GLASS REMEMBERS WHAT STOOD IN FRONT OF IT.",
+  "HALF OPEN": "A FACE IN THE FRAME BLINKED. I DID NOT.",
+  "TRAMPOLINE": "THE PUMPS WERE MY FATHER'S WORK. I ONLY OIL THEM.",
+  "SLINGSHOT": "THE TIDE KNOWS MY ROUTE BETTER THAN I DO.",
+  "LONG CROSSING": "WATER IN THE ENGINE ROOM AGAIN. I CALLED IT A DREAM.",
+};
+for (const l of LEVELS) if (DIARY[l.name]) l.diary = DIARY[l.name];
