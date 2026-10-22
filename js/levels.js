@@ -629,6 +629,17 @@ def(3, "CHORUS", {
   g.set(4, 12, "L").set(24, 12, "L").set(9, 4, "L").set(17, 4, "L");
 });
 
+def(3, "WINDFALL", {
+  bonus: 20, echoes: ["tide", "gust"], recMax: 30,
+  hint: "THE FERRY ONLY TAKES YOU PART OF THE WAY. YOU CAN RECORD WHILE YOU RIDE IT: JUMP OFF AT ITS FAR END AND STOP IN MID AIR, FACING THE FAR BANK.",
+}, (g) => {
+  g.base();
+  g.set(2, 14, "@");
+  g.pit(9, 18);
+  g.fill(28, 13, 28, 14, "X");
+  g.set(5, 8, "L").set(14, 4, "L").set(24, 8, "L");
+});
+
 // ================================================================ tier 5: the mirror
 // The puppet comes first (it needs no swap). Swap (Q) is on in the levels that show the swap sign, which are the ones after Other Side.
 def(4, "REFLECTION", {
@@ -747,6 +758,18 @@ def(4, "NIGHT TRAIN", {
   g.fill(27, 8, 30, 14, "#");
   g.fill(29, 6, 29, 7, "X");
   g.set(28, 5, "L");
+});
+
+def(4, "OVER THE WALL", {
+  bonus: 20, echoes: ["spring", "mirror"], recMax: 24, swap: true,
+  hint: "THE WALL GOES TO THE CEILING AND THE LEDGE IS HIGH. YOUR PUPPET HANGS WHEREVER YOU STOP, SEEN IN THE GLASS. A SPRING CAN TAKE YOU HIGHER THAN A JUMP, AND SWAP TAKES YOU TO THE PUPPET.",
+}, (g) => {
+  g.base();
+  g.set(2, 14, "@");
+  g.fill(15, 1, 16, 14, "#");
+  g.fill(21, 6, 30, 14, "#");
+  g.fill(28, 4, 28, 5, "X");
+  g.set(5, 8, "L").set(11, 4, "L").set(24, 3, "L");
 });
 
 // ================================================================ tier 6 to 10: temporary levels, one per tier, to see the scenery
@@ -868,6 +891,20 @@ def(5, "TWO TIERS", {
   g.fill(25, 10, 30, 14, "#");
   g.fill(28, 8, 28, 9, "X");
   g.set(5, 4, "L").set(16, 3, "L").set(27, 4, "L");
+});
+
+def(5, "PULSE", {
+  bonus: 20, echoes: ["reflector"], recMax: 20,
+  hint: "THE CLOCK DOOR LETS THE LIGHT THROUGH ONLY WHILE IT IS OPEN, AND THE THORNS AND THE GATE LIVE ON THAT LIGHT. BE THROUGH BEFORE IT SHUTS.",
+}, (g) => {
+  g.base();
+  g.set(2, 14, "@");
+  g.set(5, 1, "s");
+  g.fill(9, 1, 9, 10, "#").fill(9, 11, 9, 14, "T");
+  g.fill(11, 14, 15, 14, "t");
+  g.fill(17, 1, 17, 12, "#").fill(17, 13, 17, 14, "G");
+  g.fill(28, 13, 28, 14, "X");
+  g.set(3, 8, "L").set(13, 5, "L").set(24, 8, "L");
 });
 
 // ================================================================ tier 7: the wreck (pull, cargo platforms)

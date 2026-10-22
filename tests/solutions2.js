@@ -1082,3 +1082,92 @@ SOLUTIONS["DEEP END"] = () => {
   Bot.waitUntil(() => G.L.doorOpen.a, 1500, "the door to open");
   Bot.walkTo(572);
 };
+
+// ================================================================ bonus levels
+SOLUTIONS["WINDFALL"] = () => {
+  // Record the ferry as in Ferry: wait at the edge, jump out, stop in mid air. Then ride it and record a gust at the top of a jump from its
+  // far end, facing the far bank. Ride it again a cycle later and jump the same way: the wind carries you across.
+  const tideOf = () => G.echoes.tide;
+  Bot.record("tide");
+  Bot.walkTo(172);
+  Bot.run(120);
+  Bot.jumpKey(true);
+  Bot.dir(1);
+  for (let i = 0; i < 36; i++) Bot.tick();
+  Bot.jumpKey(false);
+  Bot.dir(0);
+  Bot.stop();
+  const cycle = 2 * (tideOf().trace.length - 1);
+  Bot.record("gust");
+  Bot.walkTo(172);
+  Bot.waitUntil(() => Math.abs(tideOf().x + PW / 2 - 172) < 2 && G.t < 100, 600, "the tide to wait at the edge");
+  Bot.jumpTo(tideOf().x + PW / 2, 12);
+  Bot.waitUntil(() => G.t >= 205, 400, "the ferry to reach its far end");
+  Bot.dir(1);
+  Bot.jumpKey(true);
+  for (let i = 0; i < 60; i++) {
+    if (i === 24) Bot.jumpKey(false);
+    if (i > 10 && G.p.vy > -20) { Bot.jumpKey(false); Bot.dir(0); Bot.stop(); break; }
+    Bot.tick();
+    if (G.dead) Bot.fail("fell");
+  }
+  Bot.walkTo(172);
+  Bot.waitUntil(() => G.t > cycle - 20 && Math.abs(tideOf().x + PW / 2 - 172) < 2, 1500, "the tide to be back at the edge");
+  Bot.jumpTo(tideOf().x + PW / 2, 12);
+  Bot.waitUntil(() => (G.t % cycle) >= 205, 900, "the ferry to reach its far end");
+  Bot.dir(1);
+  Bot.jumpKey(true);
+  for (let i = 0; i < 160; i++) {
+    if (i === 24) Bot.jumpKey(false);
+    Bot.tick();
+    if (G.dead) Bot.fail("fell in the gap");
+    if (i > 20 && G.p.onGround) break;
+  }
+  Bot.jumpKey(false);
+  Bot.dir(0);
+  Bot.expect(G.p.onGround && Bot.px() > 384, "across the gap");
+  Bot.walkTo(572);
+};
+SOLUTIONS["OVER THE WALL"] = () => {
+  // A running jump from the spawn lands on the spring with the jump held: a big bounce. Record the puppet at the top of it: it hangs high on the other
+  // side of the wall, above the ledge. Then swap with it and drop onto the ledge.
+  recWait("spring", 130, 12);
+  Bot.record("mirror");
+  settle("spring", 30);
+  Bot.dir(1);
+  Bot.jumpKey(true);
+  let bounced = false;
+  for (let i = 0; i < 300; i++) {
+    if (G.p.vy < -600) bounced = true;
+    if (bounced && G.p.vy > -30) break;
+    Bot.tick();
+    if (G.dead) Bot.fail("fell");
+  }
+  Bot.jumpKey(false);
+  Bot.dir(0);
+  Bot.stop();
+  settle("mirror", 14);
+  Bot.select("mirror");
+  Bot.swap();
+  Bot.run(20);
+  Bot.expect(Bot.px() > 400 && G.p.onGround && Bot.feet() < 125, "on the ledge on the other side");
+  Bot.walkTo(572);
+};
+SOLUTIONS["PULSE"] = () => {
+  // The reflector under the ceiling beam sends it along the floor. The clock door passes it for half of every five seconds, lighting the thorns
+  // and opening the gate. Wait for the door and run the thorns while it is open.
+  Bot.record("reflector");
+  Bot.walkTo(124, 3);
+  Bot.dir(-1);
+  for (let i = 0; i < 100 && Bot.px() > 110; i++) Bot.tick();
+  Bot.dir(0);
+  Bot.run(10);
+  Bot.stop();
+  settle("reflector", 30);
+  Bot.walkTo(164, 3);
+  Bot.waitUntil(() => { const k = G.t % 300; return k >= 156 && k < 168; }, 900, "the clock door to open");
+  Bot.dir(1);
+  for (let i = 0; i < 400 && !G.won; i++) { Bot.tick(); if (G.dead) Bot.fail("caught by the thorns or the door"); }
+  Bot.dir(0);
+  Bot.expect(G.won, "through the door, the thorns and the gate");
+};
