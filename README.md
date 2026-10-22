@@ -21,21 +21,21 @@ Each slot along the bottom of the screen holds one echo, and an echo's power swi
 Later levels give you several slots, sometimes two or three of the same kind. An echo does not care about walls or
 glass, so one you no longer need can be recorded again somewhere else.
 
-The game has 39 levels in five tiers, each with its own scenery. Every echo gets one or two easy levels, then the
+The game has 43 levels in five tiers, each with its own scenery, and a second page of levels is on the way. Every echo gets one or two easy levels, then the
 tiers mix them and climb to levels where the order matters, an echo has to be recorded again halfway through, and
 what you recorded earlier can carry you or lead you through doors.
 
 | Echo | What it does |
 |---|---|
 | Shade | Holds down plates, and you can stand on it. |
-| Glow | Carries light. Dark planks and light gates hold in it, light sensors fire, and thorns wither. |
+| Glow | Carries light. Dark planks and light gates hold in it, and thorns wither. |
 | Phase | Crystal fades away around it. |
 | Flip | Reverses gravity in a zone around it, so you can fall upward and walk on ceilings. |
 | Tide | Replays its path back and forth forever, waiting where you waited. Ride it like a ferry or a lift. |
 | Spring | Bounces you high when you land on it. Hold jump for a bigger bounce. |
 | Gust | Blows a wind the way it was facing, which carries a jump much farther. |
 
-**Swap** is an ability, not an echo. Press **Q** to trade places with the picked echo, whatever kind it is: you appear where it was, and it stays where you were. It is switched on in every level of the fourth tier, The Mirror, and nowhere else. Those levels show a swap sign beside the level name and on the level select. A small clock beside the level name starts with your first move.
+**Swap** is an ability, not an echo. Press **Q** to trade places with the picked echo, whatever kind it is: you appear where it was, and it stays where you were. It is switched on in every level of the fifth tier, The Mirror, and nowhere else. Those levels show a swap sign beside the level name and on the level select. A small clock beside the level name starts with your first move.
 
 Every level also scores up to three stars: finishing it, beating its par time, and using no more recordings than
 its par. A few levels hide a lantern worth finding.
