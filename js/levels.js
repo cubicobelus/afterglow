@@ -1135,6 +1135,65 @@ def(8, "TURNSTILE", {
   g.set(3, 9, "L").set(22, 10, "L").set(26, 8, "L");
 });
 
+def(8, "SLIDING DOORS", {
+  echoes: ["shade"], recMax: 16, dark: true,
+  hint: "T DOORS ARE SHUT FOR THE FIRST HALF OF EVERY FIVE SECONDS AND U DOORS FOR THE SECOND HALF. THE LAST DOOR WANTS A PLATE HELD, AND THE PLATE IS IN THE FIRST ROOM.",
+}, (g) => {
+  g.base();
+  g.set(2, 14, "@");
+  g.fill(6, 1, 26, 11, "#");
+  g.fill(9, 12, 9, 14, "T");
+  g.set(11, 14, "a");
+  g.fill(13, 12, 13, 14, "U");
+  g.fill(17, 12, 17, 14, "T");
+  g.fill(22, 12, 22, 14, "A");
+  g.fill(28, 13, 28, 14, "X");
+  g.set(3, 9, "L").set(11, 12, "L").set(19, 12, "L").set(24, 12, "L");
+});
+
+def(8, "TRIPLE", {
+  echoes: ["shade", "fork"], recMax: 24, dark: true,
+  hint: "THREE PLATES, ONE DOOR, AND NOT ENOUGH OF YOU. ONE RECORDING CAN BE IN TWO PLACES, BUT THE SECOND ONLY LATER.",
+}, (g) => {
+  g.base();
+  g.set(2, 14, "@");
+  g.set(4, 14, "a").set(7, 14, "a").set(10, 14, "a");
+  g.fill(15, 1, 15, 8, "#").fill(15, 9, 15, 14, "A");
+  g.fill(28, 13, 28, 14, "X");
+  g.set(5, 10, "L").set(12, 10, "L").set(22, 8, "L");
+});
+
+def(8, "THORN PAIR", {
+  echoes: ["glow", "fork"], recMax: 24, dark: true,
+  hint: "THE THORNS NEED LIGHT, THE DOOR NEEDS TWO PLATES, AND THE PLATES ARE FAR APART. THE TWIN COVERS THE FIRST ONE WHILE YOU ARE AT THE SECOND.",
+}, (g) => {
+  g.base();
+  g.set(2, 14, "@");
+  g.set(4, 14, "a");
+  g.fill(9, 14, 13, 14, "t");
+  g.set(15, 14, "a");
+  g.fill(17, 1, 17, 8, "#").fill(17, 9, 17, 14, "A");
+  g.fill(28, 13, 28, 14, "X");
+  g.set(2, 9, "L").set(24, 8, "L");
+});
+
+def(8, "CLOCK TOWER", {
+  echoes: ["fork"], recMax: 24, dark: true,
+  hint: "TWO CLOSETS, ONE PLATE EACH, AND THEIR DOORS TAKE TURNS: T IS OPEN WHILE U IS SHUT. THE HATCH WANTS BOTH PLATES. YOUR TWIN IS EXACTLY HALF A CYCLE BEHIND YOU.",
+}, (g) => {
+  g.base();
+  g.set(6, 14, "@");
+  g.fill(1, 12, 30, 12, "#");
+  g.fill(4, 13, 4, 14, "T");
+  g.set(2, 14, "a");
+  g.fill(10, 13, 10, 14, "U");
+  g.set(12, 14, "a");
+  g.set(7, 12, "A");
+  g.fill(14, 13, 30, 14, "#");
+  g.fill(16, 10, 16, 11, "X");
+  g.set(4, 9, "L").set(12, 8, "L").set(24, 8, "L").set(3, 12, "L").set(8, 13, "L");
+});
+
 def(8, "TRENCH TEMP", {
   temp: true, echoes: [], dark: true, hint: "A BLANK ROOM TO SEE THE SCENERY OF THE TRENCH. IT IS DARK.",
 }, (g) => {

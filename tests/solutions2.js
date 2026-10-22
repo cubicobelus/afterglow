@@ -737,3 +737,89 @@ SOLUTIONS["TURNSTILE"] = () => {
   Bot.waitUntil(() => G.L.doorOpen.a, 900, "the door to open");
   Bot.walkTo(570);
 };
+
+// Walk through a timed door of kind T or U (a player centre x just before it) once it has been open a moment, to x on the other side.
+const throughTimed = (kind, xBefore, xAfter) => {
+  Bot.walkTo(xBefore, 3);
+  Bot.waitUntil(() => { const p = G.t % 300; return kind === "T" ? p >= 154 && p < 230 : p >= 4 && p < 80; }, 900, "the " + kind + " door to open");
+  Bot.dir(1);
+  for (let i = 0; i < 200 && Bot.px() < xAfter; i++) { Bot.tick(); if (G.dead) Bot.fail("crushed by the door"); }
+  Bot.dir(0);
+};
+
+SOLUTIONS["SLIDING DOORS"] = () => {
+  // The plate is in the first room: slip through the first door when it opens, record a shade on the plate. Then walk the rooms in order, waiting
+  // in each for the next door's turn.
+  Bot.record("shade");
+  throughTimed("T", 172, 230);
+  Bot.walkTo(230, 3);
+  Bot.run(24);
+  Bot.stop();
+  throughTimed("T", 172, 250);
+  throughTimed("U", 250, 310);
+  throughTimed("T", 310, 400);
+  Bot.walkTo(570);
+};
+SOLUTIONS["TRIPLE"] = () => {
+  // The shade holds the third plate. The fork holds the first for a long while, then goes to the second: its twin takes over the first for a time
+  // while the original sits on the second, so for about two seconds all three are held.
+  recWait("shade", 210, 12);
+  Bot.record("fork");
+  Bot.walkTo(90, 3);
+  Bot.run(170);
+  Bot.walkTo(150, 3);
+  Bot.run(20);
+  Bot.stop();
+  Bot.walkTo(290, 3);
+  Bot.waitUntil(() => G.L.doorOpen.a, 900, "the door to open");
+  Bot.walkTo(570);
+};
+SOLUTIONS["THORN PAIR"] = () => {
+  // The glow by the thorn bed lights it. The fork stays on the first plate for a long while, crosses the lit bed and stops on the second plate: the
+  // twin is on the first while the original is on the second, and the door opens.
+  recWait("glow", 170, 12);
+  Bot.record("fork");
+  settle("glow", 40);
+  Bot.walkTo(90, 3);
+  Bot.run(170);
+  Bot.walkTo(310, 3);
+  Bot.run(20);
+  Bot.stop();
+  settle("glow", 40);
+  Bot.walkTo(330, 3);
+  Bot.waitUntil(() => G.L.doorOpen.a, 900, "the door to open");
+  Bot.walkTo(570);
+};
+SOLUTIONS["CLOCK TOWER"] = () => {
+  // The left closet is open in the second half of each cycle and the right one in the first half of the next. Stand on the left plate for a while,
+  // slip out just before its door shuts, go to the right plate as its door opens. The twin is half a cycle behind: it is on the left plate
+  // while the original is on the right one, and the hatch opens.
+  Bot.record("fork");
+  Bot.walkTo(126, 3);
+  Bot.waitUntil(() => G.t >= 152, 600, "the left door to open");
+  Bot.walkTo(50, 3);
+  Bot.waitUntil(() => G.t >= 268, 600, "the stay on the plate");
+  Bot.dir(1);
+  for (let i = 0; i < 80 && Bot.px() < 112; i++) { Bot.tick(); if (G.dead) Bot.fail("crushed"); }
+  Bot.dir(0);
+  Bot.waitUntil(() => G.t >= 306, 600, "the right door to open");
+  Bot.dir(1);
+  for (let i = 0; i < 200 && Bot.px() < 232; i++) { Bot.tick(); if (G.dead) Bot.fail("crushed"); }
+  Bot.dir(0);
+  Bot.walkTo(250, 3);
+  Bot.run(20);
+  Bot.stop();
+  Bot.walkTo(150, 3);
+  Bot.waitUntil(() => G.L.doorOpen.a, 900, "the hatch to open");
+  Bot.jumpKey(true);
+  for (let i = 0; i < 80; i++) {
+    Bot.dir(Bot.feet() < 236 ? 1 : 0);
+    Bot.tick();
+    if (G.dead) Bot.fail("crushed by the hatch");
+    if (i > 6 && G.p.onGround && Bot.feet() <= 241) break;
+  }
+  Bot.jumpKey(false);
+  Bot.dir(0);
+  Bot.expect(G.p.onGround && G.p.y + PH < 245, "up through the hatch");
+  Bot.walkTo(570);
+};
