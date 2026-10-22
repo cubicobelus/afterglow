@@ -136,13 +136,13 @@ SOLUTIONS["OTHER SIDE"] = () => {
 SOLUTIONS["STEP THROUGH"] = () => {
   // The puppet is already on the far side of the wall. Stand on the plate and swap with it: you land on the other side, and the
   // puppet stays on the plate and holds the door open.
-  recWait("mirror", 170, 10);
-  Bot.walkTo(170, 3);
+  recWait("mirror", 150, 10);
+  Bot.walkTo(150, 3);
   Bot.waitUntil(() => G.echoes.mirror.restT > 12, 900, "the puppet to arrive");
   Bot.swap();
   Bot.expect(Bot.px() > 340, "on the far side of the wall");
   Bot.waitUntil(() => G.L.doorOpen.a, 300, "the door to open");
-  Bot.walkTo(570);
+  Bot.walkTo(590);
 };
 
 // ================================================================ tier 6: the shallows (beam, reflector)
@@ -528,15 +528,15 @@ SOLUTIONS["SPORE LIFT"] = () => {
 SOLUTIONS["ROOTWALK"] = () => {
   // Hop from root ledge to root ledge without stopping.
   Bot.walkTo(126, 3);
-  Bot.jumpTo(180, 20);
-  Bot.expect(G.p.onGround && G.p.y + PH < 265, "on the first roots");
-  Bot.jumpTo(262, 22);
-  Bot.expect(G.p.onGround && G.p.y + PH < 245, "on the second roots");
-  Bot.jumpTo(342, 20);
-  Bot.expect(G.p.onGround && G.p.y + PH < 265, "on the third roots");
-  Bot.jumpTo(422, 22);
+  Bot.jumpTo(170, 18);
+  Bot.expect(G.p.onGround && G.p.y + PH < 265, "on the first root");
+  Bot.jumpTo(240, 24);
+  Bot.expect(G.p.onGround && G.p.y + PH < 225, "on the second roots");
+  Bot.jumpTo(310, 26);
+  Bot.expect(G.p.onGround && G.p.y + PH < 185, "on the third root");
+  Bot.jumpTo(400, 14);
   Bot.expect(G.p.onGround && G.p.y + PH < 245, "on the fourth roots");
-  Bot.jumpTo(498, 20);
+  Bot.jumpTo(500, 20);
   Bot.walkTo(570);
 };
 

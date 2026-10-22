@@ -782,12 +782,14 @@ def(4, "STEP THROUGH", {
   hint: "THE WALL GOES ALL THE WAY UP, AND YOUR PUPPET IS ON THE OTHER SIDE OF IT. WHAT YOU SWAP WITH TAKES YOUR PLACE, AND STAYS THERE.",
 }, (g) => {
   g.base();
-  g.set(3, 14, "@");
+  // The block on the left keeps you from standing anywhere whose mirror image is past the door.
+  g.fill(1, 1, 5, 14, "#");
+  g.set(9, 14, "@");
   g.fill(15, 1, 16, 14, "#");
-  g.set(8, 14, "a");
-  g.fill(24, 1, 24, 8, "#").fill(24, 9, 24, 14, "A");
-  g.fill(28, 13, 28, 14, "X");
-  g.set(5, 8, "L").set(11, 8, "L").set(20, 8, "L").set(27, 8, "L");
+  g.set(7, 14, "a");
+  g.fill(27, 1, 27, 8, "#").fill(27, 9, 27, 14, "A");
+  g.fill(29, 13, 29, 14, "X");
+  g.set(8, 8, "L").set(12, 8, "L").set(21, 8, "L").set(29, 8, "L");
 });
 
 def(4, "NIGHT TRAIN", {
@@ -1096,10 +1098,10 @@ def(7, "ROOTWALK", {
   g.base();
   g.set(2, 14, "@");
   g.pit(7, 23);
-  g.fill(8, 13, 9, 13, "r");
-  g.fill(12, 12, 13, 12, "r");
-  g.fill(16, 13, 17, 13, "r");
-  g.fill(20, 12, 21, 12, "r");
+  g.fill(8, 13, 8, 13, "r");
+  g.fill(11, 11, 12, 11, "r");
+  g.fill(15, 9, 15, 9, "r");
+  g.fill(19, 12, 20, 12, "r");
   g.fill(28, 13, 28, 14, "X");
   g.set(5, 8, "L").set(14, 5, "L").set(24, 8, "L");
 });
@@ -1312,7 +1314,7 @@ def(8, "CLOCK TOWER", {
   g.set(7, 12, "A");
   g.fill(14, 13, 30, 14, "#");
   g.fill(16, 10, 16, 11, "X");
-  g.set(4, 9, "L").set(12, 8, "L").set(24, 8, "L").set(3, 12, "L").set(8, 13, "L");
+  g.set(4, 9, "L").set(12, 8, "L").set(24, 8, "L").set(3, 13, "L").set(8, 13, "L");
 });
 
 def(8, "DEEP END", {

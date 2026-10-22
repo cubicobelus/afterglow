@@ -760,10 +760,10 @@ function stepPlayer() {
     }
   }
 
-  // Crystal that has just formed again around the player crushes them. Pushing them out instead would slide them
-  // through the wall (out of the bottom of it, into the floor).
+  // Crystal or a door that has just formed again around the player crushes them. Pushing them out instead would slide them
+  // through the wall (out of the bottom of it, into the floor, or up into a ceiling above a doorway).
   for (const s of buildSolids(p, false, g)) {
-    if (s.crystal && overlap({ x: p.x + 1, y: p.y + 1, w: p.w - 2, h: p.h - 2 }, s)) { kill(); return; }
+    if ((s.crystal || s.door) && overlap({ x: p.x + 1, y: p.y + 1, w: p.w - 2, h: p.h - 2 }, s)) { kill(); return; }
   }
 
   const dir = (Input.right() ? 1 : 0) - (Input.left() ? 1 : 0);
