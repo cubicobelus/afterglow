@@ -1207,6 +1207,47 @@ def(8, "TRENCH TEMP", {
   g.set(4, 10, "L").set(10, 12, "L").set(17, 8, "L").set(27, 11, "L");
 });
 
+// ================================================================ tier 10: the foundation (shift, then everything)
+def(9, "THRESHOLD", {
+  unlock: "shift", echoes: ["shift"], recMax: 8,
+  hint: "THE GOLD BLOCK AND THE DARK BRIDGE ARE THE SAME ROOM SEEN FROM TWO SIDES. INSIDE THE RING GOLD VANISHES AND DARK APPEARS. RECORD INSIDE THE TUNNEL.",
+}, (g) => {
+  g.base();
+  g.set(2, 14, "@");
+  g.fill(8, 1, 20, 12, "#");
+  g.fill(9, 15, 12, 17, ".");
+  g.fill(9, 15, 12, 15, "*");
+  g.fill(13, 13, 13, 14, "+");
+  g.fill(28, 13, 28, 14, "X");
+  g.set(5, 8, "L").set(25, 8, "L");
+});
+
+def(9, "NIGHT STAIRS", {
+  echoes: ["shift", "shift"], recMax: 20,
+  hint: "THE STAIRS ARE ONLY THERE INSIDE A RING OF SHIFT, AND ONE RING DOES NOT REACH ALL OF THEM. A SECOND ONE CAN BE RECORDED WHILE YOU STAND ON THE FIRST STEP.",
+}, (g) => {
+  g.base();
+  g.set(2, 14, "@");
+  g.fill(10, 12, 12, 12, "*");
+  g.fill(14, 9, 16, 9, "*");
+  g.fill(18, 6, 20, 6, "*");
+  g.fill(22, 3, 30, 14, "#");
+  g.fill(28, 1, 28, 2, "X");
+  g.set(5, 8, "L").set(15, 3, "L").set(26, 1, "L");
+});
+
+def(9, "THE SPAN", {
+  echoes: ["shift"], recMax: 14, swap: true,
+  hint: "THE DARK BRIDGE IS LONGER THAN ONE RING. WHAT YOU SWAP WITH TAKES YOUR PLACE, AND ITS RING GOES WITH IT, SO THE RING CAN BE LEAPT ALONG.",
+}, (g) => {
+  g.base();
+  g.set(2, 14, "@");
+  g.fill(8, 15, 23, 17, ".");
+  g.fill(8, 15, 23, 15, "*");
+  g.fill(28, 13, 28, 14, "X");
+  g.set(5, 8, "L").set(15, 5, "L").set(26, 8, "L");
+});
+
 def(9, "FOUNDATION TEMP", {
   temp: true, echoes: [], hint: "A BLANK ROOM TO SEE THE SCENERY OF THE FOUNDATION.",
 }, (g) => {

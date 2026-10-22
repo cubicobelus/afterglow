@@ -823,3 +823,52 @@ SOLUTIONS["CLOCK TOWER"] = () => {
   Bot.expect(G.p.onGround && G.p.y + PH < 245, "up through the hatch");
   Bot.walkTo(570);
 };
+
+// ================================================================ tier 10: the foundation (shift, then everything)
+SOLUTIONS["THRESHOLD"] = SOLUTIONS["SHIFT"];
+SOLUTIONS["NIGHT STAIRS"] = () => {
+  // The first ring hangs in the air over the floor and brings up the first two steps. Climb them and record the second ring on the second step:
+  // it brings up the third. Both stay.
+  hoverAt("shift", 250, 44, 56);
+  settle("shift", 30);
+  Bot.record("shift2");
+  settle("shift", 30);
+  Bot.walkTo(186, 3);
+  Bot.jumpTo(232, 24);
+  Bot.expect(G.p.onGround && Bot.feet() < 245, "on the first step");
+  Bot.jumpTo(300, 24);
+  Bot.expect(G.p.onGround && Bot.feet() < 185, "on the second step");
+  Bot.walkTo(318, 3);
+  Bot.run(14);
+  Bot.stop();
+  settle("shift", 30);
+  settle("shift2", 30);
+  Bot.walkTo(186, 3);
+  Bot.jumpTo(232, 24);
+  Bot.jumpTo(300, 24);
+  Bot.jumpTo(380, 24);
+  Bot.expect(G.p.onGround && Bot.feet() < 125, "on the third step");
+  Bot.walkTo(396, 3);
+  Bot.jumpTo(462, 24);
+  Bot.expect(G.p.onGround && Bot.feet() < 65, "up on the ledge");
+  Bot.walkTo(570);
+};
+SOLUTIONS["THE SPAN"] = () => {
+  // A ring at the left bank brings up the first part of the bridge. Walk to the edge of it and swap: you go back to the ring's old place and the ring
+  // moves to where you were, bringing up the next part. Repeat.
+  recWait("shift", 150, 12);
+  settle("shift", 30);
+  const hop = (x) => {
+    Bot.walkTo(x, 3);
+    Bot.run(2);
+    Bot.swap();
+    Bot.run(14);
+  };
+  Bot.walkTo(240, 4);
+  hop(250);
+  Bot.walkTo(344, 4);
+  hop(350);
+  Bot.walkTo(444, 4);
+  hop(450);
+  Bot.walkTo(570);
+};
