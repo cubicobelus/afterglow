@@ -703,3 +703,37 @@ SOLUTIONS["ESCALATOR"] = () => {
   climbVine("vine", 80, 1);
   Bot.walkTo(570);
 };
+
+// ================================================================ tier 9: the trench (fork, blades, timed doors)
+SOLUTIONS["PAIR"] = SOLUTIONS["FORK"];
+SOLUTIONS["CLOSET"] = () => {
+  // The closet opens in the second half of each five second cycle. Slip in, stand on the plate and record, and the shade keeps the plate.
+  Bot.record("shade");
+  Bot.waitUntil(() => G.t > 152, 600, "the closet door to open");
+  Bot.walkTo(50, 3);
+  Bot.run(24);
+  Bot.stop();
+  Bot.waitUntil(() => G.L.doorOpen.a, 600, "the shade to reach the plate");
+  Bot.walkTo(570);
+};
+SOLUTIONS["TURNSTILE"] = () => {
+  // Stand on the first plate and watch the blade. Leave it when the blade is level (a window comes every 3.3 s) and run through to the second plate.
+  // The twin holds the first plate while the original holds the second, and the door opens for about a second. In the end run, cross early,
+  // wait by the door and go through when it opens.
+  Bot.record("fork");
+  Bot.walkTo(130, 3);
+  Bot.waitUntil(() => G.t >= 356, 900, "the blade to come level");
+  Bot.dir(1);
+  for (let i = 0; i < 300 && Bot.px() < 350; i++) { Bot.tick(); if (G.dead) Bot.fail("hit by the blade"); }
+  Bot.dir(0);
+  Bot.walkTo(350, 3);
+  Bot.run(20);
+  Bot.stop();
+  Bot.walkTo(130, 3);
+  Bot.waitUntil(() => G.t >= 156, 900, "the blade to come level");
+  Bot.dir(1);
+  for (let i = 0; i < 300 && Bot.px() < 366; i++) { Bot.tick(); if (G.dead) Bot.fail("hit by the blade"); }
+  Bot.dir(0);
+  Bot.waitUntil(() => G.L.doorOpen.a, 900, "the door to open");
+  Bot.walkTo(570);
+};

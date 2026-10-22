@@ -1093,6 +1093,48 @@ def(7, "ESCALATOR", {
   g.set(5, 8, "L").set(12, 5, "L").set(24, 2, "L");
 });
 
+// ================================================================ tier 9: the trench (fork, blades, timed doors; dark)
+def(8, "PAIR", {
+  unlock: "fork", echoes: ["fork"], recMax: 14, dark: true,
+  hint: "THE DOOR NEEDS BOTH PLATES. STAND ON THE FIRST FOR A WHILE, THEN WALK TO THE SECOND AND STAY. YOUR TWIN FOLLOWS A FEW SECONDS LATER.",
+}, (g) => {
+  g.base();
+  g.set(2, 14, "@");
+  g.set(8, 14, "a").set(11, 14, "a");
+  g.fill(16, 1, 16, 8, "#").fill(16, 9, 16, 14, "A");
+  g.fill(28, 13, 28, 14, "X");
+  g.set(4, 10, "L").set(14, 11, "L").set(22, 8, "L");
+});
+
+def(8, "CLOSET", {
+  autoHint: true, echoes: ["shade"], recMax: 16, dark: true,
+  hint: "THE PLATE IS IN A CLOSET WHOSE DOOR OPENS AND SHUTS ON A CLOCK. AN ECHO DOES NOT NEED THE DOOR TO BE OPEN.",
+}, (g) => {
+  g.base();
+  g.set(8, 14, "@");
+  g.fill(1, 1, 4, 10, "#");
+  g.fill(5, 1, 5, 10, "#").fill(5, 11, 5, 14, "T");
+  g.set(2, 14, "a");
+  g.fill(14, 1, 14, 8, "#").fill(14, 9, 14, 14, "A");
+  g.fill(28, 13, 28, 14, "X");
+  g.set(8, 10, "L").set(3, 12, "L").set(20, 10, "L");
+});
+
+def(8, "TURNSTILE", {
+  autoHint: true, echoes: ["fork"], recMax: 20, dark: true,
+  hint: "THE BLADE TURNS IN THE TUNNEL AND YOU CAN ONLY PASS WHEN IT IS NEARLY LEVEL. THE DOOR OPENS ONLY WHILE BOTH PLATES ARE HELD, AND YOUR TWIN IS A FEW SECONDS BEHIND YOU.",
+}, (g) => {
+  g.base();
+  g.set(2, 14, "@");
+  g.set(6, 14, "a");
+  g.fill(7, 1, 16, 11, "#");
+  g.blade(11, 13, 24, 1.5, 0);
+  g.set(17, 14, "a");
+  g.fill(19, 1, 19, 8, "#").fill(19, 9, 19, 14, "A");
+  g.fill(28, 13, 28, 14, "X");
+  g.set(3, 9, "L").set(22, 10, "L").set(26, 8, "L");
+});
+
 def(8, "TRENCH TEMP", {
   temp: true, echoes: [], dark: true, hint: "A BLANK ROOM TO SEE THE SCENERY OF THE TRENCH. IT IS DARK.",
 }, (g) => {
