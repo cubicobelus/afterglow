@@ -1134,10 +1134,10 @@ const Render = (() => {
     ctx.save();
     const g = ctx.createLinearGradient(0, d.y, 0, base);
     g.addColorStop(0, "rgba(190,255,250,0)");
-    g.addColorStop(1, "rgba(190,255,250," + 0.13 * k + ")");
+    g.addColorStop(1, "rgba(190,255,250," + 0.22 * k + ")");
     ctx.fillStyle = g;
     ctx.fillRect(d.x, d.y, d.w, d.h);
-    ctx.strokeStyle = "rgba(210,255,250," + 0.28 * k + ")";
+    ctx.strokeStyle = "rgba(225,255,252," + 0.6 * k + ")";
     ctx.lineWidth = 1;
     for (let i = 0; i < 9; i++) {
       const lane = (i * 7) % 9, bx = d.x + 5 + lane * 3.7 + Math.sin(t * 0.07 + i * 1.7) * 2;
@@ -1158,28 +1158,33 @@ const Render = (() => {
     ctx.restore();
   }
 
-  // A platform on a track. It hangs from two short chains and its track is drawn faintly so you can see where it goes.
+  // A cargo platform on a track. It hangs from two short chains and its track is drawn faintly so you can see where it goes. Planks and iron bands,
+  // so it stands out from the stone around it.
   function drawMover(ctx, m, t, L) {
     const pal = CHAPTERS[L.chapter].pal;
     ctx.save();
-    ctx.strokeStyle = rgba(pal.wallHi, 0.16);
+    ctx.strokeStyle = rgba(pal.wallHi, 0.18);
     ctx.lineWidth = 1;
     ctx.setLineDash([2, 4]);
     ctx.beginPath(); ctx.moveTo(m.x0 + m.w / 2, m.y0 + 4); ctx.lineTo(m.x1 + m.w / 2, m.y1 + 4); ctx.stroke();
     ctx.setLineDash([]);
     const x = Math.round(m.x), y = Math.round(m.y);
-    ctx.fillStyle = rgba(pal.wallHi, 0.55);
-    for (const cx of [x + 5, x + m.w - 6]) for (let k = 1; k <= 3; k++) ctx.fillRect(cx, y - k * 4, 1, 2);
-    ctx.fillStyle = pal.wallLo;
-    ctx.fillRect(x, y + 2, m.w, m.h - 2);
-    ctx.fillStyle = pal.wallHi;
-    ctx.fillRect(x, y, m.w, 3);
-    ctx.fillStyle = tint(pal.wallHi, 0.4);
+    ctx.fillStyle = "#9aa4b5";
+    for (const cx of [x + 5, x + m.w - 6]) for (let k = 1; k <= 3; k++) { ctx.fillRect(cx, y - k * 4, 1, 2); ctx.fillRect(cx - 1, y - k * 4 + 1, 3, 1); }
+    ctx.fillStyle = "#4a3320";
+    ctx.fillRect(x, y + 3, m.w, m.h - 3);
+    ctx.fillStyle = "#8a6334";
+    ctx.fillRect(x, y, m.w, 4);
+    ctx.fillStyle = "#c79a5c";
     ctx.fillRect(x, y, m.w, 1);
-    ctx.fillStyle = pal.mortar;
-    for (let px = x + 10; px < x + m.w - 2; px += 20) ctx.fillRect(px, y + 3, 1, m.h - 3);
-    ctx.fillRect(x + 2, y + 3, 1, 1);
-    ctx.fillRect(x + m.w - 3, y + 3, 1, 1);
+    ctx.fillStyle = "#2f2014";
+    for (let px = x + 10; px < x + m.w - 2; px += 10) ctx.fillRect(px, y + 1, 1, m.h - 1);
+    ctx.fillStyle = "#aab4c6";
+    ctx.fillRect(x, y + 2, 3, m.h - 2);
+    ctx.fillRect(x + m.w - 3, y + 2, 3, m.h - 2);
+    ctx.fillStyle = "#e3e9f4";
+    ctx.fillRect(x, y + 2, 3, 1);
+    ctx.fillRect(x + m.w - 3, y + 2, 3, 1);
     ctx.restore();
   }
 
