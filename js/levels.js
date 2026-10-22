@@ -981,17 +981,116 @@ def(6, "WRECK TEMP", {
   g.set(4, 9, "L").set(15, 5, "L").set(26, 8, "L");
 });
 
-def(7, "GARDEN TEMP", {
-  temp: true, echoes: [], hint: "A BLANK ROOM TO SEE THE SCENERY OF THE GARDEN.",
+// ================================================================ tier 8: the garden (vine, mushrooms, roots)
+def(7, "SPROUT", {
+  unlock: "vine", echoes: ["vine"], recMax: 8,
+  hint: "RECORD A VINE AT THE FOOT OF THE WALL AND WAIT. HOLD JUMP TO CLIMB IT. LET GO AND YOU SLIDE.",
 }, (g) => {
   g.base();
   g.set(2, 14, "@");
-  g.fill(7, 12, 9, 14, "#");
-  g.fill(12, 9, 14, 9, "=");
-  g.fill(17, 12, 19, 14, "#");
-  g.fill(23, 10, 25, 10, "=");
+  g.fill(20, 9, 30, 14, "#");
+  g.fill(28, 7, 28, 8, "X");
+  g.set(5, 8, "L").set(14, 5, "L");
+});
+
+def(7, "SPORE LIFT", {
+  autoHint: true, echoes: ["shade"], recMax: 16,
+  hint: "THE MUSHROOM THROWS YOU HIGH. A STEP HUNG IN THE AIR AT THE END OF A BOUNCE IS HIGHER THAN ANYTHING YOU CAN JUMP TO.",
+}, (g) => {
+  g.base();
+  g.set(2, 14, "@");
+  g.set(6, 14, "m");
+  g.fill(14, 4, 30, 14, "#");
+  g.fill(28, 2, 28, 3, "X");
+  g.set(4, 8, "L").set(9, 3, "L").set(22, 2, "L");
+});
+
+def(7, "ROOTWALK", {
+  autoHint: true, echoes: [],
+  hint: "THE ROOT LEDGES GIVE WAY SOON AFTER YOU STAND ON THEM, AND GROW BACK LATER. KEEP MOVING.",
+}, (g) => {
+  g.base();
+  g.set(2, 14, "@");
+  g.pit(7, 23);
+  g.fill(8, 13, 9, 13, "r");
+  g.fill(12, 12, 13, 12, "r");
+  g.fill(16, 13, 17, 13, "r");
+  g.fill(20, 12, 21, 12, "r");
   g.fill(28, 13, 28, 14, "X");
-  g.set(5, 8, "L").set(13, 5, "L").set(22, 7, "L");
+  g.set(5, 8, "L").set(14, 5, "L").set(24, 8, "L");
+});
+
+def(7, "TWO VINES", {
+  echoes: ["vine", "vine"], recMax: 24,
+  hint: "THE WALL IS TWICE AS TALL AS A VINE. A VINE GROWS UP FROM WHEREVER ITS ECHO STANDS, SO THE SECOND ONE CAN START ON THE SHELF.",
+}, (g) => {
+  g.base();
+  g.set(2, 14, "@");
+  g.fill(17, 9, 20, 14, "#");
+  g.fill(21, 4, 30, 14, "#");
+  g.fill(28, 2, 28, 3, "X");
+  g.set(5, 8, "L").set(12, 5, "L").set(24, 2, "L");
+});
+
+def(7, "HANGING VINE", {
+  echoes: ["vine"], recMax: 14,
+  hint: "A VINE GROWS UP FROM WHEREVER ITS ECHO STANDS, SO STAND HIGHER. THE ROOTS GIVE WAY IF YOU STAY, BUT THE VINE DOES NOT NEED THEM.",
+}, (g) => {
+  g.base();
+  g.set(2, 14, "@");
+  g.fill(10, 12, 13, 12, "r");
+  g.fill(14, 6, 30, 14, "#");
+  g.fill(28, 4, 28, 5, "X");
+  g.set(5, 8, "L").set(9, 4, "L").set(22, 3, "L");
+});
+
+def(7, "GREEN DARK", {
+  echoes: ["vine", "glow"], recMax: 24, dark: true,
+  hint: "THE THORNS ON THE LEDGE NEED LIGHT, AND THE LIGHT HAS TO BE UP THERE WITH THEM. A VINE IS THE ONLY WAY UP.",
+}, (g) => {
+  g.base();
+  g.set(2, 14, "@");
+  g.fill(20, 9, 30, 14, "#");
+  g.fill(22, 8, 25, 8, "t");
+  g.fill(28, 7, 28, 8, "X");
+  g.set(6, 6, "L");
+});
+
+def(7, "TREETOP", {
+  echoes: ["vine"], recMax: 24,
+  hint: "THE MUSHROOM THROWS YOU HIGHER THAN ANY VINE REACHES FROM THE GROUND. A VINE HUNG IN THE AIR AT THE TOP OF A BOUNCE REACHES HIGHER STILL.",
+}, (g) => {
+  g.base();
+  g.set(2, 14, "@");
+  g.set(6, 14, "m");
+  g.fill(11, 3, 30, 14, "#");
+  g.fill(28, 1, 28, 2, "X");
+  g.set(4, 8, "L").set(8, 3, "L");
+});
+
+def(7, "SPORE WIND", {
+  echoes: ["gust"], recMax: 20,
+  hint: "THE MUSHROOM THROWS YOU HIGH BUT NOT FAR. A GUST HUNG AT THE TOP OF THE BOUNCE WILL BLOW YOU THE REST OF THE WAY.",
+}, (g) => {
+  g.base();
+  g.set(2, 14, "@");
+  g.set(6, 14, "m");
+  g.pit(8, 14);
+  g.fill(15, 9, 30, 14, "#");
+  g.fill(28, 7, 28, 8, "X");
+  g.set(4, 8, "L").set(11, 4, "L").set(22, 5, "L");
+});
+
+def(7, "ESCALATOR", {
+  echoes: ["tide", "vine"], recMax: 40,
+  hint: "TWO CLIMBS AND ONE VINE. A TIDE REPEATS YOUR WHOLE ROUTE BACK AND FORTH, UP THE WALL TOO, AND YOU CAN STAND ON IT. WAIT AT THE START SO YOU CAN CATCH IT.",
+}, (g) => {
+  g.base();
+  g.set(2, 14, "@");
+  g.fill(17, 9, 20, 14, "#");
+  g.fill(21, 4, 30, 14, "#");
+  g.fill(28, 2, 28, 3, "X");
+  g.set(5, 8, "L").set(12, 5, "L").set(24, 2, "L");
 });
 
 def(8, "TRENCH TEMP", {
@@ -1210,5 +1309,22 @@ const PAR = {
   "STAIRWELL": { t: 25, r: 1 },
   "SURFACE LIGHT": { t: 20, r: 1 },
   "TWO TIERS": { t: 35, r: 2 },
+  "GRAPPLE": { t: 20, r: 1 },
+  "SLOW BOAT": { t: 20, r: 0 },
+  "CRANE": { t: 25, r: 1 },
+  "DELIVERY": { t: 35, r: 1 },
+  "HOIST": { t: 35, r: 1 },
+  "THE LONG HAUL": { t: 25, r: 1 },
+  "BOUNCE WELL": { t: 25, r: 2 },
+  "WINDLASS": { t: 30, r: 2 },
+  "SPROUT": { t: 25, r: 1 },
+  "SPORE LIFT": { t: 20, r: 1 },
+  "ROOTWALK": { t: 15, r: 0 },
+  "TWO VINES": { t: 45, r: 2 },
+  "HANGING VINE": { t: 25, r: 1 },
+  "GREEN DARK": { t: 45, r: 2 },
+  "TREETOP": { t: 20, r: 1 },
+  "SPORE WIND": { t: 20, r: 1 },
+  "ESCALATOR": { t: 45, r: 3 },
 };
 for (const l of LEVELS) l.par = PAR[l.name];
