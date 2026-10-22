@@ -1031,3 +1031,54 @@ SOLUTIONS["THE FIRST LIGHT"] = () => {
     stVine("vine", 528, 180),
   ], () => Bot.walkTo(592));
 };
+const stFerry = () => ({
+  pass() {
+    const m = G.L.movers[0];
+    Bot.walkTo(108, 4);
+    Bot.waitUntil(() => { const k = G.t % m.cycle; return k >= 3 && k < m.dwell - 25; }, 1500, "the platform to wait at the near end");
+    Bot.walkTo(140, 3);
+    Bot.waitUntil(() => { const k = G.t % m.cycle; return k >= m.dwell + m.travel + 12 && k < 2 * m.dwell + m.travel - 20; }, 900, "the platform to reach the far end");
+    Bot.dir(1);
+    for (let i = 0; i < 80 && Bot.px() < 300; i++) Bot.tick();
+    Bot.dir(0);
+  },
+});
+SOLUTIONS["SALVAGE"] = () => {
+  runChain([
+    stFerry(),
+    stPull("pull", 320, 455),
+    stPlate("shade", 490, 520),
+  ], () => {
+    Bot.waitUntil(() => G.L.doorOpen.a, 900, "the door to open");
+    Bot.walkTo(592);
+  });
+};
+SOLUTIONS["THE GRINDER"] = () => {
+  // The blade sweeps the vine twice a turn. Wait at the foot until it has just gone past, then climb.
+  recWait("vine", 348, 12);
+  Bot.waitUntil(() => G.vines.length && G.vines[0].base - G.vines[0].top >= 118, 900, "the vine to grow");
+  Bot.walkTo(348, 2);
+  Bot.waitUntil(() => { const k = G.t % 300; return k >= 30 && k < 38; }, 900, "the blade to be clear of the vine");
+  climbVine("vine", 180, 1);
+  Bot.walkTo(572);
+};
+SOLUTIONS["DEEP END"] = () => {
+  // The glow lights the thorns. The fork is recorded crossing them and the clock door: stay on the first plate a long while, then move to the
+  // second. In the final run do not wait for the twin: cross early and be at the door when the plates are both held.
+  recWait("glow", 110, 12);
+  Bot.record("fork");
+  settle("glow", 40);
+  Bot.walkTo(228, 3);
+  throughTimed("T", 232, 290);
+  Bot.walkTo(310, 3);
+  Bot.run(170);
+  Bot.walkTo(370, 3);
+  Bot.run(20);
+  Bot.stop();
+  settle("glow", 40);
+  Bot.walkTo(228, 3);
+  throughTimed("T", 232, 290);
+  Bot.walkTo(408, 3);
+  Bot.waitUntil(() => G.L.doorOpen.a, 1500, "the door to open");
+  Bot.walkTo(572);
+};

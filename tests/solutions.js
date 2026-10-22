@@ -1637,27 +1637,6 @@ SOLUTIONS["LONG CROSSING"] = () => {
   Bot.walkTo(570);
 };
 
-// ---------------------------------------------------------------- tier 6 to 10 temporary levels: just run and jump
-const runAndJump = (xs, hold) => {
-  const done = new Set();
-  let held = 0;
-  Bot.dir(1);
-  for (let i = 0; i < 1500 && !G.won; i++) {
-    const x = Bot.px();
-    if (held === 0 && G.p.onGround) {
-      for (const jx of xs) if (!done.has(jx) && x >= jx) { done.add(jx); held = hold || 24; Bot.jumpKey(true); break; }
-    }
-    Bot.tick();
-    if (Bot.px() > 0 && held > 0) { held--; if (held === 0) Bot.jumpKey(false); }
-    if (G.dead) Bot.fail("died on the way");
-  }
-  Bot.jumpKey(false);
-  Bot.dir(0);
-  Bot.expect(G.won, "reached the door");
-};
-SOLUTIONS["WRECK TEMP"] = () => runAndJump([148, 268, 408]);
-SOLUTIONS["TRENCH TEMP"] = () => runAndJump([168, 308]);
-
 // ---------------------------------------------------------------- the lab: one room per new echo
 SOLUTIONS["CALM"] = () => {
   // The vent blows back across the gap; a calm by the edge silences it.

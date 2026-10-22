@@ -968,20 +968,21 @@ def(6, "WINDLASS", {
   g.set(5, 8, "L").set(11, 4, "L").set(24, 8, "L");
 });
 
-def(6, "WRECK TEMP", {
-  temp: true, echoes: [], hint: "A BLANK ROOM TO SEE THE SCENERY OF THE WRECK.",
+def(6, "SALVAGE", {
+  echoes: ["pull", "shade"], recMax: 40,
+  hint: "THE PLATFORM TAKES YOU TO THE ISLAND, A WELL TAKES YOU OFF IT, AND THE DOOR WANTS A PLATE HELD ON THE FAR BANK. WHAT YOU RECORD LATER IS RECORDED RIDING WHAT YOU RECORDED BEFORE.",
 }, (g) => {
   g.base();
   g.set(2, 14, "@");
-  g.fill(8, 12, 10, 14, "#");
-  g.fill(13, 9, 17, 9, "=");
-  g.set(14, 14, "^");
-  g.fill(21, 12, 24, 14, "#");
-  g.fill(28, 13, 28, 14, "X");
-  g.set(4, 9, "L").set(15, 5, "L").set(26, 8, "L");
+  g.pit(7, 13);
+  g.mover(6, 15, 11, 15, 3, { sp: 40, dwell: 60 });
+  g.pit(16, 21);
+  g.set(24, 14, "a");
+  g.fill(27, 1, 27, 8, "#").fill(27, 9, 27, 14, "A");
+  g.fill(29, 13, 29, 14, "X");
+  g.set(4, 8, "L").set(10, 5, "L").set(17, 4, "L").set(25, 8, "L");
 });
 
-// ================================================================ tier 8: the garden (vine, mushrooms, roots)
 def(7, "SPROUT", {
   unlock: "vine", echoes: ["vine"], recMax: 8,
   hint: "RECORD A VINE AT THE FOOT OF THE WALL AND WAIT. HOLD JUMP TO CLIMB IT. LET GO AND YOU SLIDE.",
@@ -1194,20 +1195,32 @@ def(8, "CLOCK TOWER", {
   g.set(4, 9, "L").set(12, 8, "L").set(24, 8, "L").set(3, 12, "L").set(8, 13, "L");
 });
 
-def(8, "TRENCH TEMP", {
-  temp: true, echoes: [], dark: true, hint: "A BLANK ROOM TO SEE THE SCENERY OF THE TRENCH. IT IS DARK.",
+def(8, "THE GRINDER", {
+  echoes: ["vine"], recMax: 40, dark: true,
+  hint: "THE VINE GROWS AT THE FOOT OF THE WALL, AND THE BLADE SWEEPS THE VINE ON EVERY TURN. CLIMB WHILE IT IS ON THE FAR SIDE.",
 }, (g) => {
   g.base();
   g.set(2, 14, "@");
-  g.pit(9, 12);
-  g.fill(9, 14, 12, 14, "~");
-  g.fill(16, 12, 18, 14, "#");
-  g.fill(22, 9, 24, 9, "=");
-  g.fill(28, 13, 28, 14, "X");
-  g.set(4, 10, "L").set(10, 12, "L").set(17, 8, "L").set(27, 11, "L");
+  g.fill(18, 9, 30, 14, "#");
+  g.fill(28, 7, 28, 8, "X");
+  g.blade(15, 11, 40, 2.0, 0);
+  g.set(4, 10, "L").set(9, 9, "L").set(15, 14, "L").set(24, 6, "L");
 });
 
-// ================================================================ tier 10: the foundation (shift, then everything)
+def(8, "DEEP END", {
+  echoes: ["glow", "fork"], recMax: 40, dark: true,
+  hint: "THE THORNS, THE CLOCK DOOR AND THE TWO PLATES, IN THAT ORDER. THE TWIN SLIPS THROUGH THE CLOCK DOOR ON ITS OWN SCHEDULE, SO ONLY YOU HAVE TO WAIT FOR IT.",
+}, (g) => {
+  g.base();
+  g.set(2, 14, "@");
+  g.fill(6, 14, 9, 14, "t");
+  g.fill(12, 1, 12, 8, "#").fill(12, 9, 12, 14, "T");
+  g.set(15, 14, "a").set(18, 14, "a");
+  g.fill(21, 1, 21, 8, "#").fill(21, 9, 21, 14, "A");
+  g.fill(28, 13, 28, 14, "X");
+  g.set(4, 10, "L").set(14, 10, "L").set(24, 8, "L");
+});
+
 def(9, "THRESHOLD", {
   unlock: "shift", echoes: ["shift"], recMax: 8,
   hint: "THE GOLD BLOCK AND THE DARK BRIDGE ARE THE SAME ROOM SEEN FROM TWO SIDES. INSIDE THE RING GOLD VANISHES AND DARK APPEARS. RECORD INSIDE THE TUNNEL.",
