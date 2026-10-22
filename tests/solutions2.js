@@ -1314,3 +1314,42 @@ SOLUTIONS["DOCKSIDE"] = () => {
     stHoist("shade", 472, 528, 0, 582),
   ], () => { if (!G.won) Bot.walkTo(592); });
 };
+SOLUTIONS["GOLDEN HOUR"] = () => {
+  // Ring one at the left bank; a swap brings it to the middle of the bridge. Ring two is recorded at the foot of the stairs after crossing, hung in
+  // the air so that it brings up the first two steps.
+  const crossBridge = () => {
+    settle("shift", 30);
+    Bot.walkTo(250, 4);
+    Bot.run(2);
+    Bot.select("shift");
+    Bot.swap();
+    Bot.run(14);
+    Bot.walkTo(372, 4);
+  };
+  recWait("shift", 150, 12);
+  Bot.record("shift2");
+  crossBridge();
+  Bot.walkTo(440, 3);
+  Bot.jumpKey(true);
+  let found = false;
+  for (let i = 0; i < 90; i++) {
+    Bot.tick();
+    if (G.dead) Bot.fail("fell");
+    const h = 300 - Bot.feet();
+    if (i > 8 && G.p.vy > 0 && h <= 56 && h >= 44) { found = true; break; }
+  }
+  Bot.expect(found, "a hover window");
+  Bot.jumpKey(false);
+  Bot.stop();
+  settleAll();
+  crossBridge();
+  Bot.walkTo(406, 3);
+  Bot.jumpTo(452, 24);
+  Bot.expect(G.p.onGround && Bot.feet() < 245, "on the first step");
+  Bot.jumpTo(522, 24);
+  Bot.expect(G.p.onGround && Bot.feet() < 185, "on the second step");
+  Bot.walkTo(530, 3);
+  Bot.jumpTo(592, 24);
+  Bot.expect(G.p.onGround && Bot.feet() < 125, "up on the ledge");
+  Bot.walkTo(610);
+};

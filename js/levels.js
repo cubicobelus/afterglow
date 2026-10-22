@@ -1428,6 +1428,21 @@ def(9, "THE FIRST LIGHT", {
   g.set(4, 8, "L").set(10, 5, "L").set(16, 4, "L").set(24, 5, "L");
 });
 
+def(9, "GOLDEN HOUR", {
+  bonus: 20, echoes: ["shift", "shift"], recMax: 40, swap: true,
+  hint: "A LONG BRIDGE AND THEN A STAIRCASE, BOTH ONLY THERE IN A RING OF SHIFT. THE FIRST RING CAN BE LEAPT ACROSS THE BRIDGE BY SWAPPING. THE SECOND IS RECORDED AT THE STAIRS, AFTER YOU HAVE CROSSED.",
+}, (g) => {
+  g.base();
+  g.set(2, 14, "@");
+  g.fill(8, 15, 17, 17, ".");
+  g.fill(8, 15, 17, 15, "*");
+  g.fill(21, 12, 23, 12, "*");
+  g.fill(25, 9, 27, 9, "*");
+  g.fill(29, 6, 30, 14, "#");
+  g.fill(30, 4, 30, 5, "X");
+  g.set(5, 8, "L").set(13, 5, "L").set(20, 6, "L");
+});
+
 // ================================================================ the lab: one room per new echo (the benched ones last)
 def(10, "CALM", {
   lab: true, unlock: "calm", echoes: ["calm"], recMax: 8,
@@ -1652,5 +1667,15 @@ const PAR = {
   "GILDED GLASS": { t: 40, r: 3 },
   "UNDERTOW": { t: 55, r: 3 },
   "THE FIRST LIGHT": { t: 90, r: 4 },
+  "WINDFALL": { t: 40, r: 2 },
+  "OVER THE WALL": { t: 20, r: 2 },
+  "PULSE": { t: 20, r: 1 },
+  "SALVAGE": { t: 70, r: 2 },
+  "DOCKSIDE": { t: 130, r: 2 },
+  "CANOPY": { t: 35, r: 2 },
+  "THE GRINDER": { t: 35, r: 1 },
+  "DEEP END": { t: 35, r: 2 },
+  "FOUR CORNERS": { t: 35, r: 2 },
+  "GOLDEN HOUR": { t: 40, r: 2 },
 };
 for (const l of LEVELS) l.par = PAR[l.name];
