@@ -646,7 +646,8 @@ SOLUTIONS["BREEZE"] = () => {
 
 SOLUTIONS["SAIL"] = () => {
   // slots: gust, gust2. The first gust stands at the edge. The second is recorded in mid-air at the end of a wind jump: a step
-  // with a wind of its own. A jump from the edge lands on it, and a second wind jump from it carries across.
+  // with a wind of its own, stopped low (below the start ledge) on the way down. A jump from the edge lands on it, and a second wind
+  // jump from it only just reaches the far bank.
   const rest = (k) => () => G.echoes[k] && G.echoes[k].restT > 30;
   const windJump = () => {
     Bot.jumpKey(true);
@@ -663,8 +664,7 @@ SOLUTIONS["SAIL"] = () => {
   let found = false;
   for (let i = 0; i < 90; i++) {
     Bot.tick();
-    const h = 300 - Bot.feet();
-    if (i > 8 && G.p.vy > 0 && h <= 44 && h >= 28) { found = true; break; }
+    if (i > 8 && G.p.vy > 0 && Bot.feet() >= 240) { found = true; break; }
   }
   Bot.expect(found, "a hover window over the pit");
   Bot.jumpKey(false);
@@ -675,8 +675,8 @@ SOLUTIONS["SAIL"] = () => {
   const e = G.echoes.gust2;
   Bot.jumpTo(e.x + PW / 2, 24);
   Bot.expect(G.p.stand === e, "standing on the second gust");
-  Bot.jumpTo(500, 24);
-  Bot.expect(G.p.onGround && Bot.px() > 465, "across the pit");
+  Bot.jumpTo(580, 40);
+  Bot.expect(G.p.onGround && Bot.px() > 505, "across the pit");
   Bot.walkTo(570);
 };
 
@@ -1096,79 +1096,6 @@ SOLUTIONS["APEX"] = () => {
   Bot.walkTo(570);
 };
 
-SOLUTIONS["UPSIDE DOWN"] = () => {
-  // One flip. It starts at the foot of the corridor; you fall up to the ceiling inside its zone and walk along it.
-  // At the edge of the zone you swap: you go back to the echo, and the echo (with its zone) is left where you stood.
-  const flipRest = () => G.echoes.flip && G.echoes.flip.restT > 30;
-  const onCeiling = () => G.p.g === -1 && G.p.onGround;
-  Bot.record("flip");
-  Bot.walkTo(70);
-  Bot.run(6);
-  Bot.stop();
-  Bot.waitUntil(flipRest, 600, "the zone to open");
-  Bot.walkTo(90);
-  Bot.waitUntil(onCeiling, 400, "to fall up to the ceiling");
-  const stops = [118, 182, 246, 310, 374, 440]; // the last swap is made under the plate, so the echo is left holding it
-  for (const x of stops) {
-    Bot.dir(1);
-    for (let i = 0; i < 400 && Bot.px() < x; i++) { Bot.tick(); if (G.dead) Bot.fail("died on the ceiling walk at " + Math.round(Bot.px())); }
-    Bot.dir(0);
-    Bot.run(6);
-    Bot.swap();
-    Bot.waitUntil(onCeiling, 300, "back on the ceiling after the swap at " + x);
-  }
-  Bot.expect(G.L.plates[0].pressed, "the echo holds the ceiling plate");
-  Bot.dir(1);
-  for (let i = 0; i < 600 && !(G.p.g === 1 && G.p.onGround && Bot.px() > 505); i++) { Bot.tick(); if (G.dead) Bot.fail("died on the last stretch at " + Math.round(Bot.px())); }
-  Bot.dir(0);
-  Bot.expect(G.p.onGround && Bot.px() > 505, "down on the far platform");
-  Bot.waitUntil(() => G.L.doorOpen.a, 120, "the door to open");
-  Bot.walkTo(590);
-};
-
-SOLUTIONS["NIGHT TRAIN"] = () => {
-  // slots: glow, spring. The planks are only solid in the glow's light, and one glow does not reach across, so you
-  // hop it forward with swap. The spring is recorded during such a crossing, so it ends up waiting at the foot of the
-  // block on the far bank; the real crossing then ends with a bounce.
-  const rest = (k) => () => G.echoes[k] && G.echoes[k].restT > 30;
-  const crossBridge = () => {
-    Bot.waitUntil(rest("glow"), 900, "the glow to settle");
-    Bot.walkTo(110);
-    Bot.jumpTo(150, 24);
-    Bot.walkTo(200);
-    Bot.swap();
-    Bot.run(20);
-    Bot.walkTo(110);
-    Bot.jumpTo(150, 24);
-    Bot.walkTo(300);
-    Bot.swap();
-    Bot.run(20);
-    Bot.walkTo(395);
-    Bot.swap();
-    Bot.run(20);
-    Bot.walkTo(470);
-    Bot.expect(G.p.onGround && Bot.px() > 440, "across the bridge and through the gate");
-  };
-  Bot.record("glow");
-  Bot.walkTo(100);
-  Bot.run(6);
-  Bot.stop();
-  Bot.record("spring");
-  Bot.select("glow");
-  crossBridge();
-  Bot.walkTo(490);
-  Bot.run(6);
-  Bot.stop();
-  Bot.select("glow");
-  Bot.waitUntil(() => rest("spring")() && rest("glow")(), 4000, "both echoes to settle");
-  crossBridge();
-  Bot.waitUntil(rest("spring"), 600, "the spring to be ready");
-  Bot.walkTo(445);
-  jumpToSpring(490, 1);
-  Bot.expect(G.p.y < 160 && Bot.px() > 542, "up on the block");
-  Bot.walkTo(590);
-};
-
 SOLUTIONS["THREE PANES"] = () => {
   // slots: phase, phase2. The first phase opens the first wall. The second stands between the first two walls, near
   // enough to both for its circle to hold them open. The first is then recorded again between walls two and three.
@@ -1497,39 +1424,6 @@ SOLUTIONS["HALF OPEN"] = () => {
   Bot.jumpKey(false);
   Bot.dir(0);
   Bot.expect(G.won, "at the door");
-};
-
-SOLUTIONS["SKYLIGHT"] = () => {
-  // slots: phase, flip, flip2. The phase hangs at the top of a jump under the glass; the flip hangs lower, so its field lifts you
-  // far enough to go through the hole. The second flip is recorded up in the room at the lip of the pit in the low road.
-  const rest = (k) => () => G.echoes[k] && G.echoes[k].restT > 30;
-  Bot.record("phase");
-  Bot.walkTo(310, 3);
-  Bot.jumpKey(true);
-  for (let i = 0; i < 18; i++) Bot.tick();
-  Bot.jumpKey(false);
-  Bot.stop();
-  Bot.record("flip");
-  Bot.waitUntil(rest("phase"), 900, "the phase echo to settle");
-  Bot.walkTo(290, 3);
-  Bot.jumpKey(true);
-  for (let i = 0; i < 8; i++) Bot.tick();
-  Bot.jumpKey(false);
-  Bot.stop();
-  Bot.record("flip2");
-  Bot.waitUntil(() => rest("phase")() && rest("flip")(), 900, "the phase and the flip to settle");
-  Bot.dir(1);
-  for (let i = 0; i < 700 && !(G.p.onGround && G.p.g === 1 && G.p.y < 170 && Bot.px() > 350); i++) Bot.tick();
-  Bot.dir(0);
-  Bot.expect(G.p.onGround && G.p.y < 170, "up in the room");
-  Bot.walkTo(388, 3);
-  Bot.run(10);
-  Bot.stop();
-  Bot.waitUntil(() => rest("phase")() && rest("flip")() && rest("flip2")(), 1500, "all three to settle");
-  Bot.dir(1);
-  for (let i = 0; i < 1500 && !G.won; i++) Bot.tick();
-  Bot.dir(0);
-  Bot.expect(G.won, "across the pit and out");
 };
 
 SOLUTIONS["LONG CROSSING"] = () => {

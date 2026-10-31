@@ -18,7 +18,7 @@ const App = (() => {
   // ---------------------------------------------------------------- save
   const SAVE_KEY = "afterglow.save";
   const SETTINGS_KEY = "afterglow.settings";
-  const SAVE_VERSION = 18;
+  const SAVE_VERSION = 19;
   let save = { done: [], best: {}, stars: {}, lanterns: {}, seen: {} };
   let hadSave = false;
   try {
@@ -123,6 +123,18 @@ const App = (() => {
         "DEEP END", "FOUR CORNERS", "THRESHOLD", "NIGHT STAIRS", "THE SPAN", "KEYSTONE", "ARCHWAY", "LAMP HALL",
         "GILDED GLASS", "UNDERTOW", "THE FIRST LIGHT", "GOLDEN HOUR", "CALM", "MIRROR", "VINE", "PULL",
         "BEAM", "REFLECTOR", "FORK", "SHIFT", "FLOAT", "SLOW", "SHRINK"],
+      18: ["FIRST STEPS", "THE PLATE", "STEPPING STONE", "TWIN PLATES", "STAIRCASE", "LAMPLIGHT", "SUNKEN GATE", "GATEHOUSE", "RELAY",
+        "SWITCHBOARD", "GLASS WALL", "UNDER GLASS", "THREE PANES", "GHOST GLASS", "OVERHEAD", "CEILING PLATE", "LOOKING GLASS",
+        "HALF OPEN", "HALL OF MIRRORS", "SKYLIGHT", "TRAMPOLINE", "SKYHOOK", "STAGECOACH", "SLINGSHOT", "FERRY", "TWO STAGES",
+        "SLUICE", "FERRY LIGHT", "PUMP ROOM", "LONG CROSSING", "BREEZE", "SAIL", "STILL AIR", "SLACK WATER", "GALLOP", "WEATHERVANE",
+        "UP AND OVER", "AFTERIMAGE", "CHORUS", "WINDFALL", "REFLECTION", "OTHER SIDE", "LEAPFROG", "STAY BEHIND", "APEX",
+        "UPSIDE DOWN", "GLASS CEILING", "STEP THROUGH", "NIGHT TRAIN", "OVER THE WALL", "SHAFT", "TURRET", "HATCH", "OPEN DOOR",
+        "GRAZE", "STAIRWELL", "SURFACE LIGHT", "TWO TIERS", "PERISCOPE", "PULSE", "GRAPPLE", "SAFETY NET", "ROPE", "CRANE",
+        "BOUNCE WELL", "HAUL ACROSS", "RIGGING", "FLING", "SALVAGE", "DOCKSIDE", "SPROUT", "BOUGH", "HANGING VINE", "ROOT BRIDGE",
+        "TRELLIS", "GREEN DARK", "TREETOP", "ESCALATOR", "KNOT", "CANOPY", "PAIR", "CLOSET", "MILLSTONE", "TURNSTILE", "THORN PAIR",
+        "LONG SHUTTER", "THE GRINDER", "CLOCK TOWER", "DEEP END", "FOUR CORNERS", "THRESHOLD", "NIGHT STAIRS", "WAY BACK",
+        "KEYSTONE", "THE SPAN", "GOLD SEAL", "GILDED GLASS", "UNDERTOW", "THE FIRST LIGHT", "GOLDEN HOUR", "CALM", "MIRROR", "VINE",
+        "PULL", "BEAM", "REFLECTOR", "FORK", "SHIFT", "BRANCH", "SWING", "PORTAL", "FLOAT", "SLOW", "SHRINK"],
     };
     // Same name but a different puzzle now: the old result no longer applies.
     const REDESIGNED = {
@@ -142,7 +154,8 @@ const App = (() => {
       14: { "LOOKING GLASS": true, "SKYLIGHT": true },
       15: {},
       16: {},
-      17: { "GREEN DARK": true, "THE GRINDER": true, "LONG CROSSING": true, "PULSE": true, "OVER THE WALL": true, "FOUR CORNERS": true },
+      17: { "GREEN DARK": true, "THE GRINDER": true, "LONG CROSSING": true, "PULSE": true, "OVER THE WALL": true, "FOUR CORNERS": true, "STILL AIR": true, "SLACK WATER": true, "SAIL": true },
+      18: { "STILL AIR": true, "SLACK WATER": true, "SAIL": true, "OVER THE WALL": true },
     };
     // The level is the same but its lantern moved, so the old pickup no longer counts.
     // Value: the save version in which the lantern moved; older saves lose that pickup.

@@ -77,7 +77,7 @@ const CHAPTERS = [
 // Story screens. The interlude plays after the last level of The Mirror (the lamp is lit, and it costs the keeper his last memory); the ending plays
 // after the last level of the game.
 const INTERLUDE = {
-  after: "NIGHT TRAIN",
+  after: "THE LENS",
   title: "THE LAMP BURNS AGAIN.",
   lines: [
     "THE BEAM SWEEPS THE DARK WATER.",
@@ -399,22 +399,21 @@ def(1, "HALL OF MIRRORS", {
   g.set(10, 12, "L").set(24, 5, "L");
 });
 
-def(1, "SKYLIGHT", {
-  bonus: 20, echoes: ["phase", "flip", "flip"], recMax: 20,
-  hint: "A FLIP ON THE FLOOR CANNOT LIFT YOU HIGH ENOUGH. RECORD THE PHASE AT THE TOP OF A JUMP UNDER THE GLASS, THEN A FLIP PART WAY UP A JUMP. A SECOND FLIP FOR THE ROAD ABOVE.",
+
+def(1, "AFTERIMAGE", {
+  bonus: 20, echoes: ["glow", "phase", "shade"], recMax: 28, dark: true,
+  hint: "THE THORNS ARE ONLY SAFE WHILE LIT. WHAT YOU RECORDED CROSSING THEM STILL WALKS THERE. NOTHING SAYS WHICH ECHO HAS TO CARRY YOU.",
 }, (g) => {
   g.base();
   g.set(2, 14, "@");
-  g.fill(8, 1, 30, 9, "#");
-  g.fill(10, 2, 16, 8, ".");
-  g.fill(17, 7, 29, 8, ".");
-  g.fill(14, 9, 16, 9, "%");
-  g.fill(20, 9, 23, 9, "^");
-  g.fill(20, 10, 23, 10, "#");
-  g.fill(28, 7, 28, 8, "X");
-  g.set(5, 8, "L").set(12, 4, "L");
+  g.fill(6, 14, 11, 14, "t");
+  g.fill(14, 14, 19, 14, "t");
+  g.fill(22, 1, 23, 14, "%");
+  g.set(24, 14, "a").fill(26, 1, 26, 8, "#").fill(26, 9, 26, 14, "A");
+  g.fill(28, 1, 28, 8, "#").fill(28, 9, 28, 14, "G");
+  g.fill(30, 13, 30, 14, "X");
+  g.set(8, 11, "L").set(17, 6, "L").set(5, 12, "L");
 });
-
 
 // ================================================================ tier 3: the tideworks
 def(2, "TRAMPOLINE", {
@@ -564,15 +563,15 @@ def(3, "BREEZE", {
   g.set(5, 8, "L").set(13, 5, "L").set(24, 8, "L");
 });
 
-def(3, "SAIL", {
-  echoes: ["gust", "gust"], recMax: 14,
-  hint: "A GUST FROZEN IN MID-AIR IS A STEP WITH A WIND OF ITS OWN. ONE IS NOT ENOUGH FOR THIS PIT.",
+def(3, "WINDFALL", {
+  echoes: ["tide", "gust"], recMax: 30,
+  hint: "THE FERRY ONLY TAKES YOU PART OF THE WAY. YOU CAN RECORD WHILE YOU RIDE IT: JUMP OFF AT ITS FAR END AND STOP IN MID AIR, FACING THE FAR BANK.",
 }, (g) => {
   g.base();
   g.set(2, 14, "@");
-  g.pit(9, 22);
+  g.pit(9, 18);
   g.fill(28, 13, 28, 14, "X");
-  g.set(5, 8, "L").set(15, 5, "L").set(26, 8, "L");
+  g.set(5, 8, "L").set(14, 4, "L").set(24, 8, "L");
 });
 
 def(3, "STILL AIR", {
@@ -581,7 +580,7 @@ def(3, "STILL AIR", {
 }, (g) => {
   g.base();
   g.set(2, 14, "@");
-  g.pit(10, 11);
+  g.pit(10, 12);
   g.set(13, 14, "<");
   g.fill(28, 13, 28, 14, "X");
   g.set(5, 8, "L").set(17, 7, "L").set(25, 8, "L");
@@ -593,11 +592,11 @@ def(3, "SLACK WATER", {
 }, (g) => {
   g.base();
   g.set(2, 14, "@");
-  g.pit(6, 7);
+  g.pit(6, 8);
   g.set(9, 14, "<");
-  g.set(11, 14, "a");
-  g.pit(15, 16);
-  g.set(18, 14, "<");
+  g.set(12, 14, "a");
+  g.pit(16, 18);
+  g.set(19, 14, "<");
   g.fill(23, 1, 23, 8, "#").fill(23, 9, 23, 14, "A");
   g.fill(28, 13, 28, 14, "X");
   g.set(4, 8, "L").set(12, 7, "L").set(20, 8, "L").set(26, 8, "L");
@@ -643,23 +642,33 @@ def(3, "UP AND OVER", {
   g.set(8, 9, "L").set(15, 5, "L").set(24, 5, "L");
 });
 
-def(3, "AFTERIMAGE", {
-  echoes: ["glow", "phase", "shade"], recMax: 28, dark: true,
-  hint: "THE THORNS ARE ONLY SAFE WHILE LIT. WHAT YOU RECORDED CROSSING THEM STILL WALKS THERE. NOTHING SAYS WHICH ECHO HAS TO CARRY YOU.",
+def(3, "DOLDRUMS", {
+  echoes: ["gust", "calm"], recMax: 24,
+  hint: "THE VENT ON THE FAR BANK BLOWS BACK ANYONE IN THE AIR. A CALM STOPPED IN MID-AIR IS A STEP THAT CARRIES ITS OWN STILL AIR, BUT KEEP IT AWAY FROM YOUR GUST.",
 }, (g) => {
   g.base();
   g.set(2, 14, "@");
-  g.fill(6, 14, 11, 14, "t");
-  g.fill(14, 14, 19, 14, "t");
-  g.fill(22, 1, 23, 14, "%");
-  g.set(24, 14, "a").fill(26, 1, 26, 8, "#").fill(26, 9, 26, 14, "A");
-  g.fill(28, 1, 28, 8, "#").fill(28, 9, 28, 14, "G");
-  g.fill(30, 13, 30, 14, "X");
-  g.set(8, 11, "L").set(17, 6, "L").set(5, 12, "L");
+  g.pit(7, 15);
+  g.fill(16, 12, 30, 14, "#");
+  g.set(16, 11, "<");
+  g.fill(28, 10, 28, 11, "X");
+  g.set(4, 8, "L").set(14, 5, "L").set(24, 6, "L");
+});
+
+def(3, "SAIL", {
+  echoes: ["gust", "gust"], recMax: 14,
+  hint: "A GUST FROZEN IN MID-AIR IS A STEP WITH A WIND OF ITS OWN. ONE IS NOT ENOUGH FOR THIS PIT, AND TWO ONLY JUST REACH: STOP THE SECOND ONE LOW, ON THE WAY DOWN.",
+}, (g) => {
+  g.base();
+  g.fill(1, 11, 8, 14, "#");
+  g.set(2, 10, "@");
+  g.pit(9, 24);
+  g.fill(28, 13, 28, 14, "X");
+  g.set(5, 8, "L").set(15, 5, "L").set(26, 8, "L");
 });
 
 def(3, "CHORUS", {
-  echoes: ["gust", "gust", "spring", "shade"], recMax: 30,
+  bonus: 20, echoes: ["gust", "gust", "spring", "shade"], recMax: 30,
   hint: "THE DOOR UP HERE ANSWERS TO A PLATE DOWN BELOW. WIND ONLY HAS TO BE THERE WHEN YOU RECORD, IF SOMETHING ELSE CAN CARRY YOU.",
 }, (g) => {
   g.base();
@@ -672,17 +681,6 @@ def(3, "CHORUS", {
   g.fill(23, 1, 23, 3, "#").fill(23, 4, 23, 7, "A");
   g.fill(2, 6, 2, 7, "X");
   g.set(4, 12, "L").set(24, 12, "L").set(9, 4, "L").set(17, 4, "L");
-});
-
-def(3, "WINDFALL", {
-  bonus: 20, echoes: ["tide", "gust"], recMax: 30,
-  hint: "THE FERRY ONLY TAKES YOU PART OF THE WAY. YOU CAN RECORD WHILE YOU RIDE IT: JUMP OFF AT ITS FAR END AND STOP IN MID AIR, FACING THE FAR BANK.",
-}, (g) => {
-  g.base();
-  g.set(2, 14, "@");
-  g.pit(9, 18);
-  g.fill(28, 13, 28, 14, "X");
-  g.set(5, 8, "L").set(14, 4, "L").set(24, 8, "L");
 });
 
 // ================================================================ tier 5: the mirror
@@ -751,23 +749,9 @@ def(4, "APEX", {
   g.set(6, 9, "L").set(20, 9, "L").set(25, 9, "L");
 });
 
-def(4, "UPSIDE DOWN", {
-  echoes: ["flip"], recMax: 10, swap: true,
-  hint: "THE FLOOR IS DEATH ALL THE WAY ACROSS AND ONE ZONE ONLY REACHES SO FAR. WHEREVER YOU SWAP FROM, THE ZONE GOES THERE, AND THE DOOR WANTS SOMETHING LEFT ON ITS PLATE.",
-}, (g) => {
-  g.base();
-  g.set(2, 14, "@");
-  g.fill(1, 1, 30, 11, "#");
-  g.fill(5, 14, 24, 14, "^");
-  g.set(22, 12, "1");
-  g.fill(26, 12, 26, 14, "A");
-  g.fill(29, 13, 29, 14, "X");
-  g.set(4, 12, "L").set(14, 12, "L").set(28, 12, "L");
-});
-
 def(4, "GLASS CEILING", {
   echoes: ["flip", "phase"], recMax: 30, swap: true,
-  hint: "A WALL OF GLASS STANDS ACROSS THE CEILING ROAD. YOUR SWAPS ARE KEPT IN WHAT YOU RECORD, SO AN ECHO CAN BE LEFT WHERE YOU WILL NEED IT.",
+  hint: "THE FLOOR IS DEATH AND A WALL OF GLASS STANDS ACROSS THE CEILING ROAD. WHEREVER YOU SWAP FROM, THE ZONE GOES THERE. YOUR SWAPS ARE KEPT IN WHAT YOU RECORD, SO AN ECHO CAN BE LEFT WHERE YOU WILL NEED IT.",
 }, (g) => {
   g.base();
   g.set(2, 14, "@");
@@ -793,18 +777,34 @@ def(4, "STEP THROUGH", {
   g.set(8, 8, "L").set(12, 8, "L").set(21, 8, "L").set(29, 8, "L");
 });
 
-def(4, "NIGHT TRAIN", {
-  echoes: ["glow", "spring"], recMax: 40, dark: true, swap: true,
-  hint: "A RECORDING KEEPS EVERYTHING YOU DID, SWAPS TOO. SOMETHING HAS TO BE WAITING ON THE FAR BANK BEFORE YOU GET THERE FOR REAL.",
+def(4, "PASSENGER", {
+  echoes: ["shade", "mirror"], recMax: 24,
+  hint: "THE DOOR ANSWERS TO THE PLATE BY THE WALL, AND NOTHING STANDS ON THE SPIKES. YOUR PUPPET WALKS WHERE YOU WALK, SEEN IN THE GLASS, AND IT DOES NOT NEED A FLOOR. ANYTHING THAT WALKS CAN CARRY YOU.",
+}, (g) => {
+  g.base();
+  g.set(4, 14, "@");
+  g.set(1, 14, "a");
+  g.fill(10, 13, 10, 14, "#");
+  g.fill(17, 14, 27, 14, "^");
+  g.fill(28, 1, 28, 8, "#").fill(28, 9, 28, 14, "A");
+  g.fill(30, 13, 30, 14, "X");
+  g.set(6, 8, "L").set(16, 7, "L").set(25, 8, "L");
+});
+
+def(4, "THE LENS", {
+  echoes: ["mirror", "mirror", "mirror", "mirror"], recMax: 40, swap: true,
+  hint: "THE WALL SPLITS THE TOWER IN TWO AND NO LEDGE CAN BE JUMPED TO FROM THE ONE BELOW IT. EACH PUPPET IS RECORDED BY CLIMBING AS HIGH AS THE LAST ONE TAKES YOU, THEN ONE JUMP MORE. WHERE YOU JUMP FROM DECIDES WHERE YOU LAND.",
 }, (g) => {
   g.base();
   g.set(2, 14, "@");
-  g.pit(6, 21);
-  g.fill(6, 14, 21, 14, "~");
-  g.fill(22, 1, 22, 8, "#").fill(22, 9, 22, 14, "G");
-  g.fill(27, 8, 30, 14, "#");
-  g.fill(29, 6, 29, 7, "X");
-  g.set(28, 5, "L");
+  g.fill(15, 1, 16, 14, "#");
+  // Ledges on the two sides of the wall climb in turn, three tiles apart, so each side's ledges are six tiles apart.
+  g.fill(18, 12, 28, 12, "#");
+  g.fill(2, 9, 12, 9, "#");
+  g.fill(18, 6, 24, 6, "#");
+  g.fill(7, 3, 9, 3, "#");
+  g.fill(8, 1, 8, 2, "X");
+  g.set(5, 12, "L").set(26, 9, "L").set(4, 6, "L").set(21, 3, "L");
 });
 
 def(4, "OVER THE WALL", {
@@ -813,6 +813,8 @@ def(4, "OVER THE WALL", {
 }, (g) => {
   g.base();
   g.set(2, 14, "@");
+  // The low ceiling over the spawn sits one body short of the ledge's height, so the mirror of anything under it is inside the ledge.
+  g.fill(1, 1, 6, 6, "#");
   g.fill(9, 1, 12, 11, "#").fill(9, 14, 12, 14, "#").set(11, 13, "a");
   g.fill(15, 1, 16, 14, "#");
   g.fill(21, 6, 30, 14, "#");
@@ -1688,7 +1690,6 @@ const PAR = {
   "HALL OF MIRRORS": { t: 50, r: 4 },
   "LOOKING GLASS": { t: 55, r: 4 },
   "HALF OPEN": { t: 25, r: 1 },
-  "SKYLIGHT": { t: 55, r: 3 },
   "FERRY": { t: 25, r: 1 },
   "TRAMPOLINE": { t: 20, r: 1 },
   "SKYHOOK": { t: 20, r: 1 },
@@ -1705,8 +1706,6 @@ const PAR = {
   "SAIL": { t: 25, r: 2 },
   "STAY BEHIND": { t: 20, r: 1 },
   "APEX": { t: 20, r: 1 },
-  "UPSIDE DOWN": { t: 22, r: 1 },
-  "NIGHT TRAIN": { t: 50, r: 2 },
   "THREE PANES": { t: 32, r: 3 },
   "GLASS CEILING": { t: 35, r: 2 },
   "UP AND OVER": { t: 40, r: 3 },
@@ -1772,6 +1771,9 @@ const PAR = {
   "OVER THE WALL": { t: 25, r: 3 },
   "PULSE": { t: 45, r: 2 },
   "FOUR CORNERS": { t: 35, r: 2 },
+  "DOLDRUMS": { t: 25, r: 2 },
+  "PASSENGER": { t: 30, r: 2 },
+  "THE LENS": { t: 50, r: 4 },
 };
 for (const l of LEVELS) l.par = PAR[l.name];
 

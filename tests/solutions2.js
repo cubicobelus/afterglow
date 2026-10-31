@@ -49,34 +49,34 @@ const board = (key) => {
 SOLUTIONS["SLACK WATER"] = () => {
   // Calm at the first gap, then a shade that waits at the spawn, crosses the gap and stands on the plate. The shade carries you across
   // again, so the calm slot is free for the second gap.
-  recWait("calm", 108, 12);
+  recWait("calm", 114, 12);
   Bot.record("shade");
   Bot.run(40);
-  Bot.walkTo(108, 4);
+  Bot.walkTo(112, 4);
   Bot.run(8);
   Bot.dir(1);
   Bot.jumpKey(true);
   for (let i = 0; i < 160; i++) { if (i === 24) Bot.jumpKey(false); Bot.tick(); if (G.dead) Bot.fail("fell in the first gap"); if (G.p.onGround && i > 10) break; }
   Bot.dir(0);
-  Bot.expect(Bot.px() > 170, "on the island");
-  walkThrough(230);
+  Bot.expect(Bot.px() > 190, "on the island");
+  walkThrough(250);
   Bot.run(20);
   Bot.stop();
   Bot.record("calm");
   board("shade");
   Bot.waitUntil(() => !G.echoes.shade.moving, 900, "the shade to reach the plate");
-  Bot.walkTo(288, 3);
+  Bot.walkTo(312, 3);
   Bot.run(14);
   Bot.stop();
   board("shade");
   Bot.waitUntil(() => !G.echoes.shade.moving, 900, "the shade to reach the plate");
   settle("calm");
-  Bot.walkTo(288, 3);
+  Bot.walkTo(312, 3);
   Bot.dir(1);
   Bot.jumpKey(true);
   for (let i = 0; i < 160; i++) { if (i === 24) Bot.jumpKey(false); Bot.tick(); if (G.dead) Bot.fail("fell in the second gap"); if (G.p.onGround && i > 10) break; }
   Bot.dir(0);
-  Bot.expect(Bot.px() > 340, "across the second gap");
+  Bot.expect(Bot.px() > 370, "across the second gap");
   Bot.walkTo(570);
 };
 
@@ -143,6 +143,68 @@ SOLUTIONS["STEP THROUGH"] = () => {
   Bot.expect(Bot.px() > 340, "on the far side of the wall");
   Bot.waitUntil(() => G.L.doorOpen.a, 300, "the door to open");
   Bot.walkTo(590);
+};
+
+SOLUTIONS["PASSENGER"] = () => {
+  // The shade holds the plate. The puppet is recorded walking the solid floor from the middle of the room back toward the plate, so on the
+  // other side of the glass it walks over the spikes from their near end to the door, and it waits at the near end long enough to board.
+  recWait("shade", 30, 12);
+  Bot.record("mirror");
+  Bot.walkTo(190, 3);
+  Bot.jumpTo(240, 16);
+  Bot.walkTo(300, 2);
+  Bot.run(150);
+  Bot.walkTo(240, 3);
+  Bot.jumpTo(186, 16);
+  Bot.walkTo(64, 2);
+  Bot.run(6);
+  Bot.stop();
+  Bot.walkTo(190, 3);
+  Bot.jumpTo(240, 16);
+  Bot.walkTo(326, 2);
+  Bot.waitUntil(() => { const e = G.echoes.mirror; return e && e.x + PW / 2 < 346; }, 900, "the puppet at the near end of the spikes");
+  Bot.jumpTo(Bot.px() + 10, 12);
+  Bot.expect(G.p.stand === G.echoes.mirror, "riding the puppet");
+  Bot.waitUntil(() => !G.echoes.mirror.moving, 1500, "the ride to the door");
+  Bot.expect(G.L.doorOpen.a, "the door open");
+  Bot.walkTo(612);
+};
+
+// Climb the lens: walk to x, jump straight up and stop the recording at the top of the jump.
+const lensTop = (x) => {
+  Bot.walkTo(x, 2);
+  Bot.run(4);
+  Bot.jumpKey(true);
+  for (let i = 0; i < 60; i++) { Bot.tick(); if (i > 4 && G.p.vy > -20) break; }
+  Bot.jumpKey(false);
+  Bot.stop();
+};
+// Swap with a puppet once it hangs at the top of its jump, then land on the ledge below it.
+const lensSwap = (key) => {
+  settle(key, 10);
+  Bot.select(key);
+  Bot.swap();
+  Bot.waitUntil(() => G.p.onGround || G.won, 120, "landing after the swap with " + key);
+};
+SOLUTIONS["THE LENS"] = () => {
+  // Four puppets. Each recording climbs the ledges the earlier puppets reach, swapping with each in turn, and ends at the top of one more
+  // jump: its puppet hangs on the other side of the wall just above the next ledge. Where each ledge is jumped from picks the ledge landed on.
+  const spots = [250, 540, 240, 480];
+  const keys = ["mirror", "mirror2", "mirror3", "mirror4"];
+  for (let k = 0; k < 4; k++) {
+    Bot.record(keys[k]);
+    for (let j = 0; j < k; j++) {
+      Bot.walkTo(spots[j], 2);
+      lensSwap(keys[j]);
+    }
+    lensTop(spots[k]);
+  }
+  for (let j = 0; j < 4 && !G.won; j++) {
+    Bot.walkTo(spots[j], 2);
+    lensSwap(keys[j]);
+  }
+  if (!G.won) Bot.walkTo(170, 3);
+  Bot.expect(G.won, "at the lamp");
 };
 
 // ================================================================ tier 6: the shallows (beam, reflector)
@@ -359,6 +421,41 @@ SOLUTIONS["OPEN DOOR"] = () => {
 };
 
 // The lab room for the calm is the same room as Still Air.
+SOLUTIONS["DOLDRUMS"] = () => {
+  // A gust at the edge facing the pit. The calm is stopped late in a wind jump, low over the pit: a step far enough from the gust to
+  // leave its wind alone. A jump off the calm step stays in its still air nearly all the way to the bank, past the vent.
+  const windJump = () => {
+    Bot.walkTo(100, 5);
+    Bot.dir(1);
+    Bot.run(8);
+    Bot.jumpKey(true);
+  };
+  Bot.record("gust");
+  Bot.walkTo(132, 2);
+  Bot.dir(1);
+  Bot.run(2);
+  Bot.dir(0);
+  Bot.run(12);
+  Bot.stop();
+  Bot.record("calm");
+  settle("gust");
+  windJump();
+  Bot.run(40);
+  Bot.jumpKey(false);
+  Bot.dir(0);
+  Bot.stop();
+  Bot.waitUntil(() => G.echoes.gust.restT > 40 && G.echoes.calm.restT > 40, 900, "the gust and the calm");
+  windJump();
+  for (let i = 0; i < 120; i++) { Bot.tick(); if (G.dead) Bot.fail("fell before the calm"); if (G.p.onGround && i > 5) break; }
+  Bot.jumpKey(false);
+  Bot.expect(G.p.stand === G.echoes.calm, "standing on the calm");
+  Bot.dir(1);
+  Bot.jumpKey(true);
+  for (let i = 0; i < 160; i++) { if (i === 24) Bot.jumpKey(false); Bot.tick(); if (G.dead) Bot.fail("fell short of the bank"); if (G.p.onGround && i > 5) break; }
+  Bot.expect(G.p.onGround && Bot.px() > 316, "on the bank");
+  Bot.walkTo(570);
+};
+
 SOLUTIONS["CALM"] = SOLUTIONS["STILL AIR"];
 
 // ================================================================ tier 7: the wreck (pull, cargo platforms)
@@ -873,12 +970,13 @@ SOLUTIONS["WINDFALL"] = () => {
   Bot.walkTo(572);
 };
 SOLUTIONS["OVER THE WALL"] = () => {
-  // A running jump from the spawn lands on the spring with the jump held: a big bounce. Record the puppet at the top of it: it hangs high on the
+  // A running jump from under the low ceiling lands on the spring with the jump held: a big bounce. Record the puppet at the top of it: it hangs high on the
   // other side of the wall, above the ledge. The puppet stays up there without the spring, so the spring is recorded again on the plate under the
   // low roof (where it cannot bounce anyone), which holds the door. Then swap with the puppet and walk through.
-  recWait("spring", 130, 12);
+  recWait("spring", 156, 12);
   Bot.record("mirror");
   settle("spring", 30);
+  Bot.walkTo(86, 3);
   Bot.dir(1);
   Bot.jumpKey(true);
   let bounced = false;
