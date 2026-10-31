@@ -873,8 +873,9 @@ SOLUTIONS["WINDFALL"] = () => {
   Bot.walkTo(572);
 };
 SOLUTIONS["OVER THE WALL"] = () => {
-  // A running jump from the spawn lands on the spring with the jump held: a big bounce. Record the puppet at the top of it: it hangs high on the other
-  // side of the wall, above the ledge. Then swap with it and drop onto the ledge.
+  // A running jump from the spawn lands on the spring with the jump held: a big bounce. Record the puppet at the top of it: it hangs high on the
+  // other side of the wall, above the ledge. The puppet stays up there without the spring, so the spring is recorded again on the plate under the
+  // low roof (where it cannot bounce anyone), which holds the door. Then swap with the puppet and walk through.
   recWait("spring", 130, 12);
   Bot.record("mirror");
   settle("spring", 30);
@@ -890,6 +891,14 @@ SOLUTIONS["OVER THE WALL"] = () => {
   Bot.jumpKey(false);
   Bot.dir(0);
   Bot.stop();
+  Bot.select("spring");
+  Bot.record("spring");
+  Bot.walkTo(164, 3);
+  Bot.jumpTo(226, 10);
+  Bot.walkTo(230, 2);
+  Bot.run(6);
+  Bot.stop();
+  Bot.waitUntil(() => G.L.doorOpen.a, 900, "the spring to hold the plate");
   settle("mirror", 14);
   Bot.select("mirror");
   Bot.swap();
@@ -898,8 +907,17 @@ SOLUTIONS["OVER THE WALL"] = () => {
   Bot.walkTo(572);
 };
 SOLUTIONS["PULSE"] = () => {
-  // The reflector under the ceiling beam sends it along the floor. The clock door passes it for half of every five seconds, lighting the thorns
-  // and opening the gate. Wait for the door and run the thorns while it is open.
+  // The first mirror under the ceiling beam sends it along the floor; the clock door passes it for half of every five seconds. Cross the
+  // thorns while it is open and record the second mirror just inside the bubbles, facing right: it turns the beam up into the hatch.
+  // Then, in a later window, step into the bubbles and ride up through the lit hatch.
+  const open = () => { const k = G.L.timedGroups[0].clk % 300; return k >= 152 && k < 160; };
+  const crossThorns = () => {
+    Bot.walkTo(164, 3);
+    Bot.waitUntil(open, 900, "the clock door to open");
+    Bot.dir(1);
+    for (let i = 0; i < 200 && Bot.px() < 340; i++) { Bot.tick(); if (G.dead) Bot.fail("caught by the thorns or the door"); }
+    Bot.dir(0);
+  };
   Bot.record("reflector");
   Bot.walkTo(124, 3);
   Bot.dir(-1);
@@ -908,12 +926,29 @@ SOLUTIONS["PULSE"] = () => {
   Bot.run(10);
   Bot.stop();
   settle("reflector", 30);
-  Bot.walkTo(164, 3);
-  Bot.waitUntil(() => { const k = G.t % 300; return k >= 156 && k < 168; }, 900, "the clock door to open");
+  Bot.record("reflector2");
+  crossThorns();
   Bot.dir(1);
-  for (let i = 0; i < 400 && !G.won; i++) { Bot.tick(); if (G.dead) Bot.fail("caught by the thorns or the door"); }
+  for (let i = 0; i < 300 && Bot.px() < 498; i++) Bot.tick();
   Bot.dir(0);
-  Bot.expect(G.won, "through the door, the thorns and the gate");
+  Bot.stop();
+  settle("reflector2", 30);
+  crossThorns();
+  Bot.walkTo(470, 3);
+  Bot.waitUntil(open, 900, "the clock door to open again");
+  Bot.dir(1);
+  for (let i = 0; i < 60 && Bot.px() < 500; i++) Bot.tick();
+  // stay under the middle of the hatch while the bubbles lift you
+  for (let i = 0; i < 300 && !(G.p.y + PH < 178); i++) {
+    const dx = 502 - Bot.px();
+    Bot.dir(Math.abs(dx) < 2 ? 0 : Math.sign(dx));
+    Bot.tick();
+    if (G.dead) Bot.fail("died");
+  }
+  Bot.expect(G.p.y + PH < 178, "risen through the hatch");
+  Bot.dir(1);
+  for (let i = 0; i < 300 && !G.won; i++) { Bot.tick(); if (G.dead) Bot.fail("fell"); }
+  Bot.expect(G.won, "up through the hatch to the exit");
 };
 SOLUTIONS["CANOPY"] = () => {
   // Bounce from the spawn onto the mushroom, record the vine at the top of the bounce and climb it to the shelf; record the gust on the shelf at its
@@ -979,42 +1014,6 @@ SOLUTIONS["CANOPY"] = () => {
   Bot.jumpKey(false);
   Bot.dir(0);
   Bot.expect(G.p.onGround && Bot.px() > 474 && Bot.feet() <= 141, "across the gap");
-  Bot.walkTo(572);
-};
-SOLUTIONS["FOUR CORNERS"] = () => {
-  // Two forks, each standing on its first plate for a long while and then moving to its second; the windows overlap for a little over a second.
-  Bot.record("fork");
-  Bot.walkTo(90, 3);
-  Bot.run(170);
-  Bot.walkTo(150, 3);
-  Bot.run(20);
-  Bot.stop();
-  Bot.record("fork2");
-  Bot.walkTo(210, 3);
-  Bot.run(170);
-  Bot.walkTo(270, 3);
-  Bot.run(20);
-  Bot.stop();
-  Bot.walkTo(346, 3);
-  Bot.waitUntil(() => G.L.doorOpen.a, 1500, "the door to open");
-  Bot.walkTo(572);
-};
-SOLUTIONS["FOUR CORNERS"] = () => {
-  // Two forks, each standing on its first plate for a long while and then moving to its second; the windows overlap for a little over a second.
-  Bot.record("fork");
-  Bot.walkTo(90, 3);
-  Bot.run(170);
-  Bot.walkTo(150, 3);
-  Bot.run(20);
-  Bot.stop();
-  Bot.record("fork2");
-  Bot.walkTo(210, 3);
-  Bot.run(170);
-  Bot.walkTo(270, 3);
-  Bot.run(20);
-  Bot.stop();
-  Bot.walkTo(346, 3);
-  Bot.waitUntil(() => G.L.doorOpen.a, 1500, "the door to open");
   Bot.walkTo(572);
 };
 // A lift (the second mover): stand at its foot, step on while it waits at the bottom, and ride to the top.
@@ -1516,4 +1515,30 @@ SOLUTIONS["UNDERTOW"] = () => {
     Bot.waitUntil(() => G.L.doorOpen.a, 900, "the door to open");
     Bot.walkTo(590);
   });
+};
+
+SOLUTIONS["FOUR CORNERS"] = () => {
+  // The second fork goes into the closet when the clock door opens (at 2.5 s): first plate, then the second. The first fork stands on the near
+  // plate a little longer, so its moment (twin on the near plate, first on the far one) starts while the closet pair's moment is still on.
+  // Then wait by the door and go through while all four are held.
+  const tOpen = () => !doorShut(G.L.timed[0]);
+  Bot.record("fork2");
+  Bot.walkTo(480, 3);
+  Bot.waitUntil(tOpen, 600, "the closet to open");
+  Bot.walkTo(550, 2);
+  Bot.waitUntil(() => G.t >= 200, 300, "a moment on the first plate");
+  Bot.walkTo(590, 2);
+  Bot.run(30);
+  Bot.stop();
+  Bot.record("fork");
+  Bot.walkTo(390, 2);
+  Bot.waitUntil(() => G.t >= 236, 400, "a moment on the near plate");
+  Bot.walkTo(450, 2);
+  Bot.run(30);
+  Bot.stop();
+  Bot.walkTo(210, 3);
+  Bot.waitUntil(() => G.L.doorOpen.a, 900, "the door to open");
+  Bot.dir(-1);
+  for (let i = 0; i < 200 && !G.won; i++) { Bot.tick(); if (G.dead) Bot.fail("crushed by the door"); }
+  Bot.expect(G.won, "through the door");
 };

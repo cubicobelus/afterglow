@@ -142,7 +142,7 @@ const App = (() => {
       14: { "LOOKING GLASS": true, "SKYLIGHT": true },
       15: {},
       16: {},
-      17: { "GREEN DARK": true, "THE GRINDER": true, "LONG CROSSING": true },
+      17: { "GREEN DARK": true, "THE GRINDER": true, "LONG CROSSING": true, "PULSE": true, "OVER THE WALL": true, "FOUR CORNERS": true },
     };
     // The level is the same but its lantern moved, so the old pickup no longer counts.
     // Value: the save version in which the lantern moved; older saves lose that pickup.

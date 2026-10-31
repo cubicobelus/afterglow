@@ -809,12 +809,14 @@ def(4, "NIGHT TRAIN", {
 
 def(4, "OVER THE WALL", {
   bonus: 20, echoes: ["spring", "mirror"], recMax: 24, swap: true,
-  hint: "THE WALL GOES TO THE CEILING AND THE LEDGE IS HIGH. YOUR PUPPET HANGS WHEREVER YOU STOP, SEEN IN THE GLASS. A SPRING CAN TAKE YOU HIGHER THAN A JUMP, AND SWAP TAKES YOU TO THE PUPPET.",
+  hint: "THE WALL GOES TO THE CEILING AND THE LEDGE IS HIGH, AND THE DOOR UP THERE WANTS THE PLATE UNDER THE LOW ROOF. YOUR PUPPET HANGS WHEREVER YOU STOP, SEEN IN THE GLASS, AND IT STAYS THERE AFTER WHATEVER LIFTED YOU HAS GONE.",
 }, (g) => {
   g.base();
   g.set(2, 14, "@");
+  g.fill(9, 1, 12, 11, "#").fill(9, 14, 12, 14, "#").set(11, 13, "a");
   g.fill(15, 1, 16, 14, "#");
   g.fill(21, 6, 30, 14, "#");
+  g.fill(25, 1, 25, 3, "#").fill(25, 4, 25, 5, "A");
   g.fill(28, 4, 28, 5, "X");
   g.set(5, 8, "L").set(11, 4, "L").set(24, 3, "L");
 });
@@ -943,17 +945,19 @@ def(5, "PERISCOPE", {
 });
 
 def(5, "PULSE", {
-  bonus: 20, echoes: ["reflector"], recMax: 20,
-  hint: "THE CLOCK DOOR LETS THE LIGHT THROUGH ONLY WHILE IT IS OPEN, AND THE THORNS AND THE GATE LIVE ON THAT LIGHT. BE THROUGH BEFORE IT SHUTS.",
+  bonus: 20, echoes: ["reflector", "reflector"], recMax: 24,
+  hint: "THE CLOCK DOOR LETS THE LIGHT THROUGH ONLY WHILE IT IS OPEN. THE THORNS AND THE HATCH BOTH LIVE ON THAT ONE BEAM, SO THE MIRROR THAT TURNS IT UP HAS TO STAND WHERE THE BUBBLES WILL CARRY YOU.",
 }, (g) => {
   g.base();
   g.set(2, 14, "@");
   g.set(5, 1, "s");
   g.fill(9, 1, 9, 10, "#").fill(9, 11, 9, 14, "T");
   g.fill(11, 14, 15, 14, "t");
-  g.fill(17, 1, 17, 12, "#").fill(17, 13, 17, 14, "G");
-  g.fill(28, 13, 28, 14, "X");
-  g.set(3, 8, "L").set(13, 5, "L").set(24, 8, "L");
+  g.fill(18, 9, 23, 9, "#").fill(24, 9, 25, 9, "G").fill(26, 9, 30, 9, "#");
+  g.fill(18, 1, 18, 8, "#");
+  g.set(25, 14, "u");
+  g.fill(28, 7, 28, 8, "X");
+  g.set(3, 8, "L").set(13, 5, "L").set(19, 13, "L").set(21, 3, "L");
 });
 
 // ================================================================ tier 7: the wreck (pull, cargo platforms)
@@ -1341,14 +1345,16 @@ def(8, "DEEP END", {
 
 def(8, "FOUR CORNERS", {
   bonus: 20, echoes: ["fork", "fork"], recMax: 30, dark: true,
-  hint: "FOUR PLATES AND ONE DOOR. EACH FORK CAN BE IN TWO PLACES, BUT ONLY WHILE ITS TWIN IS STILL A FEW SECONDS BEHIND IT. LINE THE TWO UP.",
+  hint: "FOUR PLATES, ONE DOOR, AND TWO OF THE PLATES ARE IN A CLOSET THAT OPENS ON A CLOCK. EACH FORK HOLDS TWO PLATES FOR A MOMENT. THE TWO MOMENTS HAVE TO MEET.",
 }, (g) => {
   g.base();
-  g.set(2, 14, "@");
-  g.set(4, 14, "a").set(7, 14, "a").set(10, 14, "a").set(13, 14, "a");
-  g.fill(18, 1, 18, 8, "#").fill(18, 9, 18, 14, "A");
-  g.fill(28, 13, 28, 14, "X");
-  g.set(5, 10, "L").set(12, 10, "L").set(23, 8, "L");
+  g.set(16, 14, "@");
+  g.fill(9, 1, 9, 8, "#").fill(9, 9, 9, 14, "A");
+  g.fill(3, 13, 3, 14, "X");
+  g.set(19, 14, "a").set(22, 14, "a");
+  g.fill(25, 1, 30, 11, "#").fill(25, 12, 25, 14, "T");
+  g.set(27, 14, "a").set(29, 14, "a");
+  g.set(6, 10, "L").set(14, 10, "L").set(21, 10, "L").set(28, 13, "L");
 });
 
 // ================================================================ tier 10: the foundation (shift, then everything)
@@ -1742,13 +1748,10 @@ const PAR = {
   "UNDERTOW": { t: 55, r: 3 },
   "THE FIRST LIGHT": { t: 90, r: 4 },
   "WINDFALL": { t: 40, r: 2 },
-  "OVER THE WALL": { t: 20, r: 2 },
-  "PULSE": { t: 20, r: 1 },
   "SALVAGE": { t: 70, r: 2 },
   "DOCKSIDE": { t: 130, r: 2 },
   "CANOPY": { t: 35, r: 2 },
   "DEEP END": { t: 35, r: 2 },
-  "FOUR CORNERS": { t: 35, r: 2 },
   "GOLDEN HOUR": { t: 40, r: 2 },
   "LONG CROSSING": { t: 65, r: 5 },
   "PERISCOPE": { t: 25, r: 2 },
@@ -1766,6 +1769,9 @@ const PAR = {
   "THE GRINDER": { t: 30, r: 2 },
   "WAY BACK": { t: 35, r: 2 },
   "GOLD SEAL": { t: 40, r: 4 },
+  "OVER THE WALL": { t: 25, r: 3 },
+  "PULSE": { t: 45, r: 2 },
+  "FOUR CORNERS": { t: 35, r: 2 },
 };
 for (const l of LEVELS) l.par = PAR[l.name];
 
