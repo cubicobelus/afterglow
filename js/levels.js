@@ -1103,31 +1103,16 @@ def(7, "SPROUT", {
   g.set(5, 8, "L").set(14, 5, "L");
 });
 
-def(7, "ROOTWALK", {
-  autoHint: true, echoes: [],
-  hint: "THE ROOT LEDGES GIVE WAY SOON AFTER YOU STAND ON THEM, AND GROW BACK LATER. KEEP MOVING.",
+def(7, "BOUGH", {
+  unlock: "branch", echoes: ["branch"], recMax: 8,
+  hint: "THE TUNNEL IS TOO LOW TO JUMP THE GAP. RECORD A BRANCH STANDING AT THE EDGE, FACING ACROSS: IT GROWS A BOUGH THE WAY YOU FACED.",
 }, (g) => {
   g.base();
   g.set(2, 14, "@");
-  g.pit(7, 23);
-  g.fill(8, 13, 8, 13, "r");
-  g.fill(11, 11, 12, 11, "r");
-  g.fill(15, 9, 15, 9, "r");
-  g.fill(19, 12, 20, 12, "r");
+  g.fill(8, 1, 24, 12, "#");
+  g.pit(11, 16);
   g.fill(28, 13, 28, 14, "X");
-  g.set(5, 8, "L").set(14, 5, "L").set(24, 8, "L");
-});
-
-def(7, "SPORE LIFT", {
-  autoHint: true, echoes: ["shade"], recMax: 16,
-  hint: "THE MUSHROOM THROWS YOU HIGH. A STEP HUNG IN THE AIR AT THE END OF A BOUNCE IS HIGHER THAN ANYTHING YOU CAN JUMP TO.",
-}, (g) => {
-  g.base();
-  g.set(2, 14, "@");
-  g.set(6, 14, "m");
-  g.fill(14, 4, 30, 14, "#");
-  g.fill(28, 2, 28, 3, "X");
-  g.set(4, 8, "L").set(9, 3, "L").set(22, 2, "L");
+  g.set(5, 8, "L").set(26, 8, "L");
 });
 
 def(7, "HANGING VINE", {
@@ -1139,32 +1124,46 @@ def(7, "HANGING VINE", {
   g.fill(10, 12, 13, 12, "r");
   g.fill(14, 6, 30, 14, "#");
   g.fill(28, 4, 28, 5, "X");
+  g.set(12, 2, "o");
   g.set(5, 8, "L").set(9, 4, "L").set(22, 3, "L");
 });
 
-def(7, "SPORE WIND", {
-  echoes: ["gust"], recMax: 20,
-  hint: "THE MUSHROOM THROWS YOU HIGH BUT NOT FAR. A GUST HUNG AT THE TOP OF THE BOUNCE WILL BLOW YOU THE REST OF THE WAY.",
+def(7, "ROOT BRIDGE", {
+  echoes: ["branch"], recMax: 10,
+  hint: "THE ROOT GIVES WAY IF YOU STAND ON IT, AND THE FAR BANK IS TOO FAR TO JUMP. A BOUGH STAYS WHERE IT GREW, EVEN WHEN WHAT IT GREW FROM IS GONE.",
 }, (g) => {
   g.base();
   g.set(2, 14, "@");
-  g.set(6, 14, "m");
-  g.pit(8, 14);
-  g.fill(15, 9, 30, 14, "#");
-  g.fill(28, 7, 28, 8, "X");
-  g.set(4, 8, "L").set(11, 4, "L").set(22, 5, "L");
+  g.pit(7, 21);
+  g.fill(11, 14, 12, 14, "r");
+  g.fill(28, 13, 28, 14, "X");
+  g.set(4, 8, "L").set(12, 6, "L").set(25, 8, "L");
 });
 
-def(7, "TWO VINES", {
-  echoes: ["vine", "vine"], recMax: 24,
-  hint: "THE WALL IS TWICE AS TALL AS A VINE. A VINE GROWS UP FROM WHEREVER ITS ECHO STANDS, SO THE SECOND ONE CAN START ON THE SHELF.",
+def(7, "TRELLIS", {
+  echoes: ["vine", "branch"], recMax: 20,
+  hint: "UP THE PILLAR, THEN ACROSS. A VINE CLIMBS AND A BRANCH CROSSES, AND EACH GROWS FROM WHEREVER ITS ECHO STOOD.",
 }, (g) => {
   g.base();
   g.set(2, 14, "@");
-  g.fill(17, 9, 20, 14, "#");
-  g.fill(21, 4, 30, 14, "#");
-  g.fill(28, 2, 28, 3, "X");
-  g.set(5, 8, "L").set(12, 5, "L").set(24, 2, "L");
+  g.fill(10, 9, 12, 14, "#");
+  g.pit(13, 19);
+  g.fill(20, 9, 30, 14, "#");
+  g.fill(28, 7, 28, 8, "X");
+  g.set(5, 8, "L").set(16, 4, "L").set(25, 4, "L");
+});
+
+def(7, "GREEN DARK", {
+  echoes: ["vine", "glow"], recMax: 24, dark: true,
+  hint: "THE THORNS ON THE LEDGE NEED LIGHT, AND THE LIGHT HAS TO BE UP THERE WITH THEM. A VINE IS THE ONLY WAY UP.",
+}, (g) => {
+  g.base();
+  g.set(29, 14, "@");
+  g.fill(1, 9, 13, 14, "#");
+  g.fill(7, 8, 10, 8, "t");
+  g.fill(2, 7, 2, 8, "X");
+  g.fill(1, 1, 13, 4, "#");
+  g.set(24, 6, "L");
 });
 
 def(7, "TREETOP", {
@@ -1179,18 +1178,6 @@ def(7, "TREETOP", {
   g.set(4, 8, "L").set(8, 3, "L");
 });
 
-def(7, "GREEN DARK", {
-  echoes: ["vine", "glow"], recMax: 24, dark: true,
-  hint: "THE THORNS ON THE LEDGE NEED LIGHT, AND THE LIGHT HAS TO BE UP THERE WITH THEM. A VINE IS THE ONLY WAY UP.",
-}, (g) => {
-  g.base();
-  g.set(2, 14, "@");
-  g.fill(20, 9, 30, 14, "#");
-  g.fill(22, 8, 25, 8, "t");
-  g.fill(28, 7, 28, 8, "X");
-  g.set(6, 6, "L");
-});
-
 def(7, "ESCALATOR", {
   echoes: ["tide", "vine"], recMax: 40,
   hint: "TWO CLIMBS AND ONE VINE. A TIDE REPEATS YOUR WHOLE ROUTE BACK AND FORTH, UP THE WALL TOO, AND YOU CAN STAND ON IT. WAIT AT THE START SO YOU CAN CATCH IT.",
@@ -1201,6 +1188,19 @@ def(7, "ESCALATOR", {
   g.fill(21, 4, 30, 14, "#");
   g.fill(28, 2, 28, 3, "X");
   g.set(5, 8, "L").set(12, 5, "L").set(24, 2, "L");
+});
+
+def(7, "KNOT", {
+  echoes: ["branch", "vine"], recMax: 20,
+  hint: "NO ROOM TO JUMP IN THE TUNNEL, AND NOWHERE TO STAND UNDER THE SHELF. A VINE GROWS FROM WHEREVER ITS ECHO STANDS, AND A BOUGH IS SOMEWHERE TO STAND.",
+}, (g) => {
+  g.base();
+  g.set(2, 14, "@");
+  g.fill(1, 1, 6, 12, "#");
+  g.pit(7, 11);
+  g.fill(12, 9, 30, 14, "#");
+  g.fill(28, 7, 28, 8, "X");
+  g.set(9, 6, "L").set(20, 4, "L");
 });
 
 def(7, "CANOPY", {

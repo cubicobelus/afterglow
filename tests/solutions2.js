@@ -402,48 +402,6 @@ SOLUTIONS["CRANE"] = () => {
 
 // ================================================================ tier 8: the garden (vine, mushrooms, roots)
 SOLUTIONS["SPROUT"] = SOLUTIONS["VINE"];
-SOLUTIONS["SPORE LIFT"] = () => {
-  // A running jump from the spawn lands on the mushroom with the jump key held: a big bounce. Stop recording a shade on the way down at the
-  // end of it. Bounce again a moment later and land on the shade, then jump from it onto the wall.
-  const bounce = (delay, stopWhen) => {
-    for (let i = 0; i < delay; i++) Bot.tick();
-    Bot.dir(1);
-    Bot.jumpKey(true);
-    let bounced = false;
-    for (let i = 0; i < 300; i++) {
-      if (G.p.vy < -600) bounced = true;
-      if (stopWhen && bounced && stopWhen()) { Bot.jumpKey(false); Bot.dir(0); Bot.stop(); return true; }
-      Bot.tick();
-      if (G.dead) Bot.fail("fell");
-      if (G.p.stand && G.p.stand.kind === "shade") return true;
-    }
-    return false;
-  };
-  Bot.record("shade");
-  Bot.expect(bounce(0, () => G.p.vy > 0 && G.p.y + PH >= 142 && Bot.px() > 225), "a shade hung at the end of the bounce");
-  settle("shade", 30);
-  Bot.run(2);
-  Bot.expect(bounce(10), "landing on the shade");
-  Bot.jumpKey(false);
-  Bot.dir(0);
-  Bot.jumpTo(300, 24);
-  Bot.expect(G.p.onGround && G.p.y + PH < 85, "up on the wall");
-  Bot.walkTo(570);
-};
-SOLUTIONS["ROOTWALK"] = () => {
-  // Hop from root ledge to root ledge without stopping.
-  Bot.walkTo(126, 3);
-  Bot.jumpTo(170, 18);
-  Bot.expect(G.p.onGround && G.p.y + PH < 265, "on the first root");
-  Bot.jumpTo(240, 24);
-  Bot.expect(G.p.onGround && G.p.y + PH < 225, "on the second roots");
-  Bot.jumpTo(310, 26);
-  Bot.expect(G.p.onGround && G.p.y + PH < 185, "on the third root");
-  Bot.jumpTo(400, 14);
-  Bot.expect(G.p.onGround && G.p.y + PH < 245, "on the fourth roots");
-  Bot.jumpTo(500, 20);
-  Bot.walkTo(570);
-};
 
 // Climb a vine: stand at its column, hold jump, and step sideways onto the ledge when the feet reach topY.
 const climbVine = (vineKey, topY, sideDir) => {
@@ -462,20 +420,26 @@ const climbVine = (vineKey, topY, sideDir) => {
   Bot.expect(G.p.onGround && Bot.feet() <= topY + 1, "on the ledge at " + topY);
 };
 
-SOLUTIONS["TWO VINES"] = () => {
-  // The first vine takes you to the shelf, where the second one is recorded. Both stay: the second grows up from the shelf.
-  recWait("vine", 328, 12);
-  Bot.record("vine2");
-  climbVine("vine", 180, 1);
-  Bot.walkTo(408, 3);
-  Bot.run(14);
-  Bot.stop();
-  climbVine("vine", 180, 1);
-  climbVine("vine2", 80, 1);
-  Bot.walkTo(570);
-};
 
 SOLUTIONS["HANGING VINE"] = () => {
+  // Lantern first: a vine recorded at the top of a jump off the roots grows from up there, nearly to the ceiling.
+  Bot.record("vine");
+  Bot.walkTo(176, 3);
+  Bot.jumpTo(224, 22);
+  Bot.walkTo(250, 2);
+  Bot.jumpKey(true);
+  for (let i = 0; i < 20; i++) Bot.tick();
+  Bot.jumpKey(false);
+  Bot.stop();
+  Bot.waitUntil(() => G.vines.length && G.vines[0].base - G.vines[0].top >= 118, 900, "the high vine to grow");
+  Bot.walkTo(176, 3);
+  Bot.jumpTo(224, 22);
+  Bot.walkTo(G.vines[0].x, 2);
+  Bot.jumpKey(true);
+  for (let i = 0; i < 300 && !G.lanternsGot; i++) { Bot.tick(); if (G.dead) Bot.fail("fell"); }
+  Bot.jumpKey(false);
+  Bot.expect(G.lanternsGot === 1, "the lantern up by the ceiling");
+  Bot.press("KeyR"); Bot.tick();
   // Jump onto the roots and record the vine at the wall within the time they hold. Later, wait for the vine to grow, hop onto the roots and
   // climb at once.
   Bot.record("vine");
@@ -499,22 +463,6 @@ SOLUTIONS["HANGING VINE"] = () => {
   Bot.dir(0);
   Bot.expect(G.p.onGround && Bot.feet() <= 121, "up on the wall");
   Bot.walkTo(570);
-};
-SOLUTIONS["GREEN DARK"] = () => {
-  // The vine takes you to the ledge; the glow is recorded up there beside the thorn bed, and lights it.
-  recWait("vine", 388, 12);
-  Bot.record("glow");
-  climbVine("vine", 180, 1);
-  Bot.walkTo(412, 3);
-  Bot.run(14);
-  Bot.stop();
-  climbVine("vine", 180, 1);
-  Bot.walkTo(412, 3);
-  settle("glow", 30);
-  Bot.dir(1);
-  for (let i = 0; i < 500 && !G.won; i++) { Bot.tick(); if (G.dead) Bot.fail("died on the thorns"); }
-  Bot.dir(0);
-  Bot.expect(G.won, "across the thorns");
 };
 SOLUTIONS["TREETOP"] = () => {
   // A running jump from the spawn onto the mushroom, jump held: a big bounce. Record the vine at the top of it, hanging in the air. When it has
@@ -548,35 +496,6 @@ SOLUTIONS["TREETOP"] = () => {
   Bot.jumpKey(false);
   Bot.dir(0);
   Bot.expect(G.p.onGround && Bot.feet() <= 61, "up on the high ledge");
-  Bot.walkTo(570);
-};
-SOLUTIONS["SPORE WIND"] = () => {
-  // A running jump from the spawn onto the mushroom, jump held, gives a big bounce. Record a gust at the top of it, facing right. Bounce again:
-  // the wind carries you the rest of the way to the ledge.
-  Bot.record("gust");
-  Bot.dir(1);
-  Bot.jumpKey(true);
-  let bounced = false;
-  for (let i = 0; i < 300; i++) {
-    if (G.p.vy < -600) bounced = true;
-    if (bounced && G.p.vy > -30) break;
-    Bot.tick();
-    if (G.dead) Bot.fail("fell");
-  }
-  Bot.jumpKey(false);
-  Bot.dir(0);
-  Bot.stop();
-  settle("gust", 40);
-  Bot.dir(1);
-  Bot.jumpKey(true);
-  for (let i = 0; i < 300; i++) {
-    Bot.tick();
-    if (G.dead) Bot.fail("fell in the pit");
-    if (i > 20 && G.p.onGround) break;
-  }
-  Bot.jumpKey(false);
-  Bot.dir(0);
-  Bot.expect(G.p.onGround && Bot.px() > 305, "on the ledge");
   Bot.walkTo(570);
 };
 SOLUTIONS["ESCALATOR"] = () => {
@@ -1520,3 +1439,84 @@ const flingTo = (fromX, relTh, done) => {
   Bot.fail("the throw never got there");
 };
 var RIG_REL = 0.8;
+
+// The Garden.
+SOLUTIONS["BOUGH"] = SOLUTIONS["BRANCH"];
+// A running jump from the bank onto the root.
+const rootHop = () => {
+  Bot.walkTo(70, 3);
+  Bot.dir(1);
+  for (let i = 0; i < 100 && Bot.px() < 134; i++) Bot.tick();
+  Bot.jumpTo(240, 24);
+};
+SOLUTIONS["ROOT BRIDGE"] = () => {
+  // Jump onto the root and record the branch there, facing the far bank, before it gives way. The bough stays when the root goes.
+  Bot.record("branch");
+  rootHop();
+  Bot.expect(G.p.stand && G.p.stand.kind === "root", "on the root");
+  Bot.walkTo(252, 2);
+  Bot.dir(1); Bot.tick(); Bot.dir(0);
+  Bot.run(4);
+  Bot.stop();
+  Bot.waitUntil(() => G.branches.length && G.branches[0].w >= 118, 900, "the bough to grow");
+  rootHop();
+  Bot.dir(1);
+  for (let i = 0; i < 200 && Bot.px() < 360; i++) { Bot.tick(); if (G.dead) Bot.fail("fell"); }
+  Bot.jumpKey(true);
+  for (let i = 0; i < 80 && !(i > 8 && G.p.onGround); i++) { if (i === 20) Bot.jumpKey(false); Bot.tick(); if (G.dead) Bot.fail("fell short"); }
+  Bot.jumpKey(false);
+  Bot.walkTo(570);
+};
+SOLUTIONS["TRELLIS"] = () => {
+  // A vine at the foot of the pillar; then, from the top of the pillar, a branch across to the ledge.
+  recWait("vine", 192, 12);
+  Bot.record("branch");
+  climbVine("vine", 180, 1);
+  Bot.walkTo(252, 2);
+  Bot.dir(1); Bot.tick(); Bot.dir(0);
+  Bot.run(6);
+  Bot.stop();
+  climbVine("vine", 180, 1);
+  Bot.waitUntil(() => G.branches.length && G.branches[0].w >= 118, 900, "the bough to grow");
+  Bot.dir(1);
+  for (let i = 0; i < 200 && Bot.px() < 362; i++) { Bot.tick(); if (G.dead) Bot.fail("fell"); }
+  Bot.jumpKey(true);
+  for (let i = 0; i < 80 && !(i > 8 && G.p.onGround); i++) { if (i === 20) Bot.jumpKey(false); Bot.tick(); if (G.dead) Bot.fail("fell short"); }
+  Bot.jumpKey(false);
+  Bot.walkTo(570);
+};
+SOLUTIONS["GREEN DARK"] = () => {
+  // The vine takes you up the left wall; the glow is recorded up there beside the thorn bed, and lights it.
+  recWait("vine", 288, 12);
+  Bot.record("glow");
+  climbVine("vine", 180, -1);
+  Bot.walkTo(248, 3);
+  Bot.run(14);
+  Bot.stop();
+  climbVine("vine", 180, -1);
+  Bot.walkTo(248, 3);
+  settle("glow", 30);
+  Bot.dir(-1);
+  for (let i = 0; i < 500 && !G.won; i++) { Bot.tick(); if (G.dead) Bot.fail("died on the thorns"); }
+  Bot.dir(0);
+  Bot.expect(G.won, "across the thorns");
+};
+SOLUTIONS["KNOT"] = () => {
+  // No room to jump in the tunnel: a branch from its mouth reaches under the shelf. A vine recorded standing at the end of the bough
+  // grows up the face of the shelf.
+  Bot.record("branch");
+  Bot.walkTo(134, 2);
+  Bot.dir(1); Bot.tick(); Bot.dir(0);
+  Bot.run(6);
+  Bot.stop();
+  Bot.waitUntil(() => G.branches.length && G.branches[0].w >= 100, 900, "the bough to grow");
+  Bot.record("vine");
+  Bot.waitUntil(() => G.branches.length && G.branches[0].w >= 100, 900, "the bough to grow");
+  Bot.walkTo(232, 2);
+  Bot.run(10);
+  Bot.stop();
+  Bot.waitUntil(() => G.branches.length && G.branches[0].w >= 100, 900, "the bough to grow");
+  Bot.walkTo(200, 3);
+  climbVine("vine", 180, 1);
+  Bot.walkTo(570);
+};
