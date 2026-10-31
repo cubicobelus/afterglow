@@ -1379,6 +1379,34 @@ def(9, "NIGHT STAIRS", {
   g.set(5, 8, "L").set(15, 3, "L").set(26, 1, "L");
 });
 
+def(9, "WAY BACK", {
+  unlock: "portal", echoes: ["portal", "portal"], recMax: 14,
+  hint: "THE DOOR BY THE EXIT WANTS THE PLATE DOWN BELOW, AND ONCE YOU DROP THERE IS NO CLIMBING BACK. PORTALS COME IN PAIRS: ONE LEFT UP HERE IS A WAY BACK.",
+}, (g) => {
+  g.base();
+  g.fill(13, 6, 28, 6, "#");
+  g.fill(12, 1, 12, 5, "#");
+  g.fill(18, 1, 18, 3, "#").fill(18, 4, 18, 5, "A");
+  g.set(25, 5, "@");
+  g.fill(14, 4, 14, 5, "X");
+  g.set(4, 14, "a");
+  g.set(6, 9, "L").set(22, 2, "L").set(26, 10, "L");
+});
+
+def(9, "KEYSTONE", {
+  echoes: ["shift", "shade"], recMax: 20,
+  hint: "A WALL OF GOLD HIDES THE PLATE. THE RING THAT OPENS IT HAS TO BE RECORDED STANDING AGAINST THE WALL. AN ECHO CAN HOLD A PLATE BUT NOT THE WALL OPEN, SO THE WALL NEEDS ITS OWN.",
+}, (g) => {
+  g.base();
+  g.set(5, 14, "@");
+  g.fill(1, 1, 2, 11, "#").fill(2, 12, 2, 14, "+").set(1, 14, "o");
+  g.fill(12, 1, 12, 14, "+");
+  g.set(15, 14, "a");
+  g.fill(21, 1, 21, 8, "#").fill(21, 9, 21, 14, "A");
+  g.fill(28, 13, 28, 14, "X");
+  g.set(5, 8, "L").set(16, 8, "L").set(25, 8, "L");
+});
+
 def(9, "THE SPAN", {
   echoes: ["shift"], recMax: 14, swap: true,
   hint: "THE DARK BRIDGE IS LONGER THAN ONE RING. WHAT YOU SWAP WITH TAKES YOUR PLACE, AND ITS RING GOES WITH IT, SO THE RING CAN BE LEAPT ALONG.",
@@ -1391,48 +1419,18 @@ def(9, "THE SPAN", {
   g.set(5, 8, "L").set(15, 5, "L").set(26, 8, "L");
 });
 
-def(9, "KEYSTONE", {
-  echoes: ["shift", "shade"], recMax: 20,
-  hint: "A WALL OF GOLD HIDES THE PLATE. THE RING THAT OPENS IT HAS TO BE RECORDED STANDING AGAINST THE WALL. AN ECHO CAN HOLD A PLATE BUT NOT THE WALL OPEN, SO THE WALL NEEDS ITS OWN.",
+def(9, "GOLD SEAL", {
+  echoes: ["shift", "portal", "portal"], recMax: 20,
+  hint: "ONE RING, TWO PLACES THAT NEED IT: THE BRIDGE AND THE GOLD WALL. ONCE THE BRIDGE IS BEHIND YOU, A PAIR OF PORTALS CAN TAKE YOU ACROSS IT AGAIN.",
 }, (g) => {
   g.base();
   g.set(2, 14, "@");
-  g.fill(12, 1, 12, 14, "+");
-  g.set(15, 14, "a");
-  g.fill(21, 1, 21, 8, "#").fill(21, 9, 21, 14, "A");
+  g.fill(7, 1, 15, 12, "#");
+  g.fill(9, 15, 13, 17, ".");
+  g.fill(9, 15, 13, 15, "*");
+  g.fill(22, 1, 22, 14, "+");
   g.fill(28, 13, 28, 14, "X");
-  g.set(5, 8, "L").set(16, 8, "L").set(25, 8, "L");
-});
-
-def(9, "ARCHWAY", {
-  echoes: ["shade", "calm", "shift"], recMax: 36,
-  hint: "THREE THINGS IN A ROW: A VENT, A DARK BRIDGE AND A DOOR WITH A PLATE. EACH ECHO HELPS YOU REACH WHERE THE NEXT ONE IS NEEDED.",
-}, (g) => {
-  g.base();
-  g.set(2, 14, "@");
-  g.pit(7, 8);
-  g.set(10, 14, "<");
-  g.fill(13, 15, 16, 17, ".");
-  g.fill(13, 15, 16, 15, "*");
-  g.set(21, 14, "a");
-  g.fill(25, 1, 25, 8, "#").fill(25, 9, 25, 14, "A");
-  g.fill(28, 13, 28, 14, "X");
-  g.set(4, 8, "L").set(11, 5, "L").set(19, 8, "L").set(27, 8, "L");
-});
-
-def(9, "LAMP HALL", {
-  echoes: ["shade", "glow", "calm"], recMax: 40, dark: true,
-  hint: "THORNS, A VENT AND A DOOR, IN THAT ORDER, AND AN ECHO FOR EACH. THE LIGHT HAS TO STAY CLEAR OF THE CALM: A CALM SILENCES LIGHT TOO.",
-}, (g) => {
-  g.base();
-  g.set(2, 14, "@");
-  g.fill(6, 14, 9, 14, "t");
-  g.pit(15, 16);
-  g.set(18, 14, "<");
-  g.set(22, 14, "a");
-  g.fill(26, 1, 26, 8, "#").fill(26, 9, 26, 14, "A");
-  g.fill(29, 13, 29, 14, "X");
-  g.set(4, 10, "L").set(13, 11, "L").set(21, 11, "L").set(28, 9, "L");
+  g.set(4, 9, "L").set(18, 7, "L").set(26, 8, "L");
 });
 
 def(9, "GILDED GLASS", {
@@ -1449,18 +1447,19 @@ def(9, "GILDED GLASS", {
   g.set(4, 8, "L").set(12, 4, "L").set(24, 8, "L");
 });
 
-def(9, "UNDERTOW", {
-  echoes: ["shade", "pull", "vine"], recMax: 40,
-  hint: "A WELL TO CROSS THE WATER, A VINE TO CLIMB THE WALL, AND A PLATE UP THERE FOR THE DOOR. EACH ONE IS RECORDED CROSSING WHAT THE LAST ONE OPENED.",
+def(9, "GOLDEN HOUR", {
+  echoes: ["shift", "shift"], recMax: 40, swap: true,
+  hint: "A LONG BRIDGE AND THEN A STAIRCASE, BOTH ONLY THERE IN A RING OF SHIFT. THE FIRST RING CAN BE LEAPT ACROSS THE BRIDGE BY SWAPPING. THE SECOND IS RECORDED AT THE STAIRS, AFTER YOU HAVE CROSSED.",
 }, (g) => {
   g.base();
   g.set(2, 14, "@");
-  g.pit(7, 12);
-  g.fill(17, 9, 30, 14, "#");
-  g.set(22, 8, "a");
-  g.fill(26, 1, 26, 4, "#").fill(26, 5, 26, 8, "A");
-  g.fill(29, 7, 29, 8, "X");
-  g.set(4, 8, "L").set(10, 4, "L").set(14, 8, "L");
+  g.fill(8, 15, 17, 17, ".");
+  g.fill(8, 15, 17, 15, "*");
+  g.fill(21, 12, 23, 12, "*");
+  g.fill(25, 9, 27, 9, "*");
+  g.fill(29, 6, 30, 14, "#");
+  g.fill(30, 4, 30, 5, "X");
+  g.set(5, 8, "L").set(13, 5, "L").set(20, 6, "L");
 });
 
 def(9, "THE FIRST LIGHT", {
@@ -1477,21 +1476,6 @@ def(9, "THE FIRST LIGHT", {
   g.fill(27, 9, 30, 14, "#");
   g.fill(29, 7, 29, 8, "X");
   g.set(4, 8, "L").set(10, 5, "L").set(16, 4, "L").set(24, 5, "L");
-});
-
-def(9, "GOLDEN HOUR", {
-  bonus: 20, echoes: ["shift", "shift"], recMax: 40, swap: true,
-  hint: "A LONG BRIDGE AND THEN A STAIRCASE, BOTH ONLY THERE IN A RING OF SHIFT. THE FIRST RING CAN BE LEAPT ACROSS THE BRIDGE BY SWAPPING. THE SECOND IS RECORDED AT THE STAIRS, AFTER YOU HAVE CROSSED.",
-}, (g) => {
-  g.base();
-  g.set(2, 14, "@");
-  g.fill(8, 15, 17, 17, ".");
-  g.fill(8, 15, 17, 15, "*");
-  g.fill(21, 12, 23, 12, "*");
-  g.fill(25, 9, 27, 9, "*");
-  g.fill(29, 6, 30, 14, "#");
-  g.fill(30, 4, 30, 5, "X");
-  g.set(5, 8, "L").set(13, 5, "L").set(20, 6, "L");
 });
 
 // ================================================================ the lab: one room per new echo (the benched ones last)

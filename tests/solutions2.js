@@ -670,6 +670,11 @@ SOLUTIONS["THE SPAN"] = () => {
   Bot.walkTo(570);
 };
 SOLUTIONS["KEYSTONE"] = () => {
+  // Lantern first: a ring recorded by the spawn opens the gold cupboard behind it.
+  recWait("shift", 70, 12);
+  settle("shift", 30);
+  Bot.walkTo(28);
+  Bot.expect(G.lanternsGot === 1, "the lantern in the cupboard");
   // Stand against the gold wall and record the ring: it opens the wall for as long as it stays. Then walk through and record a shade on the plate.
   recWait("shift", 228, 12);
   settle("shift", 30);
@@ -685,34 +690,6 @@ SOLUTIONS["KEYSTONE"] = () => {
 // Jump a gap from the current spot toward x (a player centre) holding the jump for `hold` ticks, and land.
 const leap = (x, hold) => Bot.jumpTo(x, hold === undefined ? 24 : hold);
 
-SOLUTIONS["ARCHWAY"] = () => {
-  // Calm at the vent gap, then the ring at the dark bridge (recorded after crossing the gap with the calm), then the shade on the plate.
-  recWait("calm", 130, 12);
-  Bot.record("shift");
-  settle("calm", 40);
-  Bot.walkTo(130, 3);
-  leap(198, 24);
-  walkThrough(250);
-  Bot.run(12);
-  Bot.stop();
-  Bot.record("shade");
-  settle("calm", 40);
-  settle("shift", 40);
-  Bot.walkTo(130, 3);
-  leap(198, 24);
-  walkThrough(250);
-  Bot.walkTo(420, 3);
-  Bot.run(12);
-  Bot.stop();
-  settle("calm", 40);
-  settle("shift", 40);
-  Bot.walkTo(130, 3);
-  leap(198, 24);
-  walkThrough(250);
-  Bot.walkTo(430, 3);
-  Bot.waitUntil(() => G.L.doorOpen.a, 900, "the door to open");
-  Bot.walkTo(570);
-};
 
 // ---------------------------------------------------------------- chains: levels made of stations in a row, each needing its own echo
 // A station has `key` (its echo slot), place() (go to where its echo is recorded, wait, stop recording) and pass() (get across it once its
@@ -753,17 +730,6 @@ const stPlate = (key, plateX, waitX) => ({
   pass() { Bot.walkTo(waitX, 3); },
 });
 
-SOLUTIONS["LAMP HALL"] = () => {
-  // Light the thorns, calm the vent, hold the plate: each recording is made crossing what the earlier ones opened.
-  runChain([
-    stThorns("glow", 110, 250),
-    stVent("calm", 15, 400),
-    stPlate("shade", 450, 470),
-  ], () => {
-    Bot.waitUntil(() => G.L.doorOpen.a, 900, "the door to open");
-    Bot.walkTo(592);
-  });
-};
 const stCrystal = (key, spotX, afterX) => ({
   key,
   place() { Bot.walkTo(spotX, 3); Bot.run(12); Bot.stop(); },
@@ -804,16 +770,6 @@ const stVine = (key, spotX, topY) => ({
   place() { Bot.walkTo(spotX, 3); Bot.run(12); Bot.stop(); },
   pass() { climbVine(key, topY, 1); },
 });
-SOLUTIONS["UNDERTOW"] = () => {
-  runChain([
-    stPull("pull", 140, 275),
-    stVine("vine", 328, 180),
-    stPlate("shade", 450, 500),
-  ], () => {
-    Bot.waitUntil(() => G.L.doorOpen.a, 900, "the door to open");
-    Bot.walkTo(590);
-  });
-};
 const stBridge2 = (key, pitCol, afterX) => ({
   key,
   place() { walkThrough(pitCol * 20 - 10, 3); Bot.run(12); Bot.stop(); },
@@ -1518,4 +1474,35 @@ SOLUTIONS["THE GRINDER"] = () => {
   Bot.waitUntil(() => { const a = ((bladeAngle(b) % Math.PI) + Math.PI) % Math.PI; return a > 0.35 && a < 0.5; }, 1500, "the blade to be clear of the vine");
   climbVine("vine", 180, 1);
   Bot.walkTo(572);
+};
+
+// The Foundation: portals.
+SOLUTIONS["WAY BACK"] = SOLUTIONS["PORTAL"];
+SOLUTIONS["GOLD SEAL"] = () => {
+  // The ring at the edge of the dark bridge to cross it. A portal beyond the bridge, and its twin by the spawn. Then the ring again, at the gold wall,
+  // reached through the portals because the bridge has gone.
+  recWait("shift", 174, 12);
+  settle("shift", 30);
+  Bot.record("portal");
+  settle("shift", 30);
+  Bot.walkTo(410, 3);
+  Bot.run(8);
+  Bot.stop();
+  recWait("portal2", 110, 10);
+  const through = () => {
+    Bot.waitUntil(() => portalOn(G.echoes.portal) && portalOn(G.echoes.portal2), 1200, "both portals");
+    // the portal by the spawn is on the way: walking right steps into it
+    Bot.dir(1);
+    for (let i = 0; i < 200 && Bot.px() < 300; i++) { Bot.tick(); if (G.dead) Bot.fail("fell"); }
+    Bot.dir(0);
+    Bot.expect(Bot.px() > 300, "through the portal");
+  };
+  Bot.record("shift");
+  through();
+  Bot.walkTo(428, 2);
+  Bot.run(10);
+  Bot.stop();
+  through();
+  settle("shift", 30);
+  Bot.walkTo(570);
 };
