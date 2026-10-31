@@ -1448,19 +1448,18 @@ def(9, "GILDED GLASS", {
   g.set(4, 8, "L").set(12, 4, "L").set(24, 8, "L");
 });
 
-def(9, "GOLDEN HOUR", {
-  echoes: ["shift", "shift"], recMax: 40, swap: true,
-  hint: "A LONG BRIDGE AND THEN A STAIRCASE, BOTH ONLY THERE IN A RING OF SHIFT. THE FIRST RING CAN BE LEAPT ACROSS THE BRIDGE BY SWAPPING. THE SECOND IS RECORDED AT THE STAIRS, AFTER YOU HAVE CROSSED.",
+def(9, "UNDERTOW", {
+  echoes: ["shade", "pull", "vine"], recMax: 40,
+  hint: "A WELL TO CROSS THE WATER, A VINE TO CLIMB THE WALL, AND A PLATE UP THERE FOR THE DOOR. EACH ONE IS RECORDED CROSSING WHAT THE LAST ONE OPENED.",
 }, (g) => {
   g.base();
   g.set(2, 14, "@");
-  g.fill(8, 15, 17, 17, ".");
-  g.fill(8, 15, 17, 15, "*");
-  g.fill(21, 12, 23, 12, "*");
-  g.fill(25, 9, 27, 9, "*");
-  g.fill(29, 6, 30, 14, "#");
-  g.fill(30, 4, 30, 5, "X");
-  g.set(5, 8, "L").set(13, 5, "L").set(20, 6, "L");
+  g.pit(7, 12);
+  g.fill(17, 9, 30, 14, "#");
+  g.set(22, 8, "a");
+  g.fill(26, 1, 26, 4, "#").fill(26, 5, 26, 8, "A");
+  g.fill(29, 7, 29, 8, "X");
+  g.set(4, 8, "L").set(10, 4, "L").set(14, 8, "L");
 });
 
 def(9, "THE FIRST LIGHT", {
@@ -1477,6 +1476,21 @@ def(9, "THE FIRST LIGHT", {
   g.fill(27, 9, 30, 14, "#");
   g.fill(29, 7, 29, 8, "X");
   g.set(4, 8, "L").set(10, 5, "L").set(16, 4, "L").set(24, 5, "L");
+});
+
+def(9, "GOLDEN HOUR", {
+  bonus: 20, echoes: ["shift", "shift"], recMax: 40, swap: true,
+  hint: "A LONG BRIDGE AND THEN A STAIRCASE, BOTH ONLY THERE IN A RING OF SHIFT. THE FIRST RING CAN BE LEAPT ACROSS THE BRIDGE BY SWAPPING. THE SECOND IS RECORDED AT THE STAIRS, AFTER YOU HAVE CROSSED.",
+}, (g) => {
+  g.base();
+  g.set(2, 14, "@");
+  g.fill(8, 15, 17, 17, ".");
+  g.fill(8, 15, 17, 15, "*");
+  g.fill(21, 12, 23, 12, "*");
+  g.fill(25, 9, 27, 9, "*");
+  g.fill(29, 6, 30, 14, "#");
+  g.fill(30, 4, 30, 5, "X");
+  g.set(5, 8, "L").set(13, 5, "L").set(20, 6, "L");
 });
 
 // ================================================================ the lab: one room per new echo (the benched ones last)
@@ -1669,7 +1683,6 @@ const PAR = {
   "LOOKING GLASS": { t: 55, r: 4 },
   "HALF OPEN": { t: 25, r: 1 },
   "SKYLIGHT": { t: 55, r: 3 },
-  "LONG CROSSING": { t: 45, r: 3 },
   "FERRY": { t: 25, r: 1 },
   "TRAMPOLINE": { t: 20, r: 1 },
   "SKYHOOK": { t: 20, r: 1 },
@@ -1702,7 +1715,6 @@ const PAR = {
   "STEP THROUGH": { t: 15, r: 1 },
   "SHAFT": { t: 20, r: 1 },
   "TURRET": { t: 25, r: 1 },
-  "WELLSPRING": { t: 20, r: 1 },
   "HATCH": { t: 25, r: 2 },
   "OPEN DOOR": { t: 20, r: 1 },
   "GRAZE": { t: 20, r: 1 },
@@ -1710,35 +1722,22 @@ const PAR = {
   "SURFACE LIGHT": { t: 20, r: 1 },
   "TWO TIERS": { t: 35, r: 2 },
   "GRAPPLE": { t: 20, r: 1 },
-  "SLOW BOAT": { t: 20, r: 0 },
   "CRANE": { t: 25, r: 1 },
-  "DELIVERY": { t: 35, r: 1 },
-  "HOIST": { t: 35, r: 1 },
-  "THE LONG HAUL": { t: 25, r: 1 },
   "BOUNCE WELL": { t: 25, r: 2 },
-  "WINDLASS": { t: 30, r: 2 },
   "SPROUT": { t: 25, r: 1 },
-  "SPORE LIFT": { t: 20, r: 1 },
-  "ROOTWALK": { t: 15, r: 0 },
-  "TWO VINES": { t: 45, r: 2 },
   "HANGING VINE": { t: 25, r: 1 },
   "GREEN DARK": { t: 45, r: 2 },
   "TREETOP": { t: 20, r: 1 },
-  "SPORE WIND": { t: 20, r: 1 },
   "ESCALATOR": { t: 45, r: 3 },
   "PAIR": { t: 30, r: 1 },
   "CLOSET": { t: 25, r: 1 },
   "TURNSTILE": { t: 35, r: 1 },
-  "SLIDING DOORS": { t: 30, r: 1 },
-  "TRIPLE": { t: 25, r: 2 },
   "THORN PAIR": { t: 35, r: 2 },
   "CLOCK TOWER": { t: 30, r: 1 },
   "THRESHOLD": { t: 20, r: 1 },
   "NIGHT STAIRS": { t: 40, r: 2 },
   "THE SPAN": { t: 25, r: 1 },
   "KEYSTONE": { t: 30, r: 2 },
-  "ARCHWAY": { t: 45, r: 3 },
-  "LAMP HALL": { t: 50, r: 3 },
   "GILDED GLASS": { t: 40, r: 3 },
   "UNDERTOW": { t: 55, r: 3 },
   "THE FIRST LIGHT": { t: 90, r: 4 },
@@ -1748,10 +1747,25 @@ const PAR = {
   "SALVAGE": { t: 70, r: 2 },
   "DOCKSIDE": { t: 130, r: 2 },
   "CANOPY": { t: 35, r: 2 },
-  "THE GRINDER": { t: 35, r: 1 },
   "DEEP END": { t: 35, r: 2 },
   "FOUR CORNERS": { t: 35, r: 2 },
   "GOLDEN HOUR": { t: 40, r: 2 },
+  "LONG CROSSING": { t: 65, r: 5 },
+  "PERISCOPE": { t: 25, r: 2 },
+  "SAFETY NET": { t: 40, r: 1 },
+  "ROPE": { t: 30, r: 1 },
+  "HAUL ACROSS": { t: 35, r: 2 },
+  "RIGGING": { t: 45, r: 1 },
+  "FLING": { t: 30, r: 2 },
+  "BOUGH": { t: 20, r: 1 },
+  "ROOT BRIDGE": { t: 25, r: 1 },
+  "TRELLIS": { t: 35, r: 2 },
+  "KNOT": { t: 35, r: 2 },
+  "MILLSTONE": { t: 25, r: 1 },
+  "LONG SHUTTER": { t: 30, r: 1 },
+  "THE GRINDER": { t: 30, r: 2 },
+  "WAY BACK": { t: 35, r: 2 },
+  "GOLD SEAL": { t: 40, r: 4 },
 };
 for (const l of LEVELS) l.par = PAR[l.name];
 

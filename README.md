@@ -17,11 +17,11 @@ To run it offline, download the repo and open `index.html` from a local web serv
 
 Press **E** to start recording and **E** again to stop. You go back to the start and your echo walks the path you
 just took, then stays wherever you stopped, even in mid-jump, so a frozen jump makes a stepping stone in the air.
-Each slot along the bottom of the screen holds one echo, and an echo's power switches on once it comes to rest. While you record, a dashed ring shows how far that power will reach where you stop. Slots always appear in the same order (shade, glow, phase, flip, tide, spring, gust), so the numbers never tell you what to record first.
+Each slot along the bottom of the screen holds one echo, and an echo's power switches on once it comes to rest. While you record, a dashed ring shows how far that power will reach where you stop. Slots always appear in the same order (shade, glow, phase, flip, tide, spring, gust, and so on), so the numbers never tell you what to record first.
 Later levels give you several slots, sometimes two or three of the same kind. An echo does not care about walls or
 glass, so one you no longer need can be recorded again somewhere else.
 
-The game has 43 levels in five tiers, each with its own scenery, and a second page of levels is on the way. Every echo gets one or two easy levels, then the
+The game has 100 levels in ten tiers on two pages: The Tower climbs to the lamp, The Reflection goes down through the drowned half of it. Each tier has its own scenery, teaches two new echoes (or one and an ability), and ends with a bonus level that opens once you have 20 stars in that tier. Every echo gets one or two easy levels, then the
 tiers mix them and climb to levels where the order matters, an echo has to be recorded again halfway through, and
 what you recorded earlier can carry you or lead you through doors.
 
@@ -34,8 +34,20 @@ what you recorded earlier can carry you or lead you through doors.
 | Tide | Replays its path back and forth forever, waiting where you waited. Ride it like a ferry or a lift. |
 | Spring | Bounces you high when you land on it. Hold jump for a bigger bounce. |
 | Gust | Blows a wind the way it was facing, which carries a jump much farther. |
+| Calm | Silences every other echo power, and the wind vents, inside its ring. |
+| Mirror | Replays your path flipped left to right, starting on the other side of the room. |
+| Beam | Shoots a ray of light the way it faced: it opens gates, withers thorns and lights planks along its whole length. |
+| Reflector | A mirror that turns a beam round a corner, from an echo or from a turret in the wall. |
+| Pull | Draws you in and holds you, like a well, even in mid-air. |
+| Swing | Hangs a rope below itself. Swing on it and let go to be thrown far. |
+| Vine | Grows a column up from its feet. Hold jump to climb. |
+| Branch | Grows a bough sideways from its feet, the way it faced. |
+| Fork | One recording makes two echoes: the first, and a twin that follows a few seconds later. |
+| Slow | Time crawls inside its ring: other echoes, blades, clock doors and cargo platforms. |
+| Shift | Inside its ring gold blocks vanish and dark blocks appear. |
+| Portal | Portals come in pairs: walk into one and you come out of the other, still moving. |
 
-**Swap** is an ability, not an echo. Press **Q** to trade places with the picked echo, whatever kind it is: you appear where it was, and it stays where you were. It is switched on in every level of the fifth tier, The Mirror, and nowhere else. Those levels show a swap sign beside the level name and on the level select. A small clock beside the level name starts with your first move.
+**Swap** is an ability, not an echo. Press **Q** to trade places with the picked echo, whatever kind it is: you appear where it was, and it stays where you were. It is switched on in every level of the fifth tier, The Mirror, and in a few later levels. Those levels show a swap sign beside the level name and on the level select. A small clock beside the level name starts with your first move.
 
 Every level also scores up to three stars: finishing it, beating its par time, and using no more recordings than
 its par. A few levels hide a lantern worth finding.
@@ -47,7 +59,7 @@ its par. A few levels hide a lantern worth finding.
 | Move | Arrow keys or A and D |
 | Jump | Space, Up or W |
 | Record, stop | E, K or a mouse click |
-| Pick an echo slot | 1 to 7 |
+| Pick an echo slot | Number keys |
 | Swap places with the picked echo (The Mirror) | Q |
 | Restart the attempt | R |
 | Clear the picked echo | X |

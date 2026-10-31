@@ -18,7 +18,7 @@ const App = (() => {
   // ---------------------------------------------------------------- save
   const SAVE_KEY = "afterglow.save";
   const SETTINGS_KEY = "afterglow.settings";
-  const SAVE_VERSION = 17;
+  const SAVE_VERSION = 18;
   let save = { done: [], best: {}, stars: {}, lanterns: {}, seen: {} };
   let hadSave = false;
   try {
@@ -108,6 +108,21 @@ const App = (() => {
         "SKYLIGHT", "TRAMPOLINE", "SKYHOOK", "STAGECOACH", "SLINGSHOT", "FERRY", "TWO STAGES", "SLUICE", "FERRY LIGHT", "PUMP ROOM", "LONG CROSSING",
         "BREEZE", "SAIL", "GALLOP", "WEATHERVANE", "UP AND OVER", "AFTERIMAGE", "CHORUS", "LEAPFROG", "STAY BEHIND", "APEX", "UPSIDE DOWN",
         "GLASS CEILING", "NIGHT TRAIN", "SHALLOWS TEMP", "WRECK TEMP", "GARDEN TEMP", "TRENCH TEMP", "FOUNDATION TEMP"],
+      // v17: the first 100-level build (pushed as 2cb1300), lab rooms included.
+      17: ["FIRST STEPS", "THE PLATE", "STEPPING STONE", "TWIN PLATES", "STAIRCASE", "LAMPLIGHT", "SUNKEN GATE", "GATEHOUSE",
+        "RELAY", "SWITCHBOARD", "GLASS WALL", "UNDER GLASS", "THREE PANES", "GHOST GLASS", "OVERHEAD", "CEILING PLATE",
+        "LOOKING GLASS", "HALF OPEN", "HALL OF MIRRORS", "SKYLIGHT", "TRAMPOLINE", "SKYHOOK", "STAGECOACH", "SLINGSHOT",
+        "FERRY", "TWO STAGES", "SLUICE", "FERRY LIGHT", "PUMP ROOM", "LONG CROSSING", "BREEZE", "SAIL",
+        "STILL AIR", "SLACK WATER", "GALLOP", "WEATHERVANE", "UP AND OVER", "AFTERIMAGE", "CHORUS", "WINDFALL",
+        "REFLECTION", "OTHER SIDE", "LEAPFROG", "STAY BEHIND", "APEX", "UPSIDE DOWN", "GLASS CEILING", "STEP THROUGH",
+        "NIGHT TRAIN", "OVER THE WALL", "SHAFT", "TURRET", "WELLSPRING", "HATCH", "OPEN DOOR", "GRAZE",
+        "STAIRWELL", "SURFACE LIGHT", "TWO TIERS", "PULSE", "GRAPPLE", "SLOW BOAT", "CRANE", "DELIVERY",
+        "HOIST", "THE LONG HAUL", "BOUNCE WELL", "WINDLASS", "SALVAGE", "DOCKSIDE", "SPROUT", "ROOTWALK",
+        "SPORE LIFT", "HANGING VINE", "SPORE WIND", "TWO VINES", "TREETOP", "GREEN DARK", "ESCALATOR", "CANOPY",
+        "PAIR", "CLOSET", "SLIDING DOORS", "TURNSTILE", "THE GRINDER", "TRIPLE", "THORN PAIR", "CLOCK TOWER",
+        "DEEP END", "FOUR CORNERS", "THRESHOLD", "NIGHT STAIRS", "THE SPAN", "KEYSTONE", "ARCHWAY", "LAMP HALL",
+        "GILDED GLASS", "UNDERTOW", "THE FIRST LIGHT", "GOLDEN HOUR", "CALM", "MIRROR", "VINE", "PULL",
+        "BEAM", "REFLECTOR", "FORK", "SHIFT", "FLOAT", "SLOW", "SHRINK"],
     };
     // Same name but a different puzzle now: the old result no longer applies.
     const REDESIGNED = {
@@ -127,6 +142,7 @@ const App = (() => {
       14: { "LOOKING GLASS": true, "SKYLIGHT": true },
       15: {},
       16: {},
+      17: { "GREEN DARK": true, "THE GRINDER": true, "LONG CROSSING": true },
     };
     // The level is the same but its lantern moved, so the old pickup no longer counts.
     // Value: the save version in which the lantern moved; older saves lose that pickup.

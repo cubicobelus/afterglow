@@ -1506,3 +1506,14 @@ SOLUTIONS["GOLD SEAL"] = () => {
   settle("shift", 30);
   Bot.walkTo(570);
 };
+
+SOLUTIONS["UNDERTOW"] = () => {
+  runChain([
+    stPull("pull", 140, 275),
+    stVine("vine", 328, 180),
+    stPlate("shade", 450, 500),
+  ], () => {
+    Bot.waitUntil(() => G.L.doorOpen.a, 900, "the door to open");
+    Bot.walkTo(590);
+  });
+};
