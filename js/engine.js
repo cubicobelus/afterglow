@@ -781,7 +781,8 @@ function swingStep(p, dir, jumpPressed, g, Z) {
   const cx = p.x + p.w / 2, cy = p.y + p.h / 2;
   if (!r) {
     if (p.onGround || p.ropeCd > 0 || g < 0) return false;
-    const q = Z.ropes.find((q) => Math.abs(cx - q.x) < 7 && cy > q.y + 12 && cy < q.y + q.len + 4);
+    // anywhere along the rope, even right at the echo it hangs from (you slide down to the end)
+    const q = Z.ropes.find((q) => Math.abs(cx - q.x) < 8 && cy > q.y - 10 && cy < q.y + q.len + 4);
     if (!q) return false;
     const len = Math.max(24, Math.min(q.len, cy - q.y));
     const th = Math.asin(Math.max(-1, Math.min(1, (cx - q.x) / len)));

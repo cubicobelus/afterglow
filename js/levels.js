@@ -963,20 +963,35 @@ def(6, "GRAPPLE", {
   g.base();
   g.set(2, 14, "@");
   g.pit(9, 14);
+  g.set(11, 14, "o");
   g.fill(28, 13, 28, 14, "X");
   g.set(5, 8, "L").set(13, 5, "L").set(24, 8, "L");
 });
 
-def(6, "SLOW BOAT", {
-  autoHint: true, echoes: [],
-  hint: "THE CARGO PLATFORM RUNS BACK AND FORTH ON ITS OWN. HOP ON WHEN IT COMES, AND OFF WHEN IT ARRIVES.",
+def(6, "SAFETY NET", {
+  echoes: ["pull"], recMax: 10,
+  hint: "THE CARGO PLATFORM NEVER COMES CLOSE ENOUGH TO JUMP ON. A WELL OVER THE WATER CAN HOLD YOU UNTIL IT DOES.",
 }, (g) => {
   g.base();
   g.set(2, 14, "@");
-  g.pit(7, 16);
-  g.mover(6, 15, 14, 15, 3, { sp: 40, dwell: 60 });
+  g.pit(7, 24);
+  g.mover(13, 15, 22, 15, 3, { sp: 40, dwell: 60 });
   g.fill(28, 13, 28, 14, "X");
-  g.set(4, 8, "L").set(12, 5, "L").set(23, 8, "L");
+  g.set(4, 8, "L").set(11, 5, "L").set(19, 5, "L").set(27, 8, "L");
+});
+
+def(6, "ROPE", {
+  unlock: "swing", echoes: ["swing"], recMax: 8,
+  hint: "THE DROP IS FAR TOO WIDE. JUMP OFF THE LEDGE AND RECORD A SWING ON THE WAY DOWN: ITS ROPE HANGS BELOW IT. JUMP ON, SWING WITH LEFT AND RIGHT, JUMP TO LET GO.",
+}, (g) => {
+  g.base();
+  g.fill(1, 6, 7, 6, "#");
+  g.set(2, 5, "@");
+  g.pit(1, 22);
+  g.fill(23, 9, 30, 14, "#");
+  g.fill(28, 7, 28, 8, "X");
+  g.set(4, 9, "o");
+  g.set(4, 2, "L").set(14, 4, "L").set(26, 5, "L");
 });
 
 def(6, "CRANE", {
@@ -993,43 +1008,6 @@ def(6, "CRANE", {
   g.set(8, 8, "L").set(16, 5, "L").set(26, 8, "L");
 });
 
-def(6, "DELIVERY", {
-  echoes: ["spring"], recMax: 24,
-  hint: "THE WALL OVER THERE IS TOO HIGH TO CLIMB, AND THE SPRING THAT WOULD THROW YOU UP IT HAS TO BE ON THE OTHER SIDE OF THE WATER.",
-}, (g) => {
-  g.base();
-  g.set(2, 14, "@");
-  g.pit(7, 16);
-  g.mover(6, 15, 14, 15, 3, { sp: 40, dwell: 60 });
-  g.fill(24, 6, 30, 14, "#");
-  g.fill(28, 4, 28, 5, "X");
-  g.set(4, 8, "L").set(12, 5, "L").set(21, 4, "L");
-});
-
-def(6, "HOIST", {
-  autoHint: true, echoes: ["shade"], recMax: 20,
-  hint: "THE LIFT STOPS A LONG WAY BELOW THE LEDGE. AN ECHO CAN HANG IN THE AIR WHERE THE LIFT TOOK YOU, LONG AFTER THE LIFT HAS GONE.",
-}, (g) => {
-  g.base();
-  g.set(2, 14, "@");
-  g.mover(8, 15, 8, 8, 3, { sp: 40, dwell: 90 });
-  g.fill(12, 4, 30, 14, "#");
-  g.fill(28, 2, 28, 3, "X");
-  g.set(4, 8, "L").set(7, 3, "L").set(22, 2, "L");
-});
-
-def(6, "THE LONG HAUL", {
-  autoHint: true, echoes: ["pull"], recMax: 20,
-  hint: "THE CARGO PLATFORM CARRIES YOU PART OF THE WAY. YOU CAN RECORD WHILE YOU RIDE IT. JUMP OFF AT THE FAR END AND STOP IN MID AIR.",
-}, (g) => {
-  g.base();
-  g.set(2, 14, "@");
-  g.pit(6, 17);
-  g.mover(5, 15, 9, 15, 3, { sp: 40, dwell: 60 });
-  g.fill(28, 13, 28, 14, "X");
-  g.set(4, 8, "L").set(12, 5, "L").set(24, 8, "L");
-});
-
 def(6, "BOUNCE WELL", {
   echoes: ["spring", "pull"], recMax: 20,
   hint: "THE SPRING THROWS YOU HIGH ENOUGH BUT NOT FAR ENOUGH. A PULL HUNG AT THE TOP OF THE BOUNCE WILL HOLD YOU THERE WHILE YOU DRIFT ACROSS.",
@@ -1042,15 +1020,45 @@ def(6, "BOUNCE WELL", {
   g.set(4, 8, "L").set(9, 4, "L").set(22, 3, "L");
 });
 
-def(6, "WINDLASS", {
-  echoes: ["pull", "pull"], recMax: 24,
-  hint: "ONE WELL REACHES ONLY HALF WAY. THE SECOND ONE HAS TO BE HUNG WHERE THE FIRST ONE LETS GO OF YOU.",
+def(6, "HAUL ACROSS", {
+  echoes: ["swing", "shade"], recMax: 16,
+  hint: "THE PLATE IS ACROSS THE DROP, AND THE DOOR IT OPENS IS RIGHT BESIDE IT. WHATEVER HOLDS THE PLATE HAS TO CROSS THE WAY YOU DO.",
+}, (g) => {
+  g.base();
+  g.fill(1, 6, 7, 6, "#");
+  g.set(2, 5, "@");
+  g.pit(1, 22);
+  g.fill(23, 9, 30, 14, "#");
+  g.set(25, 8, "a");
+  g.fill(27, 1, 27, 6, "#").fill(27, 7, 27, 8, "A");
+  g.fill(29, 7, 29, 8, "X");
+  g.set(4, 2, "L").set(14, 4, "L").set(25, 4, "L");
+});
+
+def(6, "RIGGING", {
+  echoes: ["swing"], recMax: 16,
+  hint: "THE CEILING IS TOO LOW TO JUMP UNTIL THE PLATFORM HAS CARRIED YOU OUT. A ROPE IS RECORDED WHERE YOU LEFT IT, EVEN IN MID AIR.",
+}, (g) => {
+  g.base();
+  g.fill(1, 9, 5, 14, "#");
+  g.set(2, 8, "@");
+  g.fill(1, 1, 14, 6, "#");
+  g.pit(6, 26);
+  g.mover(6, 9, 13, 9, 3, { sp: 40, dwell: 60 });
+  g.fill(27, 9, 30, 14, "#");
+  g.fill(29, 7, 29, 8, "X");
+  g.set(3, 7, "L").set(18, 4, "L").set(28, 4, "L");
+});
+
+def(6, "FLING", {
+  echoes: ["pull", "swing"], recMax: 16,
+  hint: "THE FAR BANK IS FURTHER THAN ANY ROPE YOU CAN HANG FROM THE EDGE CAN THROW YOU. A WELL CARRIES YOU OUT TO WHERE A ROPE CAN HANG.",
 }, (g) => {
   g.base();
   g.set(2, 14, "@");
-  g.pit(6, 16);
-  g.fill(28, 13, 28, 14, "X");
-  g.set(5, 8, "L").set(11, 4, "L").set(24, 8, "L");
+  g.pit(7, 28);
+  g.fill(30, 13, 30, 14, "X");
+  g.set(4, 8, "L").set(12, 4, "L").set(22, 4, "L").set(28, 8, "L");
 });
 
 def(6, "SALVAGE", {
