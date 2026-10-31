@@ -1243,20 +1243,16 @@ def(8, "CLOSET", {
   g.set(8, 10, "L").set(3, 12, "L").set(20, 10, "L");
 });
 
-def(8, "SLIDING DOORS", {
-  echoes: ["shade"], recMax: 16, dark: true,
-  hint: "T DOORS ARE SHUT FOR THE FIRST HALF OF EVERY FIVE SECONDS AND U DOORS FOR THE SECOND HALF. THE LAST DOOR WANTS A PLATE HELD, AND THE PLATE IS IN THE FIRST ROOM.",
+def(8, "MILLSTONE", {
+  unlock: "slow", echoes: ["slow"], recMax: 10, dark: true,
+  hint: "THE BLADE IN THE TUNNEL TURNS TOO FAST TO GET PAST. RECORD A SLOW RING NEAR IT: INSIDE THE RING, TIME CRAWLS.",
 }, (g) => {
   g.base();
   g.set(2, 14, "@");
-  g.fill(6, 1, 26, 11, "#");
-  g.fill(9, 12, 9, 14, "T");
-  g.set(11, 14, "a");
-  g.fill(13, 12, 13, 14, "U");
-  g.fill(17, 12, 17, 14, "T");
-  g.fill(22, 12, 22, 14, "A");
+  g.fill(8, 1, 22, 11, "#");
+  g.blade(15, 13, 26, 6, 0);
   g.fill(28, 13, 28, 14, "X");
-  g.set(3, 9, "L").set(11, 12, "L").set(19, 12, "L").set(24, 12, "L");
+  g.set(4, 9, "L").set(12, 13, "L").set(25, 9, "L");
 });
 
 def(8, "TURNSTILE", {
@@ -1274,30 +1270,6 @@ def(8, "TURNSTILE", {
   g.set(3, 9, "L").set(22, 10, "L").set(26, 8, "L");
 });
 
-def(8, "THE GRINDER", {
-  echoes: ["vine"], recMax: 40, dark: true,
-  hint: "THE VINE GROWS AT THE FOOT OF THE WALL, AND THE BLADE SWEEPS THE VINE ON EVERY TURN. CLIMB WHILE IT IS ON THE FAR SIDE.",
-}, (g) => {
-  g.base();
-  g.set(2, 14, "@");
-  g.fill(18, 9, 30, 14, "#");
-  g.fill(28, 7, 28, 8, "X");
-  g.blade(15, 11, 40, 2.0, 0);
-  g.set(4, 10, "L").set(9, 9, "L").set(15, 14, "L").set(24, 6, "L");
-});
-
-def(8, "TRIPLE", {
-  echoes: ["shade", "fork"], recMax: 24, dark: true,
-  hint: "THREE PLATES, ONE DOOR, AND NOT ENOUGH OF YOU. ONE RECORDING CAN BE IN TWO PLACES, BUT THE SECOND ONLY LATER.",
-}, (g) => {
-  g.base();
-  g.set(2, 14, "@");
-  g.set(4, 14, "a").set(7, 14, "a").set(10, 14, "a");
-  g.fill(15, 1, 15, 8, "#").fill(15, 9, 15, 14, "A");
-  g.fill(28, 13, 28, 14, "X");
-  g.set(5, 10, "L").set(12, 10, "L").set(22, 8, "L");
-});
-
 def(8, "THORN PAIR", {
   echoes: ["glow", "fork"], recMax: 24, dark: true,
   hint: "THE THORNS NEED LIGHT, THE DOOR NEEDS TWO PLATES, AND THE PLATES ARE FAR APART. THE TWIN COVERS THE FIRST ONE WHILE YOU ARE AT THE SECOND.",
@@ -1310,6 +1282,29 @@ def(8, "THORN PAIR", {
   g.fill(17, 1, 17, 8, "#").fill(17, 9, 17, 14, "A");
   g.fill(28, 13, 28, 14, "X");
   g.set(2, 9, "L").set(24, 8, "L");
+});
+
+def(8, "LONG SHUTTER", {
+  echoes: ["slow"], recMax: 10, dark: true, clockOpen: 30,
+  hint: "THE CLOCK DOOR IS FOUR TILES THICK AND OPENS FOR HALF A SECOND, AND IT CRUSHES WHAT IS INSIDE WHEN IT SHUTS. SLOWED, IT STAYS OPEN LONGER.",
+}, (g) => {
+  g.base();
+  g.set(2, 14, "@");
+  g.fill(13, 1, 16, 12, "#").fill(13, 13, 16, 14, "T");
+  g.fill(28, 13, 28, 14, "X");
+  g.set(5, 9, "L").set(11, 12, "L").set(24, 9, "L");
+});
+
+def(8, "THE GRINDER", {
+  echoes: ["vine", "slow"], recMax: 40, dark: true,
+  hint: "THE BLADE SWEEPS THE VINE FAR TOO OFTEN TO CLIMB PAST IT. TIME RUNS SLOW INSIDE A SLOW RING, FOR BLADES TOO.",
+}, (g) => {
+  g.base();
+  g.set(2, 14, "@");
+  g.fill(18, 9, 30, 14, "#");
+  g.fill(28, 7, 28, 8, "X");
+  g.blade(15, 11, 40, 12, 0);
+  g.set(4, 10, "L").set(9, 9, "L").set(15, 14, "L").set(24, 6, "L");
 });
 
 def(8, "CLOCK TOWER", {
@@ -1646,8 +1641,8 @@ def(10, "FLOAT", {
 });
 
 def(10, "SLOW", {
-  lab: true, benched: true, unlock: "slow", echoes: ["tide", "slow"], recMax: 14,
-  hint: "BENCHED. THE DOOR OPENS ONLY WHILE THE TIDE PASSES OVER THE PLATE, AND IT IS FAR TOO THICK TO CROSS IN THAT TIME. A SLOW RING MAKES THE TIDE LINGER.",
+  lab: true, unlock: "slow", echoes: ["tide", "slow"], recMax: 14,
+  hint: "THE DOOR OPENS ONLY WHILE THE TIDE PASSES OVER THE PLATE, AND IT IS FAR TOO THICK TO CROSS IN THAT TIME. A SLOW RING MAKES THE TIDE LINGER.",
 }, (g) => {
   g.base();
   g.set(2, 14, "@");

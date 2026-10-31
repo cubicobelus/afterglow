@@ -571,33 +571,6 @@ const throughTimed = (kind, xBefore, xAfter) => {
   Bot.dir(0);
 };
 
-SOLUTIONS["SLIDING DOORS"] = () => {
-  // The plate is in the first room: slip through the first door when it opens, record a shade on the plate. Then walk the rooms in order, waiting
-  // in each for the next door's turn.
-  Bot.record("shade");
-  throughTimed("T", 172, 230);
-  Bot.walkTo(230, 3);
-  Bot.run(24);
-  Bot.stop();
-  throughTimed("T", 172, 250);
-  throughTimed("U", 250, 310);
-  throughTimed("T", 310, 400);
-  Bot.walkTo(570);
-};
-SOLUTIONS["TRIPLE"] = () => {
-  // The shade holds the third plate. The fork holds the first for a long while, then goes to the second: its twin takes over the first for a time
-  // while the original sits on the second, so for about two seconds all three are held.
-  recWait("shade", 210, 12);
-  Bot.record("fork");
-  Bot.walkTo(90, 3);
-  Bot.run(170);
-  Bot.walkTo(150, 3);
-  Bot.run(20);
-  Bot.stop();
-  Bot.walkTo(290, 3);
-  Bot.waitUntil(() => G.L.doorOpen.a, 900, "the door to open");
-  Bot.walkTo(570);
-};
 SOLUTIONS["THORN PAIR"] = () => {
   // The glow by the thorn bed lights it. The fork stays on the first plate for a long while, crosses the lit bed and stops on the second plate: the
   // twin is on the first while the original is on the second, and the door opens.
@@ -876,15 +849,6 @@ SOLUTIONS["SALVAGE"] = () => {
     Bot.waitUntil(() => G.L.doorOpen.a, 900, "the door to open");
     Bot.walkTo(592);
   });
-};
-SOLUTIONS["THE GRINDER"] = () => {
-  // The blade sweeps the vine twice a turn. Wait at the foot until it has just gone past, then climb.
-  recWait("vine", 348, 12);
-  Bot.waitUntil(() => G.vines.length && G.vines[0].base - G.vines[0].top >= 118, 900, "the vine to grow");
-  Bot.walkTo(348, 2);
-  Bot.waitUntil(() => { const k = G.t % 300; return k >= 30 && k < 38; }, 900, "the blade to be clear of the vine");
-  climbVine("vine", 180, 1);
-  Bot.walkTo(572);
 };
 SOLUTIONS["DEEP END"] = () => {
   // The glow lights the thorns. The fork is recorded crossing them and the clock door: stay on the first plate a long while, then move to the
@@ -1519,4 +1483,39 @@ SOLUTIONS["KNOT"] = () => {
   Bot.walkTo(200, 3);
   climbVine("vine", 180, 1);
   Bot.walkTo(570);
+};
+
+// The Trench: slow.
+SOLUTIONS["MILLSTONE"] = () => {
+  // A slow ring beside the blade: it turns at a crawl inside it, and there is time to pass while it is level.
+  recWait("slow", 240, 10);
+  settle("slow", 40);
+  Bot.walkTo(262, 2);
+  const b = G.L.blades[0];
+  Bot.waitUntil(() => { const a = ((bladeAngle(b) % Math.PI) + Math.PI) % Math.PI; return a > 2.75; }, 1500, "the blade to come level");
+  Bot.dir(1);
+  for (let i = 0; i < 200 && Bot.px() < 360; i++) { Bot.tick(); if (G.dead) Bot.fail("hit by the blade"); }
+  Bot.walkTo(570);
+};
+SOLUTIONS["LONG SHUTTER"] = () => {
+  // A slow ring in front of the thick clock door holds its clock back, so it stays open long enough to walk through.
+  recWait("slow", 250, 10);
+  settle("slow", 40);
+  Bot.walkTo(250, 2);
+  Bot.waitUntil(() => !doorShut(G.L.timed[0]), 3000, "the door to open");
+  Bot.dir(1);
+  for (let i = 0; i < 300 && Bot.px() < 360; i++) { Bot.tick(); if (G.dead) Bot.fail("crushed by the door"); }
+  Bot.walkTo(570);
+};
+SOLUTIONS["THE GRINDER"] = () => {
+  // The blade sweeps the vine every few ticks. A slow ring near its hub makes it crawl; climb just after it has gone past.
+  recWait("vine", 348, 12);
+  recWait("slow", 300, 10);
+  settle("slow", 40);
+  Bot.waitUntil(() => G.vines.length && G.vines[0].base - G.vines[0].top >= 118, 900, "the vine to grow");
+  Bot.walkTo(348, 2);
+  const b = G.L.blades[0];
+  Bot.waitUntil(() => { const a = ((bladeAngle(b) % Math.PI) + Math.PI) % Math.PI; return a > 0.35 && a < 0.5; }, 1500, "the blade to be clear of the vine");
+  climbVine("vine", 180, 1);
+  Bot.walkTo(572);
 };

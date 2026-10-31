@@ -1275,8 +1275,9 @@ const Render = (() => {
 
   // A door that opens and shuts on a clock: T starts shut (amber), U starts open (blue). It flickers just before it changes.
   function drawTimed(ctx, d, t) {
-    const shut = doorShut(d), cyc = d.grp.clk % TIMED_P, half = TIMED_P / 2;
-    const left = cyc < half ? half - cyc : TIMED_P - cyc;
+    const shut = doorShut(d), cyc = d.grp.clk % TIMED_P;
+    const turn = d.kind === "T" ? TIMED_P - ((G.L && G.L.clockOpen) || TIMED_P / 2) : TIMED_P / 2;
+    const left = cyc < turn ? turn - cyc : TIMED_P - cyc;
     const warn = left < 28 && Math.floor(left / 4) % 2 === 0;
     const col = d.kind === "T" ? "#ffb347" : "#6fd0ff";
     ctx.save();

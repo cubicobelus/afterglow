@@ -168,7 +168,7 @@ function parseLevel(which) {
   const rows = g.rows();
   const L = {
     idx, def, name: def.name, chapter: def.chapter, dark: !!def.dark,
-    echoes: (def.echoes || []).slice().sort((a, b) => KIND_ORDER.indexOf(a) - KIND_ORDER.indexOf(b)), recMax: def.recMax || 10, swap: !!def.swap, hint: def.hint || "",
+    echoes: (def.echoes || []).slice().sort((a, b) => KIND_ORDER.indexOf(a) - KIND_ORDER.indexOf(b)), recMax: def.recMax || 10, swap: !!def.swap, hint: def.hint || "", clockOpen: def.clockOpen || 0,
     rows, walls: [], doorTiles: [], plates: [], planks: [], crystals: [], spikes: [], thorns: [], lamps: [],
     oneways: [], gates: [], lanterns: [], halves: [], vents: [], emitters: [], shiftL: [], shiftD: [],
     updrafts: [], mushrooms: [], roots: [], timed: [], movers: [], blades: [],
@@ -273,11 +273,12 @@ function moverAt(m, t) {
   return { x: m.x0 + (m.x1 - m.x0) * s, y: m.y0 + (m.y1 - m.y0) * s };
 }
 
-// A timed door (T or U) is shut for half of every cycle; T starts shut and U starts open. Each door keeps its own clock,
-// which a slow ring holds back.
+// A timed door (T or U) is shut for half of every cycle; T starts shut and U starts open. A level can make its T doors open
+// for less of the cycle (clockOpen ticks, at the end of it). Each door keeps its own clock, which a slow ring holds back.
 function timedShut(kind, t) {
-  const first = t % TIMED_P < TIMED_P / 2;
-  return kind === "T" ? first : !first;
+  const k = t % TIMED_P;
+  if (kind === "T") return k < TIMED_P - ((G.L && G.L.clockOpen) || TIMED_P / 2);
+  return k >= TIMED_P / 2;
 }
 function doorShut(d) { return timedShut(d.kind, d.grp.clk); }
 
