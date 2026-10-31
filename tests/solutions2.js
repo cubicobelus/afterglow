@@ -157,7 +157,19 @@ SOLUTIONS["SHAFT"] = () => {
   Bot.expect(G.won, "across the thorns");
 };
 SOLUTIONS["TURRET"] = () => {
-  // Stand in the beam from the ceiling facing left (a backslash) and it turns toward the gate.
+  // Lantern first: facing right (a slash) the mirror turns the beam left, along the floor into the pocket behind the spawn.
+  Bot.record("reflector");
+  Bot.walkTo(396, 3);
+  Bot.dir(1);
+  for (let i = 0; i < 100 && Bot.px() < 409; i++) Bot.tick();
+  Bot.dir(0);
+  Bot.run(10);
+  Bot.stop();
+  settle("reflector", 30);
+  Bot.waitUntil(() => G.L.gates.find((g) => g.tx === 3).open, 300, "the pocket to open");
+  Bot.walkTo(30);
+  Bot.expect(G.lanternsGot === 1, "the lantern in the pocket");
+  // Then stand in the beam facing left (a backslash) and it turns toward the gate.
   Bot.record("reflector");
   Bot.walkTo(424, 3);
   Bot.dir(-1);
@@ -169,25 +181,50 @@ SOLUTIONS["TURRET"] = () => {
   Bot.waitUntil(() => G.L.gates.some((g) => g.open), 300, "the gate to open");
   Bot.walkTo(570);
 };
-SOLUTIONS["WELLSPRING"] = () => {
-  // Ride the bubbles to the top of the column, drift onto the ledge and record the beam up there, facing the gate.
-  const rise = () => {
-    Bot.walkTo(170, 3);
-    Bot.waitUntil(() => G.p.y + PH < 185, 600, "to be lifted");
-    Bot.run(8);
-    Bot.dir(1);
-    for (let i = 0; i < 200 && !(G.p.onGround && G.p.y + PH < 190); i++) Bot.tick();
+SOLUTIONS["PERISCOPE"] = () => {
+  // The bubbles lift you onto the shelf. Walk off its edge facing left and stop while level with the light: that mirror turns the
+  // light down. A second mirror on the floor right under it, facing left, turns it again along the floor into the gate.
+  const shelf = () => {
+    Bot.walkTo(250, 3);
+    Bot.waitUntil(() => G.p.y + PH < 178, 600, "to be lifted");
+    Bot.dir(-1);
+    for (let i = 0; i < 200 && !(G.p.onGround && G.p.y + PH <= 181); i++) Bot.tick();
     Bot.dir(0);
-    Bot.expect(G.p.onGround && G.p.y + PH < 190, "on the ledge");
+    Bot.expect(G.p.onGround && G.p.y + PH <= 181, "on the shelf");
   };
-  Bot.record("beam");
-  rise();
-  Bot.walkTo(340, 3);
-  Bot.run(14);
+  // Lantern first: while nothing turns the light, it keeps the nook in the far wall open. A mirror hung under it is a step.
+  Bot.record("reflector");
+  Bot.walkTo(440, 2);
+  Bot.jumpKey(true);
+  for (let i = 0; i < 90; i++) { Bot.tick(); const h = 300 - Bot.feet(); if (i > 8 && G.p.vy > 0 && h <= 52 && h >= 44) break; }
+  Bot.jumpKey(false);
   Bot.stop();
-  rise();
-  Bot.walkTo(340, 3);
-  Bot.waitUntil(() => G.L.gates.some((g) => g.open), 900, "the gate to open");
+  settle("reflector", 30);
+  const st = G.echoes.reflector;
+  Bot.walkTo(st.x + 6 - 30, 3);
+  Bot.jumpTo(st.x + 6, 24);
+  Bot.expect(G.p.stand === st, "standing on the step");
+  Bot.dir(1); Bot.jumpKey(true);
+  for (let i = 0; i < 50 && !G.lanternsGot; i++) Bot.tick();
+  Bot.jumpKey(false); Bot.dir(0);
+  Bot.expect(G.lanternsGot === 1, "the lantern in the nook");
+  Bot.run(30);
+  Bot.record("reflector");
+  shelf();
+  Bot.walkTo(206, 2);
+  Bot.dir(1);
+  for (let i = 0; i < 60 && !(Bot.px() > 225 && !G.p.onGround); i++) Bot.tick();
+  Bot.dir(-1);
+  for (let i = 0; i < 40 && (i < 2 || G.p.y + PH / 2 < 170); i++) Bot.tick();
+  Bot.dir(0);
+  Bot.stop();
+  const x1 = G.echoes.reflector.trace[G.echoes.reflector.trace.length - 1].x + PW / 2;
+  Bot.record("reflector2");
+  Bot.walkTo(x1 + 2, 1);
+  Bot.dir(-1); Bot.tick(); Bot.dir(0);
+  Bot.run(6);
+  Bot.stop();
+  Bot.waitUntil(() => G.L.gates.every((g) => g.open), 900, "the gate to open");
   Bot.walkTo(570);
 };
 SOLUTIONS["HATCH"] = () => {
@@ -1352,4 +1389,68 @@ SOLUTIONS["GOLDEN HOUR"] = () => {
   Bot.jumpTo(592, 24);
   Bot.expect(G.p.onGround && Bot.feet() < 125, "up on the ledge");
   Bot.walkTo(610);
+};
+
+// New echoes in the lab: branch, swing, portal.
+SOLUTIONS["BRANCH"] = () => {
+  // Stand at the edge facing across and record: the bough grows over the gap, under the low ceiling.
+  Bot.record("branch");
+  Bot.walkTo(214, 2);
+  Bot.dir(1); Bot.tick(); Bot.dir(0);
+  Bot.run(10);
+  Bot.stop();
+  Bot.waitUntil(() => G.branches.length && G.branches[0].w >= 118, 600, "the bough to grow");
+  Bot.walkTo(570);
+};
+// Swing on a rope from x: grab it from the ledge, pump with the swing, let go going forward past relTh. Ends when landed.
+const swingAcross = (fromX, hold, relTh) => {
+  Bot.walkTo(fromX, 2);
+  Bot.dir(1); Bot.jumpKey(true);
+  let grabbed = -1, rel = -1;
+  for (let i = 0; i < 900; i++) {
+    if (G.p.rope) {
+      if (grabbed < 0) grabbed = i;
+      const r = G.p.rope;
+      Bot.jumpKey(false);
+      Bot.dir(r.w > 0 ? 1 : -1);
+      if (r.th > relTh && r.w > 0 && i - grabbed > 40) { Bot.jumpKey(true); rel = i; }
+    } else if (grabbed >= 0) { Bot.dir(1); if (i - rel > 8) Bot.jumpKey(false); }
+    else if (i > hold) Bot.jumpKey(false);
+    Bot.tick();
+    if (G.dead) Bot.fail("fell off the rope");
+    if (G.won || (rel >= 0 && G.p.onGround)) break;
+  }
+  Bot.jumpKey(false); Bot.dir(0);
+  Bot.expect(rel >= 0, "let go of the rope");
+};
+SOLUTIONS["SWING"] = () => {
+  // Jump off the ledge and stop on the way down: the rope hangs from there, over the drop, clear of the ledge.
+  Bot.record("swing");
+  Bot.walkTo(150, 2);
+  Bot.dir(1); Bot.jumpKey(true);
+  for (let i = 0; i < 40; i++) Bot.tick();
+  Bot.dir(0); Bot.jumpKey(false);
+  Bot.stop();
+  Bot.waitUntil(() => G.ropes.length && G.ropes[0].len >= 119, 600, "the rope");
+  swingAcross(150, 10, 0.5);
+  Bot.walkTo(570);
+};
+SOLUTIONS["PORTAL"] = () => {
+  // One portal up on the shelf, the other on the plate below: it holds the door and it is the way back up.
+  Bot.record("portal");
+  Bot.walkTo(440, 2);
+  Bot.run(10);
+  Bot.stop();
+  Bot.record("portal2");
+  Bot.walkTo(600);
+  Bot.walkTo(90, 2);
+  Bot.run(10);
+  Bot.stop();
+  Bot.waitUntil(() => portalOn(G.echoes.portal) && portalOn(G.echoes.portal2), 900, "both portals");
+  Bot.walkTo(600);
+  Bot.dir(-1);
+  for (let i = 0; i < 600 && G.p.y > 150; i++) Bot.tick();
+  Bot.dir(0);
+  Bot.expect(G.p.y < 150 && G.L.doorOpen.a, "back up on the shelf with the door open");
+  Bot.walkTo(290);
 };

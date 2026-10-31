@@ -18,12 +18,15 @@ const GUST_R = 72, GUST_ACC = 900, GUST_V = 170, GUST_GROUND = 90, WIND_DECAY = 
 const CALM_R = 80;                        // silences every other echo power inside it
 const FLOAT_R = 72, FLOAT_G = 0.4, FLOAT_FALL = 170; // low gravity
 const PULL_R = 96, PULL_VX = 220, PULL_K = 36, PULL_C = 9, PULL_G = 0.15; // draws you in and holds you near its centre
-const SLOW_R = 88, SLOW_RATE = 0.3;       // other echoes replay slowly inside it
+const SLOW_R = 88, SLOW_RATE = 0.3;       // other echoes, blades, clock doors and cargo platforms run slowly inside it
 const SHRINK_R = 64, SHRINK_K = 0.5;      // you become half size inside it
 const VINE_H = 120, VINE_UP = 100, VINE_DOWN = 60; // a column that grows up from the echo; hold jump to climb
 const BEAM_W = 5, BEAM_BOUNCES = 8;       // half thickness of a light beam, and how many mirrors it can turn on
 const SHIFT_R = 110;                      // inside this ring the level shows its other side
 const FORK_DELAY = 150;                   // a fork echo has a twin that follows this many ticks later
+const BRANCH_L = 120, BRANCH_H = 6;       // a bough that grows sideways from the echo's feet, the way it faced
+const ROPE_L = 120, ROPE_MAX = 1.35, ROPE_PUMP = 6, FLING_DECAY = 30; // a rope hanging under the echo; how far it swings (radians) and how hard you pump it
+const PORTAL_IN = 3;                      // a portal is entered when you overlap its body by more than this
 // Things the level itself does (no echo needed): see the later tiers.
 const DRAFT_V = 130, DRAFT_ACC = 2600, DRAFT_W = 40, DRAFT_H = 140; // a column of bubbles that lifts you
 const ROOT_T = 40, ROOT_GONE = 180;       // a root ledge crumbles after this long underfoot and grows back after this long
@@ -43,17 +46,20 @@ const KINDS = {
   mirror: { name: "MIRROR", color: "#ff9fd6", blurb: "REPLAYS YOUR PATH FLIPPED LEFT TO RIGHT, STARTING ON THE OTHER SIDE OF THE ROOM." },
   float: { name: "FLOAT", color: "#8ec9ff", blurb: "GRAVITY IS A THIRD AS STRONG AROUND IT. JUMPS GO FAR AND FALLS ARE SLOW." },
   pull: { name: "PULL", color: "#ff9b5e", blurb: "DRAWS YOU TOWARD ITSELF, LIKE A WELL." },
-  slow: { name: "SLOW", color: "#7f98ff", blurb: "OTHER ECHOES MOVE AT HALF SPEED INSIDE ITS RING." },
+  slow: { name: "SLOW", color: "#7f98ff", blurb: "INSIDE ITS RING TIME RUNS SLOW: OTHER ECHOES, BLADES, CLOCK DOORS AND CARGO PLATFORMS ALL CRAWL." },
   shrink: { name: "SHRINK", color: "#f7f09a", blurb: "YOU ARE HALF SIZE INSIDE ITS RING. SMALL GAPS OPEN." },
   vine: { name: "VINE", color: "#4fd68a", blurb: "GROWS A COLUMN UPWARD WHEN IT STOPS. HOLD JUMP TO CLIMB IT, LET GO TO SLIDE." },
   beam: { name: "BEAM", color: "#f4ff7a", blurb: "SHOOTS A RAY OF LIGHT THE WAY IT FACED UNTIL IT HITS A WALL OR ANOTHER ECHO. IT OPENS GATES, WITHERS THORNS AND LIGHTS PLANKS ALL ALONG ITS LENGTH." },
   reflector: { name: "REFLECTOR", color: "#cfe7ff", blurb: "A MIRROR. FACING RIGHT IT IS A SLASH, FACING LEFT A BACKSLASH. A BEAM THAT HITS IT TURNS A CORNER, WHETHER IT CAME FROM AN ECHO OR FROM THE WALL." },
   fork: { name: "FORK", color: "#8fd0ff", blurb: "ONE RECORDING MAKES TWO ECHOES: THE FIRST, AND A TWIN THAT REPEATS IT A FEW SECONDS LATER." },
   shift: { name: "SHIFT", color: "#8b5cff", blurb: "INSIDE ITS RING THE ROOM SHOWS ITS OTHER SIDE: GOLD BLOCKS VANISH AND DARK BLOCKS APPEAR." },
+  branch: { name: "BRANCH", color: "#d2a25c", blurb: "GROWS A BOUGH SIDEWAYS FROM ITS FEET WHEN IT STOPS, THE WAY IT WAS FACING. YOU CAN WALK ON IT." },
+  swing: { name: "SWING", color: "#f0d9a8", blurb: "HANGS A ROPE BELOW ITSELF WHEN IT STOPS. JUMP INTO IT TO HANG ON, LEFT AND RIGHT TO SWING, JUMP TO LET GO." },
+  portal: { name: "PORTAL", color: "#ff5fd2", blurb: "PORTALS COME IN PAIRS. WALK INTO ONE AND YOU COME OUT OF THE OTHER, STILL MOVING." },
 };
 // Slots always appear in this order, whatever order a level lists its echoes in, so the numbers on the keys
 // never spell out the order you should record in.
-const KIND_ORDER = ["shade", "glow", "phase", "flip", "tide", "spring", "gust", "calm", "mirror", "float", "pull", "slow", "shrink", "vine", "beam", "reflector", "fork", "shift"];
+const KIND_ORDER = ["shade", "glow", "phase", "flip", "tide", "spring", "gust", "calm", "mirror", "float", "pull", "slow", "shrink", "vine", "beam", "reflector", "fork", "shift", "branch", "swing", "portal"];
 const PLATE_COLORS = { a: "#4fd1ff", b: "#ffb347", c: "#ff6fae", d: "#9cff6f" };
 
 // Settings the player can change (the UI loads and saves these).
@@ -127,7 +133,7 @@ function rectDist2(px, py, r) {
 // ---------------------------------------------------------------- world state
 const G = {
   L: null, t: 0, p: null, echoes: {}, rec: null, sel: 0,
-  lights: [], flips: [], phases: [], winds: [], drafts: [], calms: [], floats: [], pulls: [], slows: [], shrinks: [], vines: [], shifts: [], beamRects: [], beams: [],
+  lights: [], flips: [], phases: [], winds: [], drafts: [], calms: [], floats: [], pulls: [], slows: [], shrinks: [], vines: [], shifts: [], beamRects: [], beams: [], branches: [], ropes: [],
   dead: false, deadT: 0, won: false, winT: 0,
   deaths: 0, time: 0, timing: false, recCount: 0, swapCd: 0, lanternsGot: 0, notice: null,
   particles: [], shake: 0, onWin: null,
@@ -237,12 +243,22 @@ function parseLevel(which) {
     r.grp = left ? left.grp : { members: [], standT: 0 };
     r.grp.members.push(r);
   }
+  // Neighbouring clock door tiles of one kind in a column are one door: they keep one clock, so a slow ring on part of the
+  // door slows all of it.
+  L.timedAt = {};
+  for (const d of L.timed) {
+    const up = L.timed.find((q) => q.kind === d.kind && q.tx === d.tx && q.ty === d.ty - 1);
+    d.grp = up ? up.grp : { clk: 0, members: [] };
+    d.grp.members.push(d);
+    L.timedAt[d.ty * COLS + d.tx] = d;
+  }
+  L.timedGroups = [...new Set(L.timed.map((d) => d.grp))];
   L.movers = g.movers.map((m) => {
     const x0 = m.c0 * TILE, y0 = m.r0 * TILE, x1 = m.c1 * TILE, y1 = m.r1 * TILE;
     const travel = Math.max(1, Math.round(Math.hypot(x1 - x0, y1 - y0) / m.sp * 60));
-    return { kind: "mover", x: x0, y: y0, px: x0, py: y0, w: m.w * TILE, h: MOVER_H, dx: 0, dy: 0, x0, y0, x1, y1, travel, dwell: m.dwell, cycle: 2 * (travel + m.dwell), ph: m.ph };
+    return { kind: "mover", x: x0, y: y0, px: x0, py: y0, w: m.w * TILE, h: MOVER_H, dx: 0, dy: 0, x0, y0, x1, y1, travel, dwell: m.dwell, cycle: 2 * (travel + m.dwell), ph: m.ph, clk: 0 };
   });
-  L.blades = g.blades.map((b) => ({ x: b.c * TILE + TILE / 2, y: b.r * TILE + TILE / 2, len: b.len, w: b.turns * Math.PI * 2 / 600, a0: b.ph * Math.PI / 2, tx: b.c, ty: b.r }));
+  L.blades = g.blades.map((b) => ({ x: b.c * TILE + TILE / 2, y: b.r * TILE + TILE / 2, len: b.len, w: b.turns * Math.PI * 2 / 600, a0: b.ph * Math.PI / 2, tx: b.c, ty: b.r, clk: 0 }));
   return L;
 }
 
@@ -257,13 +273,21 @@ function moverAt(m, t) {
   return { x: m.x0 + (m.x1 - m.x0) * s, y: m.y0 + (m.y1 - m.y0) * s };
 }
 
-// A timed door (T or U) is shut for half of every cycle; T starts shut and U starts open.
+// A timed door (T or U) is shut for half of every cycle; T starts shut and U starts open. Each door keeps its own clock,
+// which a slow ring holds back.
 function timedShut(kind, t) {
-  const first = (t === undefined ? G.t : t) % TIMED_P < TIMED_P / 2;
+  const first = t % TIMED_P < TIMED_P / 2;
   return kind === "T" ? first : !first;
 }
+function doorShut(d) { return timedShut(d.kind, d.grp.clk); }
 
-function bladeAngle(b) { return b.a0 + b.w * G.t; }
+function bladeAngle(b) { return b.a0 + b.w * b.clk; }
+
+// Blades, clock doors and cargo platforms run at SLOW_RATE while a slow ring (not calmed) covers the given point.
+function slowedAt(x, y) {
+  for (const z of G.slows) if (inZone(z, x, y) && !calmedAt(x, y)) return true;
+  return false;
+}
 
 function bladeHit(b, p) {
   const a = bladeAngle(b), ca = Math.cos(a), sa = Math.sin(a);
@@ -309,7 +333,7 @@ function calmedAt(x, y) {
   for (const c of G.calms) if ((x - c.x) * (x - c.x) + (y - c.y) * (y - c.y) <= c.r * c.r) return true;
   return false;
 }
-const NO_ZONES = { flips: [], winds: [], drafts: [], floats: [], pulls: [], shrinks: [], vines: [] };
+const NO_ZONES = { flips: [], winds: [], drafts: [], floats: [], pulls: [], shrinks: [], vines: [], ropes: [] };
 
 function litRect(r) {
   for (const l of G.lights) {
@@ -359,7 +383,7 @@ function traceBeam(x, y, dx, dy, skip, reflectors) {
     if (ch === "#") return true;
     if (ch === "G") return true;
     if (ch >= "A" && ch <= "D" && !L.doorOpen[ch.toLowerCase()]) return true;
-    if ((ch === "T" || ch === "U") && timedShut(ch)) return true;
+    if ((ch === "T" || ch === "U") && doorShut(L.timedAt[r * COLS + c])) return true;
     for (const h of L.halves) if (px >= h.x && px < h.x + TILE && py >= h.y && py < h.y + 10) return true;
     for (const k in G.echoes) {
       const e = G.echoes[k];
@@ -413,6 +437,8 @@ function computeFields() {
   G.shrinks = [];
   G.vines = [];
   G.shifts = [];
+  G.branches = [];
+  G.ropes = [];
   G.beamRects = [];
   G.beams = [];
   // Echo powers switch on only once the echo has come to rest, growing in over a short ramp.
@@ -445,6 +471,22 @@ function computeFields() {
         if (cx > w.x && cx < w.x + w.w && w.y + w.h <= base - 4 && w.y + w.h > top) top = w.y + w.h;
       }
       G.vines.push({ x: cx, base, top, echo: e });
+    } else if (e.kind === "branch" && e.restT > 12 && !e.silenced) {
+      // a bough grows from the feet of the echo the way it faced, and stops at a wall
+      const y = e.y + PH, d = e.face >= 0 ? 1 : -1;
+      let len = Math.min(BRANCH_L, (e.restT - 12) * 1.6);
+      for (const w of L.walls) {
+        if (w.y >= y + BRANCH_H || w.y + w.h <= y) continue;
+        const gap = d > 0 ? w.x - cx : cx - (w.x + w.w);
+        if (gap >= 0 && gap < len) len = gap;
+      }
+      if (len > 1) G.branches.push({ x: d > 0 ? cx : cx - len, y, w: len, h: BRANCH_H, d, echo: e });
+    } else if (e.kind === "swing" && e.restT > 12 && !e.silenced) {
+      // a rope hangs from the feet of the echo, down to the floor if that is nearer
+      const ay = e.y + PH;
+      let len = Math.min(ROPE_L, (e.restT - 12) * 5);
+      for (const w of L.walls) if (cx > w.x && cx < w.x + w.w && w.y >= ay && w.y - ay < len) len = w.y - ay;
+      if (len > 8) G.ropes.push({ x: cx, y: ay, len, echo: e });
     }
   }
   // Light beams: from beam echoes at rest and from emitters in the walls, bent by reflector echoes at rest.
@@ -529,22 +571,25 @@ function restartAttempt() {
   G.t = 0;
   G.dead = false;
   G.deadT = 0;
-  G.p = { x: s.x, y: s.y, w: PW, h: PH, vx: 0, vy: 0, windV: 0, pullV: 0, onGround: false, face: 1, coy: 0, buf: 0, jumping: false, stand: null, g: 1, sq: 0 };
+  G.p = { x: s.x, y: s.y, w: PW, h: PH, vx: 0, vy: 0, windV: 0, pullV: 0, onGround: false, face: 1, coy: 0, buf: 0, jumping: false, stand: null, g: 1, sq: 0, rope: null, ropeCd: 0, flingV: 0, portalLock: null };
   placeEchoes();
-  for (const m of L.movers) { const q = moverAt(m, 0); m.x = m.px = q.x; m.y = m.py = q.y; m.dx = m.dy = 0; }
+  for (const m of L.movers) { m.clk = 0; const q = moverAt(m, 0); m.x = m.px = q.x; m.y = m.py = q.y; m.dx = m.dy = 0; }
+  for (const b of L.blades) b.clk = 0;
+  for (const d of L.timedGroups) d.clk = 0;
   for (const r of L.roots) { r.grp.standT = 0; r.goneT = 0; }
   computeFields();
 }
 
-// Moving platforms follow the clock of the attempt, so they are in the same place on every attempt and an echo recorded on
-// one is still on it when it replays.
+// Moving platforms, blades and clock doors each keep a clock that starts with the attempt, so they are in the same place on
+// every attempt and an echo recorded on a platform is still on it when it replays. A slow ring holds their clocks back.
 function updateMovers() {
   const L = G.L;
   for (const m of L.movers) {
     m.px = m.x; m.py = m.y;
-    const q = moverAt(m, G.t);
+    const q = moverAt(m, m.clk);
     m.x = q.x; m.y = q.y;
     m.dx = m.x - m.px; m.dy = m.y - m.py;
+    m.clk += slowedAt(m.x + m.w / 2, m.y + MOVER_H / 2) ? SLOW_RATE : 1;
   }
   for (const m of L.mushrooms) if (m.bounceT > 0) m.bounceT--;
 }
@@ -666,10 +711,13 @@ function buildSolids(p, withEchoes, g) {
   for (const w of L.walls) out.push(w);
   for (const d of L.doorTiles) if (!L.doorOpen[d.id]) out.push(d);
   for (const gt of L.gates) if (!gt.open) out.push(gt);
-  for (const d of L.timed) if (timedShut(d.kind)) out.push(d);
+  for (const d of L.timed) if (doorShut(d)) out.push(d);
   if (g !== undefined) {
     for (const o of L.oneways) {
       if (g > 0 ? p.y + p.h <= o.y + 4 : p.y >= o.y + o.h - 4) out.push(o);
+    }
+    for (const b of G.branches) {
+      if (g > 0 ? p.y + p.h <= b.y + 4 : p.y >= b.y + b.h - 4) out.push({ x: b.x, y: b.y, w: b.w, h: b.h, ow: true, src: null });
     }
     // Moving platforms, mushrooms and roots are one way like a ledge, and the player rides what they stand on.
     for (const list of [L.movers, L.mushrooms, L.roots]) {
@@ -723,6 +771,87 @@ function buildSolids(p, withEchoes, g) {
   return out;
 }
 
+// A rope from a swing echo. Jump or fall into it to hang on; you swing about the echo's feet like a pendulum, left and right
+// pump it (only so far: it never goes past ROPE_MAX from straight down), and jump lets go with the speed you had.
+// Returns true while the player is on a rope, so the normal step is skipped.
+function swingStep(p, dir, jumpPressed, g, Z) {
+  if (p.ropeCd > 0) p.ropeCd--;
+  let r = p.rope;
+  if (r && !Z.ropes.some((q) => q.echo === r.echo)) r = p.rope = null; // the rope went away (silenced, or recorded again)
+  const cx = p.x + p.w / 2, cy = p.y + p.h / 2;
+  if (!r) {
+    if (p.onGround || p.ropeCd > 0 || g < 0) return false;
+    const q = Z.ropes.find((q) => Math.abs(cx - q.x) < 7 && cy > q.y + 12 && cy < q.y + q.len + 4);
+    if (!q) return false;
+    const len = Math.max(24, Math.min(q.len, cy - q.y));
+    const th = Math.asin(Math.max(-1, Math.min(1, (cx - q.x) / len)));
+    // keep the speed along the swing
+    const vt = (p.vx + p.windV + p.pullV) * Math.cos(th) - p.vy * Math.sin(th);
+    r = p.rope = { echo: q.echo, x: q.x, y: q.y, len, th, w: vt / len, full: q.len };
+    p.windV = p.pullV = p.flingV = 0; p.jumping = false; p.stand = null; p.onGround = false;
+    SFX("plateOn");
+  }
+  if (jumpPressed) {
+    // let go: fly off along the swing with a little lift
+    // the part of the throw above running speed is kept apart, like wind, so steering in the air does not brake it
+    const vt = r.w * r.len, vx = vt * Math.cos(r.th);
+    p.vx = Math.max(-RUN, Math.min(RUN, vx));
+    p.flingV = vx - p.vx;
+    p.vy = -vt * Math.sin(r.th) - 220;
+    p.rope = null; p.ropeCd = 18; p.buf = 0; p.coy = 0;
+    if (dir) p.face = dir;
+    SFX("jump");
+    return true;
+  }
+  r.len = Math.min(r.full, r.len + 2); // you slide down to the end of the rope
+  const a = -(GRAV / r.len) * Math.sin(r.th) + dir * ROPE_PUMP * Math.cos(r.th);
+  r.w = (r.w + a * DT) * 0.997;
+  let th = r.th + r.w * DT;
+  if (Math.abs(th) > ROPE_MAX) { th = Math.sign(th) * ROPE_MAX; r.w = 0; }
+  const nx = r.x + Math.sin(th) * r.len - p.w / 2, ny = r.y + Math.cos(th) * r.len - p.h / 2;
+  const box = { x: nx, y: ny, w: p.w, h: p.h };
+  if (buildSolids(box, false, 1).some((o) => !o.ow && overlap(box, o))) {
+    r.w = -0.3 * r.w; // swung into a wall: knocked back
+  } else {
+    r.th = th; p.x = nx; p.y = ny;
+  }
+  const vt = r.w * r.len;
+  p.vx = vt * Math.cos(r.th); p.vy = -vt * Math.sin(r.th);
+  if (dir) p.face = dir;
+  p.onGround = false;
+  return true;
+}
+
+// Portals come in pairs by slot: the first and second of a level, then the third and fourth. Walking into one at rest puts you
+// in the other with the speed you had. You can go back once you have stepped out of the one you arrived in.
+function portalPartner(e) {
+  const m = e.key.match(/^portal(\d*)$/);
+  if (!m) return null;
+  const n = m[1] ? Number(m[1]) : 1;
+  const want = n % 2 ? n + 1 : n - 1;
+  return G.echoes[want === 1 ? "portal" : "portal" + want] || null;
+}
+const portalOn = (e) => !!e && e.kind === "portal" && !e.moving && e.restT > 12 && !e.silenced;
+
+function stepPortals() {
+  const p = G.p;
+  const inside = (e) => overlap({ x: p.x + PORTAL_IN, y: p.y + PORTAL_IN, w: p.w - 2 * PORTAL_IN, h: p.h - 2 * PORTAL_IN }, { x: e.x, y: e.y, w: PW, h: PH });
+  if (p.portalLock && !(G.echoes[p.portalLock] && inside(G.echoes[p.portalLock]))) p.portalLock = null;
+  for (const k in G.echoes) {
+    const e = G.echoes[k];
+    if (!portalOn(e) || k === p.portalLock || !inside(e)) continue;
+    const to = portalPartner(e);
+    if (!portalOn(to)) continue;
+    burst(p.x + p.w / 2, p.y + p.h / 2, 14, KINDS.portal.color, 90, 0.5, 2, 0);
+    p.x = to.x + (PW - p.w) / 2; p.y = to.y + PH - p.h;
+    p.stand = null; p.onGround = false; p.rope = null;
+    p.portalLock = to.key;
+    burst(p.x + p.w / 2, p.y + p.h / 2, 14, "#ffffff", 90, 0.5, 2, 0);
+    SFX("swap");
+    return;
+  }
+}
+
 function playerState(p) {
   if (!p.onGround) return p.vy * p.g < 0 ? 2 : 3;
   return Math.abs(p.vx) > 20 ? 1 : 0;
@@ -769,6 +898,7 @@ function stepPlayer() {
   const dir = (Input.right() ? 1 : 0) - (Input.left() ? 1 : 0);
   const jumpHeld = Input.jump();
   const jumpPressed = Input.hitBind("jump");
+  if (swingStep(p, dir, jumpPressed, g, Z)) return;
 
   let acc = p.onGround ? (dir ? ACC_G : DEC_G) : (dir ? ACC_A : DEC_A);
   if (dir && p.vx * dir < 0) acc *= 1.7;
@@ -859,7 +989,9 @@ function stepPlayer() {
   // ceiling cannot leave you embedded in it (or pop you up through it).
   solids.sort((a, b) => (b.ow ? 1 : 0) - (a.ow ? 1 : 0));
 
-  const evx = p.vx + p.windV + p.pullV;
+  // what is left of a throw from a rope fades in the air and stops on landing
+  if (p.flingV) p.flingV = p.onGround ? 0 : Math.sign(p.flingV) * Math.max(0, Math.abs(p.flingV) - FLING_DECAY * DT);
+  const evx = p.vx + p.windV + p.pullV + p.flingV;
   p.x += evx * DT;
   if (evx !== 0) {
     for (const s of solids) {
@@ -876,6 +1008,7 @@ function stepPlayer() {
       const yPen = Math.min(p.y + p.h - s.y, s.y + s.h - p.y);
       if (yPen < xPen) continue;
       p.x = evx > 0 ? s.x - p.w : s.x + s.w;
+      p.flingV = 0;
     }
   }
 
@@ -1017,6 +1150,7 @@ function tick() {
   updatePlates();
   stepPlayer();
   if (G.dead) { updateParticles(); return; }
+  stepPortals();
 
   const p = G.p;
   // A root ledge gives way once you have stood on it for a while, and grows back later.
@@ -1067,6 +1201,8 @@ function tick() {
       return;
     }
   }
+  for (const b of L.blades) b.clk += slowedAt(b.x, b.y) ? SLOW_RATE : 1;
+  for (const grp of L.timedGroups) grp.clk += grp.members.some((d) => slowedAt(d.x + TILE / 2, d.y + TILE / 2)) ? SLOW_RATE : 1;
   G.t++;
   updateParticles();
 }

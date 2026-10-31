@@ -835,24 +835,12 @@ def(5, "TURRET", {
   hint: "A BEAM FALLS FROM THE CEILING AND THE GATE WANTS LIGHT. STAND IN THE BEAM AND RECORD A REFLECTOR: FACING LEFT IT TURNS THE BEAM TO THE RIGHT.",
 }, (g) => {
   g.base();
-  g.set(2, 14, "@");
+  g.set(6, 14, "@");
+  g.fill(1, 12, 3, 13, "#").set(3, 14, "G").set(1, 14, "o");
   g.set(20, 1, "s");
   g.fill(24, 1, 24, 12, "#").fill(24, 13, 24, 14, "G");
   g.fill(28, 13, 28, 14, "X");
-  g.set(5, 8, "L").set(14, 6, "L");
-});
-
-def(5, "WELLSPRING", {
-  autoHint: true, echoes: ["beam"], recMax: 14,
-  hint: "BUBBLES LIFT WHOEVER STANDS IN THEM, UP TO THE TOP OF THE COLUMN. THE GATE UP THERE WANTS LIGHT.",
-}, (g) => {
-  g.base();
-  g.set(2, 14, "@");
-  g.set(8, 14, "u");
-  g.fill(10, 9, 30, 14, "#");
-  g.fill(20, 1, 20, 6, "#").fill(20, 7, 20, 8, "G");
-  g.fill(28, 7, 28, 8, "X");
-  g.set(5, 7, "L");
+  g.set(8, 6, "L").set(14, 6, "L");
 });
 
 def(5, "HATCH", {
@@ -935,6 +923,22 @@ def(5, "TWO TIERS", {
   g.fill(25, 10, 30, 14, "#");
   g.fill(28, 8, 28, 9, "X");
   g.set(5, 4, "L").set(16, 3, "L").set(27, 4, "L");
+});
+
+def(5, "PERISCOPE", {
+  echoes: ["reflector", "reflector"], recMax: 16,
+  hint: "THE GATE IS DOWN ON THE FLOOR AND THE LIGHT CROSSES HIGH UP. IT HAS TO TURN TWICE, AND THE TWO MIRRORS HAVE TO LINE UP.",
+}, (g) => {
+  g.base();
+  g.set(16, 14, "@");
+  g.fill(3, 9, 10, 14, "#");
+  g.set(12, 14, "u");
+  g.set(1, 8, "e");
+  g.fill(24, 1, 24, 6, "#").fill(24, 9, 24, 13, "#").set(24, 14, "G");
+  g.fill(25, 1, 26, 6, "#").fill(25, 9, 26, 9, "#").fill(26, 7, 26, 8, "#");
+  g.set(24, 8, "t").set(25, 8, "o");
+  g.fill(28, 13, 28, 14, "X");
+  g.set(6, 4, "L").set(18, 6, "L").set(29, 3, "L");
 });
 
 def(5, "PULSE", {
@@ -1581,6 +1585,45 @@ def(10, "SHIFT", {
   g.fill(13, 13, 13, 14, "+");
   g.fill(28, 13, 28, 14, "X");
   g.set(5, 8, "L").set(25, 8, "L");
+});
+
+def(10, "BRANCH", {
+  lab: true, unlock: "branch", echoes: ["branch"], recMax: 8,
+  hint: "THE TUNNEL IS TOO LOW TO JUMP THE GAP. RECORD A BRANCH STANDING AT THE EDGE, FACING ACROSS: IT GROWS A BOUGH THE WAY YOU FACED.",
+}, (g) => {
+  g.base();
+  g.set(2, 14, "@");
+  g.fill(8, 1, 24, 12, "#");
+  g.pit(11, 16);
+  g.fill(28, 13, 28, 14, "X");
+  g.set(5, 8, "L").set(26, 8, "L");
+});
+
+def(10, "SWING", {
+  lab: true, unlock: "swing", echoes: ["swing"], recMax: 8,
+  hint: "THE GAP IS FAR TOO WIDE. JUMP OFF THE LEDGE AND RECORD A SWING ON THE WAY DOWN: ITS ROPE HANGS BELOW IT. JUMP ON, SWING WITH LEFT AND RIGHT, JUMP TO LET GO.",
+}, (g) => {
+  g.base();
+  g.fill(1, 6, 7, 6, "#");
+  g.set(2, 5, "@");
+  g.pit(1, 22);
+  g.fill(23, 9, 30, 14, "#");
+  g.fill(28, 7, 28, 8, "X");
+  g.set(4, 2, "L").set(14, 4, "L").set(26, 5, "L");
+});
+
+def(10, "PORTAL", {
+  lab: true, unlock: "portal", echoes: ["portal", "portal"], recMax: 14,
+  hint: "THE DOOR BY THE EXIT WANTS THE PLATE DOWN BELOW, AND ONCE YOU DROP THERE IS NO CLIMBING BACK. A PORTAL LEFT UP HERE IS A WAY BACK.",
+}, (g) => {
+  g.base();
+  g.fill(13, 6, 28, 6, "#");
+  g.fill(12, 1, 12, 5, "#");
+  g.fill(18, 1, 18, 3, "#").fill(18, 4, 18, 5, "A");
+  g.set(25, 5, "@");
+  g.fill(14, 4, 14, 5, "X");
+  g.set(4, 14, "a");
+  g.set(6, 9, "L").set(22, 2, "L").set(26, 10, "L");
 });
 
 def(10, "FLOAT", {

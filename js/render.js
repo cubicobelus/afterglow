@@ -74,6 +74,9 @@ const Render = (() => {
     reflector: ["....#", "...#.", "..#..", ".#...", "#...."],
     fork: ["#...#", "#...#", ".#.#.", "..#..", "..#.."],
     shift: ["##...", "###..", "#.#.#", "..###", "...##"],
+    branch: ["#....", "##...", "#####", "...#.", "....#"],
+    swing: ["#####", "..#..", "..#..", "..#..", ".###."],
+    portal: ["##.##", "#...#", ".....", "#...#", "##.##"],
   };
 
   // ------------------------------------------------------------ baking
@@ -1049,6 +1052,36 @@ const Render = (() => {
       for (let i = 1; i < b.pts.length - 1; i++) glowAt(ctx, b.pts[i].x, b.pts[i].y, 10, "#ffffff", 0.3);
       ctx.restore();
     }
+    for (const b of G.branches) {
+      // a bough: a bark-coloured board with a lighter top, a knot or two and leaves along the underside
+      const x0 = Math.round(b.x), w = Math.round(b.w), y = Math.round(b.y);
+      ctx.fillStyle = "#6b4a28";
+      ctx.fillRect(x0, y, w, b.h);
+      ctx.fillStyle = KINDS.branch.color;
+      ctx.fillRect(x0, y, w, 2);
+      ctx.fillStyle = "#4a3018";
+      for (let x = x0 + 9; x < x0 + w - 3; x += 23) ctx.fillRect(x, y + 3, 2, 2);
+      ctx.fillStyle = "#4fd68a";
+      for (let x = x0 + 4, n = 0; x < x0 + w - 2; x += 11, n++) {
+        const sway = Math.round(Math.sin(t * 0.05 + n) * 1);
+        ctx.fillRect(x + sway, y + b.h, 3, 2);
+        if (n % 2) ctx.fillRect(x + 1 + sway, y + b.h + 2, 1, 2);
+      }
+    }
+    for (const r of G.ropes) {
+      // a rope from the feet of the echo: straight down, or to the player who hangs on it
+      const p = G.p, held = p && p.rope && p.rope.echo === r.echo;
+      const ex = held ? p.x + p.w / 2 : r.x, ey = held ? p.y + 2 : r.y + r.len;
+      ctx.strokeStyle = "rgba(60,40,20,0.9)";
+      ctx.lineWidth = 3;
+      ctx.beginPath(); ctx.moveTo(r.x, r.y); ctx.lineTo(ex, ey); ctx.stroke();
+      ctx.strokeStyle = KINDS.swing.color;
+      ctx.lineWidth = 1;
+      ctx.setLineDash([3, 2]);
+      ctx.beginPath(); ctx.moveTo(r.x, r.y); ctx.lineTo(ex, ey); ctx.stroke();
+      ctx.setLineDash([]);
+      if (!held) { ctx.fillStyle = KINDS.swing.color; ctx.fillRect(Math.round(ex) - 2, Math.round(ey) - 1, 4, 3); }
+    }
     for (const v of G.vines) {
       // a climbing stem with leaves along it, growing from the feet of the echo
       const h = v.base - v.top;
@@ -1242,7 +1275,7 @@ const Render = (() => {
 
   // A door that opens and shuts on a clock: T starts shut (amber), U starts open (blue). It flickers just before it changes.
   function drawTimed(ctx, d, t) {
-    const shut = timedShut(d.kind), cyc = G.t % TIMED_P, half = TIMED_P / 2;
+    const shut = doorShut(d), cyc = d.grp.clk % TIMED_P, half = TIMED_P / 2;
     const left = cyc < half ? half - cyc : TIMED_P - cyc;
     const warn = left < 28 && Math.floor(left / 4) % 2 === 0;
     const col = d.kind === "T" ? "#ffb347" : "#6fd0ff";
@@ -1376,6 +1409,15 @@ const Render = (() => {
     glowAt(ctx, e.x + PW / 2, e.y + (e.g < 0 ? PH + 2 : -3), 16, k.color, 0.28);
     ctx.restore();
     if (e.kind === "reflector") drawMirrorSlash(ctx, e.x + PW / 2, e.y + PH / 2, e.face >= 0, e.moving ? 0.5 : 1);
+    if (e.kind === "portal" && portalOn(e)) {
+      const on = portalOn(portalPartner(e)), pulse = 0.5 + 0.5 * Math.sin(t * 0.12);
+      ctx.save();
+      ctx.strokeStyle = rgba(k.color, on ? 0.6 + 0.3 * pulse : 0.3);
+      ctx.lineWidth = on ? 2 : 1;
+      if (!on) ctx.setLineDash([2, 3]);
+      ctx.beginPath(); ctx.ellipse(e.x + PW / 2, e.y + PH / 2, 9, 12, 0, 0, TAU); ctx.stroke();
+      ctx.restore();
+    }
     if (G.L.dupKinds.has(e.kind) && G.L.slotKeys.indexOf(e.key) >= 0) {
       // several echoes of one kind: number them like the slots in the bar
       Font.draw(ctx, String(G.L.slotKeys.indexOf(e.key) + 1), e.x + PW / 2, e.y - 24, { scale: 1, color: k.color, align: "center", shadow: null });
@@ -1398,6 +1440,16 @@ const Render = (() => {
       ctx.restore();
     } else if (G.rec.kind === "reflector") {
       drawMirrorSlash(ctx, cx, cy, d >= 0, 0.5);
+    } else if (G.rec.kind === "branch" || G.rec.kind === "swing") {
+      // where the bough or the rope will be
+      const fy = p.y + p.h;
+      ctx.save();
+      ctx.strokeStyle = rgba(k.color, 0.35 + 0.1 * Math.sin(t * 0.2));
+      ctx.setLineDash([3, 4]);
+      ctx.beginPath();
+      if (G.rec.kind === "branch") { ctx.moveTo(cx, fy + 2); ctx.lineTo(cx + d * BRANCH_L, fy + 2); } else { ctx.moveTo(cx, fy); ctx.lineTo(cx, fy + ROPE_L); }
+      ctx.stroke();
+      ctx.restore();
     }
   }
 

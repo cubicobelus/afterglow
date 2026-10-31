@@ -57,11 +57,15 @@
     if (L.thorns.length && !anyLight) problems.push("thorns without any light");
     if ((L.gates.length || L.plates.some((p) => p.sensor)) && !anyLight) problems.push("gate or sensor without any light");
     if (L.lanterns.length > 1) problems.push("more than one lantern");
-    // Without any echo, no lamp may already open a gate or wither a thorn.
+    // Without any echo, no lamp may already open a gate or wither a thorn. (A beam from an emitter in the wall may: that is
+    // part of the puzzle.)
     Bot.load(i);
     Bot.run(2);
-    if (G.L.gates.some((x) => x.open)) problems.push("a lamp already opens a gate");
-    if (G.L.thorns.length && G.L.thorns.every((x) => x.lit)) problems.push("a lamp already lights all the thorns");
+    const beams = G.beamRects;
+    G.beamRects = [];
+    if (G.L.gates.some((x) => litRect(x))) problems.push("a lamp already opens a gate");
+    if (G.L.thorns.length && G.L.thorns.every((x) => litPoint(x.cx, x.cy))) problems.push("a lamp already lights all the thorns");
+    G.beamRects = beams;
     const ok = problems.length === 0;
     RESULTS.push({ i, name: "layout " + (i + 1) + " " + LEVELS[i].name, ok, info: ok ? "ok" : problems.join("; ") });
     html += '<span class="' + (ok ? "ok" : "bad") + '">' + (ok ? "PASS " : "FAIL ") + "layout " + (i + 1) + " " + LEVELS[i].name + (ok ? "" : " - " + problems.join("; ")) + "</span>\n";
