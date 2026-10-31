@@ -539,15 +539,16 @@ def(2, "PUMP ROOM", {
 });
 
 def(2, "LONG CROSSING", {
-  bonus: 20, echoes: ["tide", "tide", "spring"], recMax: 28,
-  hint: "THE GAP IS TOO WIDE FOR ONE FERRY. YOU CAN RECORD WHILE RIDING A FERRY.",
+  bonus: 20, echoes: ["tide", "tide", "spring"], recMax: 32,
+  hint: "THE GAP IS TOO WIDE FOR ONE FERRY, AND THERE ARE TWO CLIMBS BUT ONE SPRING. YOU CAN RECORD WHILE RIDING A FERRY, AND A TIDE REPEATS ITS WHOLE ROUTE, UP THE CLIMBS TOO.",
 }, (g) => {
   g.base();
   g.set(2, 14, "@");
   g.pit(6, 16);
   g.set(6, 16, "o");
   g.fill(22, 7, 30, 14, "#");
-  g.fill(28, 5, 28, 6, "X");
+  g.fill(27, 3, 30, 6, "#");
+  g.fill(29, 1, 29, 2, "X");
   g.set(4, 9, "L").set(12, 5, "L").set(18, 8, "L");
 });
 

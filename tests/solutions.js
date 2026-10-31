@@ -1613,28 +1613,53 @@ SOLUTIONS["LONG CROSSING"] = () => {
   Bot.expect(G.p.stand === A(), "standing on the lift");
   for (let i = 0; i < 300 && G.lanternsGot < 1; i++) Bot.tick();
   Bot.expect(G.lanternsGot === 1, "the lantern at the bottom of the chasm");
-  // 5: the way across
-  Bot.waitUntil(() => edge(A, 280, 300) && G.p.stand === A(), 600, "the lift to come back up to the edge");
-  Bot.dir(-1);
-  for (let i = 0; i < 14; i++) Bot.tick();
-  Bot.dir(0);
-  boardResting(B, 262, 272);
-  rideTo(B, 230);
-  Bot.jumpKey(true);
-  Bot.dir(1);
-  for (let i = 0; i < 140; i++) {
-    if (i === 24) Bot.jumpKey(false);
-    Bot.tick();
-    if (i > 10 && G.p.onGround) break;
-  }
-  Bot.jumpKey(false);
-  Bot.dir(0);
-  Bot.expect(G.p.onGround && Bot.px() > 345, "on the far bank");
-  Bot.walkTo(412, 3);
+  // 5: the first slot once more, as a lift: it rides the second ferry over, waits on the far bank beside the spring, bounces up the
+  // block and waits on top. Ride the second ferry yourself and board the lift where it waits.
+  const across = () => {
+    boardResting(B, 262, 272);
+    rideTo(B, 230);
+    Bot.jumpKey(true);
+    Bot.dir(1);
+    for (let i = 0; i < 140; i++) {
+      if (i === 24) Bot.jumpKey(false);
+      Bot.tick();
+      if (i > 10 && G.p.onGround) break;
+    }
+    Bot.jumpKey(false);
+    Bot.dir(0);
+    Bot.expect(G.p.onGround && Bot.px() > 345, "on the far bank");
+  };
+  Bot.record("tide");
+  across();
+  Bot.walkTo(380, 3);
+  Bot.run(90);
   Bot.waitUntil(restOf("spring"), 900, "the spring to settle");
   jumpToSpring(412, 1);
   Bot.expect(G.p.y < 130, "up on the block");
-  Bot.walkTo(570);
+  Bot.walkTo(470, 3);
+  Bot.run(30);
+  Bot.stop();
+  // 6: the spring again, up on the block, reached by riding the lift
+  const rideUp = () => {
+    across();
+    Bot.walkTo(350, 3);
+    Bot.waitUntil(() => Math.abs(A().x + PW / 2 - 380) < 2 && A().dx === 0 && A().y > 270, 2400, "the lift to wait by the block");
+    Bot.walkTo(366, 2);
+    Bot.jumpTo(380, 14);
+    Bot.expect(G.p.stand === A(), "standing on the lift");
+    Bot.waitUntil(() => G.p.stand === A() && A().y < 130 && A().dx === 0 && A().dy === 0, 2400, "the lift to reach the top of the block");
+    Bot.walkTo(500, 3);
+  };
+  Bot.record("spring");
+  rideUp();
+  Bot.run(6);
+  Bot.stop();
+  rideUp();
+  Bot.waitUntil(restOf("spring"), 900, "the spring to settle");
+  Bot.walkTo(470, 3);
+  jumpToSpring(500, 1);
+  Bot.walkTo(590);
+  Bot.expect(G.won, "up to the high ledge");
 };
 
 // ---------------------------------------------------------------- the lab: one room per new echo
