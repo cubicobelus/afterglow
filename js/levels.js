@@ -1594,6 +1594,29 @@ def(10, "SECOND THOUGHTS", {
   g.fill(46, 5, 46, 6, "X");
   g.set(3, 8, "L").set(16, 9, "L").set(24, 4, "L");
 });
+def(10, "THE OTHER HALF", {
+  cols: 48, rows: 27, echoes: ["phase", "calm", "shift", "mirror", "shade"], recMax: 40, swap: true,
+  hint: "THE WALL GOES ALL THE WAY UP AND THE LAMP IS ON THE OTHER SIDE. A RING DOES NOT CARE ABOUT WALLS. WHAT YOU SWAP WITH TAKES YOUR PLACE, AND STANDS ON WHATEVER YOU STOOD ON.",
+}, (g) => {
+  g.base();
+  g.set(8, 21, "@");
+  g.fill(23, 1, 23, 21, "#");
+  // the left half: a glass closet with a plate, a vent gap, and a block by the wall
+  g.fill(2, 16, 5, 16, "#").fill(5, 17, 5, 21, "%");
+  g.set(3, 21, "a");
+  g.pit(12, 14);
+  g.set(15, 21, "<");
+  g.fill(16, 19, 22, 21, "#");
+  // the right half: solid above the inner rooms, so no swap lands inside them from above
+  g.fill(24, 1, 31, 19, "#");
+  g.fill(24, 20, 24, 21, "X");
+  g.fill(25, 20, 25, 21, "+");
+  g.fill(28, 20, 28, 21, "B");
+  g.fill(31, 20, 31, 21, "A");
+  g.set(44, 21, "b");
+  g.set(10, 10, "L").set(38, 10, "L").set(44, 14, "L");
+});
+
 
 
 
@@ -1867,6 +1890,7 @@ const PAR = {
   "THE LONG WAY": { t: 380, r: 8 },
   "GOLD LEAF": { t: 80, r: 5 },
   "SECOND THOUGHTS": { t: 160, r: 7 },
+  "THE OTHER HALF": { t: 35, r: 5 },
 };
 for (const l of LEVELS) l.par = PAR[l.name];
 

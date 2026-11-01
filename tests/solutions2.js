@@ -1942,3 +1942,49 @@ SOLUTIONS["SECOND THOUGHTS"] = () => {
   settleAll();
   Bot.walkTo(930);
 };
+
+SOLUTIONS["THE OTHER HALF"] = () => {
+  // The phase opens the glass closet. A calm hung just past the edge of the vent gap gets you across it and up onto the block, where the
+  // shift stands against the wall: its ring opens the gold on the other side. The puppet waits on the left floor, so it stands on the right
+  // floor. Swapping from the plate in the closet leaves the puppet on that plate, holding the near door on the right; a shade, recorded
+  // through that same swap, holds the far plate on the right.
+  const swapFromPlate = () => {
+    settle("phase", 40);
+    Bot.waitUntil(() => G.echoes.mirror && !G.echoes.mirror.moving, 900, "the puppet to stop");
+    Bot.walkTo(70, 3);
+    Bot.run(4);
+    Bot.select("mirror");
+    Bot.swap();
+    Bot.run(6);
+    Bot.expect(Bot.px() > 500, "on the other side");
+  };
+  recWait("phase", 130, 10);
+  Bot.record("calm");
+  Bot.walkTo(232, 3);
+  Bot.dir(1);
+  Bot.jumpKey(true);
+  Bot.run(6);
+  Bot.jumpKey(false);
+  Bot.dir(0);
+  Bot.stop();
+  Bot.record("shift");
+  settle("calm", 40);
+  Bot.walkTo(222, 3);
+  Bot.jumpTo(310, 24);
+  Bot.walkTo(306, 3);
+  Bot.jumpTo(350, 24);
+  Bot.expect(G.p.onGround && Bot.feet() <= 381, "up on the block");
+  Bot.walkTo(450, 3);
+  Bot.run(12);
+  Bot.stop();
+  recWait("mirror", 200, 10);
+  Bot.record("shade");
+  swapFromPlate();
+  Bot.walkTo(890, 3);
+  Bot.run(12);
+  Bot.stop();
+  swapFromPlate();
+  settleAll();
+  Bot.waitUntil(() => G.L.doorOpen.a && G.L.doorOpen.b, 600, "both doors");
+  Bot.walkTo(490);
+};
