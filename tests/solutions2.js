@@ -1770,20 +1770,58 @@ SOLUTIONS["THE LONG WAY"] = () => {
 };
 
 SOLUTIONS["GOLD LEAF"] = () => {
-  // The calm stands on the plate on the bridge: it holds the door and keeps the gold under it, but it is too far from the wall to keep that.
-  // The shift by the wall opens it and would take the bridge without the calm. The phase opens the glass.
-  recWait("calm", 270, 12);
+  // The calm is wanted at the bridge, so the vent is beaten by a gust hung just before the gap, blowing the other way. The shade holds
+  // the plate that lights the thorns. The shift stands right against the gold wall, and the calm on the bridge between the two: near
+  // enough to keep the gold the shift would take, far enough from the shift, the wall and the lit thorns to leave them alone.
+  const crossVent = () => {
+    settle("gust", 40);
+    Bot.walkTo(56, 4);
+    Bot.dir(1);
+    Bot.run(4);
+    Bot.jumpKey(true);
+    for (let i = 0; i < 200; i++) { if (i === 24) Bot.jumpKey(false); Bot.tick(); if (G.dead) Bot.fail("fell in the vent gap"); if (G.p.onGround && i > 5) break; }
+    Bot.jumpKey(false);
+    Bot.dir(0);
+    Bot.expect(Bot.px() > 140, "across the vent gap");
+  };
+  Bot.record("gust");
+  Bot.walkTo(71, 3);
+  Bot.dir(1);
+  Bot.run(2);
+  Bot.dir(0);
+  Bot.jumpKey(true);
+  Bot.run(12);
+  Bot.jumpKey(false);
+  Bot.stop();
+  Bot.record("shade");
+  crossVent();
+  Bot.walkTo(170, 3);
+  Bot.run(12);
+  Bot.stop();
+  const toBridge = () => {
+    crossVent();
+    Bot.waitUntil(() => G.L.doorOpen.a, 900, "the lamp over the thorns");
+    walkThrough(190, 4);
+    Bot.run(30);
+  };
+  Bot.record("calm");
+  toBridge();
+  Bot.walkTo(400, 3);
+  Bot.run(12);
+  Bot.stop();
   Bot.record("shift");
-  settle("calm", 30);
-  Bot.walkTo(350, 3);
+  toBridge();
+  Bot.walkTo(510, 3);
   Bot.run(12);
   Bot.stop();
   Bot.record("phase");
-  settleAll();
-  Bot.walkTo(450, 3);
+  toBridge();
+  settle("calm", 40);
+  settle("shift", 40);
+  Bot.walkTo(570, 3);
   Bot.run(12);
   Bot.stop();
+  toBridge();
   settleAll();
-  Bot.waitUntil(() => G.L.doorOpen.a, 600, "the door");
-  Bot.walkTo(610);
+  Bot.walkTo(612);
 };

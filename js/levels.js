@@ -1549,22 +1549,27 @@ def(10, "THE LONG WAY", {
   g.set(10, 8, "L").set(27, 6, "L").set(44, 5, "L");
 });
 def(10, "GOLD LEAF", {
-  echoes: ["calm", "shift", "phase"], recMax: 24,
-  hint: "THE RING THAT OPENS THE GOLD WALL ALSO TAKES THE GOLD BRIDGE FROM UNDER YOU. A CALM SILENCES EVERY POWER INSIDE ITS RING, EVEN A SHIFT.",
+  echoes: ["gust", "shade", "calm", "shift", "phase"], recMax: 40,
+  hint: "THE RING THAT OPENS THE GOLD WALL ALSO TAKES THE BRIDGE FROM UNDER YOU, AND NOTHING JUMPS UNDER THAT ROOF. A CALM SILENCES EVERY POWER INSIDE ITS RING: A SHIFT, A LAMP, A WALL OF GOLD, A VENT. THERE IS ONLY ONE.",
 }, (g) => {
   g.base();
-  g.set(3, 14, "@");
-  // a bridge of gold over the pit, under a low roof, and a gold wall at its end
-  g.pit(8, 15);
-  g.fill(8, 15, 15, 15, "+");
-  g.fill(11, 1, 17, 12, "#");
-  g.set(13, 14, "a");
-  g.fill(18, 1, 18, 14, "+");
-  g.fill(23, 1, 23, 14, "%");
-  g.fill(27, 1, 27, 8, "#").fill(27, 9, 27, 14, "A");
+  g.set(2, 14, "@");
+  g.pit(4, 6);
+  g.set(7, 14, "<");
+  // the plate lights the lamp over the thorns
+  g.set(8, 14, "a");
+  g.fill(10, 14, 14, 14, "t");
+  g.set(12, 10, "P");
+  // a gold bridge under a roof too low to jump, then a gold wall, then glass
+  g.pit(17, 22);
+  g.fill(17, 15, 22, 15, "+");
+  g.fill(15, 1, 25, 13, "#");
+  g.fill(26, 1, 26, 14, "+");
+  g.fill(29, 1, 29, 14, "%");
   g.fill(30, 13, 30, 14, "X");
-  g.set(5, 8, "L").set(21, 6, "L").set(25, 6, "L");
+  g.set(3, 8, "L").set(27, 6, "L");
 });
+
 
 
 
@@ -1833,7 +1838,7 @@ const PAR = {
   "PASSENGER": { t: 30, r: 2 },
   "THE LENS": { t: 50, r: 4 },
   "THE LONG WAY": { t: 380, r: 8 },
-  "GOLD LEAF": { t: 50, r: 3 },
+  "GOLD LEAF": { t: 80, r: 5 },
 };
 for (const l of LEVELS) l.par = PAR[l.name];
 
