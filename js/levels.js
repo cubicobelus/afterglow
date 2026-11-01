@@ -1616,6 +1616,61 @@ def(10, "THE OTHER HALF", {
   g.set(44, 21, "b");
   g.set(10, 10, "L").set(38, 10, "L").set(44, 14, "L");
 });
+// The finale: a tower of four floors, one station for every echo the game has. 64 x 36 tiles, drawn at half size.
+def(10, "EVERY ECHO", {
+  cols: 64, rows: 36, recMax: 200,
+  echoes: ["shade", "glow", "fork", "calm", "gust", "tide", "spring", "mirror", "pull", "slow", "phase", "beam", "reflector", "shift", "flip", "swing", "vine", "branch", "shade", "portal", "portal"],
+  hint: "ONE OF EVERY ECHO, FLOOR BY FLOOR. EACH ONE IS RECORDED GETTING PAST WHAT THE OTHERS OPENED. TAB STEPS THROUGH THE SLOTS.",
+}, (g) => {
+  g.base();
+  // floors: the ground (surface row 31), then slabs at rows 23, 15 and 7, each with a way up at alternate ends
+  g.fill(1, 23, 57, 23, "#");
+  // floor one, left to right: a gap for a step, thorns, two plates and their door, a vent gap, a gust gap, a ferry gap, a spring up
+  g.set(2, 30, "@");
+  g.pit(5, 9);
+  g.fill(12, 30, 16, 30, "t");
+  g.set(18, 30, "c").set(20, 30, "c");
+  g.fill(22, 24, 22, 30, "C");
+  g.pit(26, 28);
+  g.set(29, 30, "<");
+  g.pit(35, 43);
+  g.set(44, 30, "<");
+  g.pit(49, 55);
+  g.set(3, 26, "L").set(24, 26, "L").set(46, 26, "L").set(60, 26, "L");
+  // floor two, right to left: a door whose plate is shut in a room across the tower, spikes, a blade in a tunnel, glass, a mushroom up
+  g.fill(1, 15, 16, 15, "#").fill(21, 15, 62, 15, "#");
+  g.fill(7, 16, 7, 22, "#").fill(12, 16, 12, 22, "#").set(9, 22, "d");
+  g.fill(51, 16, 51, 22, "D");
+  g.fill(42, 22, 47, 22, "^");
+  g.fill(30, 16, 37, 19, "#");
+  g.blade(33, 21, 26, 6, 0);
+  g.fill(24, 16, 24, 22, "%");
+  g.set(18, 22, "m");
+  g.set(55, 18, "L").set(44, 18, "L").set(14, 18, "L");
+  // floor three, left to right: thorns in a line, a gate lit by a turned beam, a gold wall, spikes under a low ceiling, a hole, a mushroom
+  g.fill(1, 7, 57, 7, "#");
+  g.fill(24, 14, 29, 14, "t");
+  g.set(33, 8, "s");
+  g.fill(37, 8, 37, 12, "#").fill(37, 13, 37, 14, "G");
+  g.fill(40, 8, 40, 14, "+");
+  g.fill(43, 8, 48, 12, "#").fill(45, 14, 47, 14, "^");
+  g.fill(50, 15, 55, 15, ".");
+  g.set(60, 14, "m");
+  g.set(19, 9, "L").set(50, 10, "L");
+  // floor three's left end is a sealed pocket, reached only by dropping from floor four
+  g.fill(16, 8, 16, 14, "#").set(5, 14, "a");
+  // floor four, right to left: a block, a gap in a low tunnel, then two doors, a plate, a hole down to the pocket, and the lamp
+  g.fill(44, 3, 46, 6, "#");
+  g.fill(26, 1, 36, 4, "#").fill(29, 7, 33, 7, ".");
+  g.set(17, 6, "b");
+  g.set(15, 7, ".");
+  g.fill(13, 1, 13, 4, "#").fill(13, 5, 13, 6, "B");
+  g.fill(11, 1, 11, 4, "#").fill(11, 5, 11, 6, "A");
+  g.fill(9, 5, 9, 6, "X");
+  g.set(40, 3, "L").set(56, 3, "L").set(6, 3, "L");
+});
+
+
 
 
 
@@ -1891,6 +1946,7 @@ const PAR = {
   "GOLD LEAF": { t: 80, r: 5 },
   "SECOND THOUGHTS": { t: 160, r: 7 },
   "THE OTHER HALF": { t: 35, r: 5 },
+  "EVERY ECHO": { t: 1785, r: 22 },
 };
 for (const l of LEVELS) l.par = PAR[l.name];
 

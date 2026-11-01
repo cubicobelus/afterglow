@@ -838,7 +838,7 @@ const leap = (x, hold) => Bot.jumpTo(x, hold === undefined ? 24 : hold);
 // echo is in place, ending on the far side). Echoes are recorded in order, each recording crossing the stations before it; then the whole route.
 // A replaying echo that is still walking cuts any beam it crosses and can be in the way, so wait for every echo to be at rest before crossing.
 // Big rooms on page three have recordings of a minute or more, so the wait scales with the longest recording.
-const settleAll = () => Bot.waitUntil(() => Object.values(G.echoes).every((e) => !e.moving && e.restT > 30), G.L.def.cols ? 7200 : 2400, "every echo to settle");
+const settleAll = () => Bot.waitUntil(() => Object.values(G.echoes).every((e) => e.kind === "tide" || (!e.moving && e.restT > 30)), G.L.def.cols ? 7200 : 2400, "every echo to settle"); // a tide never stops
 const runChain = (stations, finish) => {
   for (let k = 0; k < stations.length; k++) {
     if (!stations[k].key) continue;
@@ -1987,4 +1987,225 @@ SOLUTIONS["THE OTHER HALF"] = () => {
   settleAll();
   Bot.waitUntil(() => G.L.doorOpen.a && G.L.doorOpen.b, 600, "both doors");
   Bot.walkTo(490);
+};
+
+// ---------------------------------------------------------------- the finale, Every Echo: one station per echo, floor by floor
+// Floor one runs left to right on the ground (feet at y 620).
+const EVERY_ECHO = [
+  {
+    key: "shade",
+    // a gap a jump cannot clear: a shade stopped over it is the step
+    place() { Bot.walkTo(92, 3); Bot.dir(1); Bot.jumpKey(true); for (let i = 0; i < 26; i++) { if (i === 10) Bot.jumpKey(false); Bot.tick(); } Bot.jumpKey(false); Bot.dir(0); Bot.stop(); },
+    pass() {
+      settle("shade", 20);
+      const e = G.echoes.shade;
+      Bot.walkTo(90, 3);
+      Bot.jumpTo(e.x + PW / 2, 24);
+      Bot.expect(G.p.stand === e, "standing on the shade");
+      Bot.run(4);
+      Bot.dir(1); Bot.jumpKey(true);
+      for (let i = 0; i < 200; i++) { if (i === 12) Bot.jumpKey(false); Bot.tick(); if (G.dead) Bot.fail("fell in the step gap"); if (G.p.onGround && i > 4) break; }
+      Bot.jumpKey(false); Bot.dir(0);
+      Bot.expect(G.p.onGround && Bot.px() > 205 && Bot.px() < 236, "across the step gap");
+    },
+  },
+  stThorns("glow", 230, 352),
+  {
+    key: "fork",
+    // stay on the first plate a long while, then the second: for a while the twin holds the first
+    place() { Bot.walkTo(370, 3); Bot.run(240); Bot.walkTo(410, 3); Bot.run(10); Bot.stop(); },
+    pass() {
+      Bot.walkTo(424, 3);
+      for (let i = 0; i < 2000 && Bot.px() < 466; i++) { Bot.dir(G.L.doorOpen.c ? 1 : Bot.px() > 426 ? -1 : 0); Bot.tick(); if (G.dead) Bot.fail("crushed by door c"); }
+      Bot.dir(0);
+      Bot.expect(Bot.px() > 466, "through door c");
+    },
+  },
+  {
+    key: "calm",
+    place() { Bot.walkTo(512, 3); Bot.dir(1); Bot.jumpKey(true); Bot.run(6); Bot.jumpKey(false); Bot.dir(0); Bot.stop(); },
+    pass() { settle("calm", 40); Bot.walkTo(502, 3); Bot.jumpTo(592, 24); walkThrough(610); },
+  },
+  {
+    key: "gust",
+    place() { walkThrough(690, 4); Bot.dir(1); Bot.run(6); Bot.jumpKey(true); for (let i = 0; i < 34; i++) { if (i === 22) Bot.jumpKey(false); Bot.tick(); } Bot.jumpKey(false); Bot.dir(0); Bot.stop(); },
+    pass() {
+      settle("gust", 40);
+      const e = G.echoes.gust;
+      walkThrough(690, 4);
+      Bot.jumpTo(e.x + PW / 2, 24);
+      Bot.expect(G.p.stand === e, "standing on the gust");
+      Bot.run(4);
+      Bot.dir(1); Bot.jumpKey(true);
+      for (let i = 0; i < 200; i++) { if (i === 24) Bot.jumpKey(false); Bot.tick(); if (G.dead) Bot.fail("fell in the gust gap"); if (G.p.onGround && i > 5) break; }
+      Bot.jumpKey(false); Bot.dir(0);
+      Bot.expect(Bot.px() > 882, "across the gust gap");
+      walkThrough(940);
+    },
+  },
+  {
+    key: "tide",
+    place() { Bot.walkTo(972, 3); Bot.run(120); Bot.jumpKey(true); Bot.dir(1); Bot.run(36); Bot.jumpKey(false); Bot.dir(0); Bot.stop(); },
+    pass() {
+      walkThrough(966, 4);
+      // board early in its wait at the edge, on its way out (a tide plays its path forward, then back)
+      const tr = G.echoes.tide.trace, at = tr.map((t, i) => (Math.abs(t.x + PW / 2 - 972) < 2 ? i : -1)).filter((i) => i >= 0);
+      const i0 = at[0], i1 = at[at.length - 1];
+      Bot.waitUntil(() => { const e = G.echoes.tide, n = e.trace.length, k = Math.floor(e.clk) % (2 * (n - 1)); return k >= i0 + 40 && k <= (i0 + i1) / 2; }, 9000, "the tide waiting at the edge");
+      Bot.jumpTo(972, 12);
+      // later echoes recorded riding the tide ride along with it, so standing on any of them is the same ride
+      Bot.expect(G.p.stand && G.p.stand.trace, "on the tide or something riding it");
+      const n = G.echoes.tide.trace.length;
+      Bot.waitUntil(() => { const e = G.echoes.tide; return Math.floor(e.clk) % (2 * (n - 1)) >= n - 3; }, 900, "the ride out over the gap");
+      Bot.jumpTo(1150, 24);
+      Bot.expect(G.p.onGround && Bot.px() > 1125, "across the ferry gap");
+    },
+  },
+  {
+    key: "spring",
+    place() { Bot.walkTo(1190, 3); Bot.run(8); Bot.stop(); },
+    pass() {
+      settle("spring", 30);
+      Bot.walkTo(1150, 3);
+      Bot.jumpKey(true);
+      let b = false;
+      for (let i = 0; i < 300; i++) {
+        if (G.p.vy < -520) b = true;
+        Bot.dir(!b ? (Math.abs(1190 - Bot.px()) < 3 ? 0 : Math.sign(1190 - Bot.px())) : Bot.feet() < 455 ? -1 : 0);
+        Bot.tick();
+        if (G.dead) Bot.fail("fell");
+        if (b && G.p.onGround) break;
+      }
+      Bot.jumpKey(false); Bot.dir(0);
+      Bot.expect(G.p.onGround && Bot.feet() <= 461, "up on floor two");
+    },
+  },
+  // Floor two runs right to left (feet at y 460).
+  { key: "mirror", place() { Bot.walkTo(1090, 3); Bot.run(10); Bot.stop(); }, pass() { Bot.waitUntil(() => G.L.doorOpen.d, 2400, "the puppet on plate d"); Bot.walkTo(1000, 3); } },
+  {
+    key: "pull",
+    place() { Bot.walkTo(966, 3); Bot.dir(-1); Bot.jumpKey(true); for (let i = 0; i < 28; i++) { if (i === 22) Bot.jumpKey(false); Bot.tick(); if (G.dead) Bot.fail("fell"); } Bot.jumpKey(false); Bot.dir(0); Bot.stop(); },
+    pass() {
+      settle("pull", 40);
+      Bot.dir(-1);
+      for (let i = 0; i < 900; i++) { Bot.tick(); if (G.dead) Bot.fail("fell on the spikes"); if (G.p.onGround && Bot.px() < 832) break; }
+      Bot.dir(0);
+    },
+  },
+  {
+    key: "slow",
+    place() { Bot.walkTo(740, 3); Bot.run(10); Bot.stop(); },
+    pass() {
+      settle("slow", 40);
+      Bot.walkTo(718, 2);
+      const bl = G.L.blades[0];
+      Bot.waitUntil(() => { const a = ((bladeAngle(bl) % Math.PI) + Math.PI) % Math.PI; return a > 2.75; }, 1500, "the blade to come level");
+      Bot.dir(-1);
+      for (let i = 0; i < 200 && Bot.px() > 590; i++) { Bot.tick(); if (G.dead) Bot.fail("hit by the blade"); }
+      Bot.dir(0);
+    },
+  },
+  {
+    key: "phase",
+    place() { Bot.walkTo(510, 3); Bot.run(10); Bot.stop(); },
+    pass() {
+      settle("phase", 40);
+      Bot.walkTo(400, 3);
+      // the mushroom under the shaft: a held bounce, then over onto floor three
+      Bot.jumpKey(true);
+      let b = false;
+      for (let i = 0; i < 300; i++) {
+        if (G.p.vy < -520) b = true;
+        Bot.dir(!b ? (Math.abs(370 - Bot.px()) < 3 ? 0 : Math.sign(370 - Bot.px())) : Bot.feet() < 296 ? 1 : 0);
+        Bot.tick();
+        if (G.dead) Bot.fail("fell");
+        if (b && G.p.onGround) break;
+      }
+      Bot.jumpKey(false); Bot.dir(0);
+      Bot.expect(G.p.onGround && Bot.feet() <= 301, "up on floor three");
+    },
+  },
+  // Floor three runs left to right (feet at y 300).
+  { key: "beam", place() { Bot.walkTo(470, 3); Bot.run(10); Bot.stop(); }, pass() { settle("beam", 30); Bot.walkTo(470, 3); Bot.dir(1); for (let i = 0; i < 400 && Bot.px() < 612; i++) { Bot.tick(); if (G.dead) Bot.fail("died on the thorns"); } Bot.dir(0); } },
+  {
+    key: "reflector",
+    // a reflector sends a beam the opposite way to the way it faces, so it ends facing back toward the thorns
+    place() { Bot.walkTo(684, 3); Bot.dir(-1); for (let i = 0; i < 100 && Bot.px() > 671; i++) Bot.tick(); Bot.dir(0); Bot.run(10); Bot.stop(); },
+    pass() { settle("reflector", 30); Bot.waitUntil(() => G.L.gates.some((gt) => gt.open), 600, "the gate"); Bot.walkTo(772, 3); },
+  },
+  { key: "shift", place() { Bot.walkTo(790, 3); Bot.run(10); Bot.stop(); }, pass() { settle("shift", 30); Bot.walkTo(846, 3); } },
+  {
+    key: "flip",
+    place() { Bot.walkTo(888, 3); Bot.run(10); Bot.stop(); },
+    pass() {
+      settle("flip", 30);
+      Bot.walkTo(870, 3);
+      Bot.dir(1);
+      for (let i = 0; i < 300 && !(G.p.onGround && Bot.px() > 975 && G.p.g > 0); i++) { Bot.tick(); if (G.dead) Bot.fail("died under the low ceiling"); }
+      Bot.dir(0);
+      Bot.expect(G.p.onGround && Bot.px() > 975, "past the spikes");
+    },
+  },
+  {
+    key: "swing",
+    // the rope hangs from a jump stopped on its way down into the hole
+    place() { Bot.walkTo(990, 2); Bot.run(6); Bot.dir(1); Bot.jumpKey(true); for (let i = 0; i < 34; i++) Bot.tick(); Bot.dir(0); Bot.jumpKey(false); Bot.stop(); },
+    pass() {
+      Bot.waitUntil(() => { const r = G.ropes.find((q) => q.echo === G.echoes.swing); return r && r.len >= 119; }, 900, "the rope");
+      swingAcross(990, 10, 0.5);
+      Bot.expect(G.p.onGround && Bot.feet() <= 301 && Bot.px() > 1125, "across the hole");
+      // the mushroom under the shaft: a held bounce, then over onto floor four
+      Bot.walkTo(1170, 3);
+      Bot.jumpKey(true);
+      let b = false;
+      for (let i = 0; i < 300; i++) {
+        if (G.p.vy < -520) b = true;
+        Bot.dir(!b ? (Math.abs(1210 - Bot.px()) < 3 ? 0 : Math.sign(1210 - Bot.px())) : Bot.feet() < 136 ? -1 : 0);
+        Bot.tick();
+        if (G.dead) Bot.fail("fell");
+        if (b && G.p.onGround) break;
+      }
+      Bot.jumpKey(false); Bot.dir(0);
+      Bot.expect(G.p.onGround && Bot.feet() <= 141, "up on floor four");
+    },
+  },
+  // Floor four runs right to left (feet at y 140).
+  { key: "vine", place() { Bot.walkTo(950, 3); Bot.run(12); Bot.stop(); }, pass() { climbVine("vine", 60, -1); Bot.walkTo(860, 3); } },
+  {
+    key: "branch",
+    // the tunnel is too low to jump the hole: a bough grown from the edge, the way you faced, is the bridge
+    place() { Bot.walkTo(686, 2); Bot.dir(-1); Bot.tick(); Bot.dir(0); Bot.run(10); Bot.stop(); },
+    pass() { Bot.waitUntil(() => { const br = G.branches.find((q) => q.echo === G.echoes.branch); return br && br.w >= 100; }, 900, "the bough"); Bot.walkTo(556, 3); },
+  },
+  // Two doors and one second shade: it holds the near plate while a portal is left between the doors, its twin hangs in the air
+  // by the block, and then the shade drops through the hole to the plate in the pocket below, which holds the far door.
+  { key: "shade2", place() { Bot.walkTo(350, 3); Bot.run(12); Bot.stop(); }, pass() {} },
+  { key: "portal", place() { Bot.walkTo(332, 3); Bot.jumpTo(286, 12); Bot.expect(Bot.feet() < 145, "over the hole"); Bot.waitUntil(() => G.L.doorOpen.b, 900, "door b"); Bot.walkTo(250, 3); Bot.run(10); Bot.stop(); }, pass() {} },
+  { key: "portal2", place() { Bot.walkTo(420, 3); Bot.jumpKey(true); for (let i = 0; i < 60; i++) { Bot.tick(); if (i > 4 && G.p.vy > -20) break; } Bot.jumpKey(false); Bot.stop(); }, pass() {} },
+  {
+    key: "shade2",
+    place() { Bot.walkTo(310, 2); Bot.waitUntil(() => G.p.onGround && Bot.feet() > 290, 300, "the drop to the pocket"); Bot.walkTo(110, 3); Bot.run(12); Bot.stop(); },
+    pass() {
+      Bot.waitUntil(() => portalOn(G.echoes.portal) && portalOn(G.echoes.portal2) && G.L.doorOpen.a, 2400, "the portals and door a");
+      Bot.walkTo(440, 3);
+      // jump up into the hanging portal; stop steering once it has put you between the doors
+      Bot.jumpKey(true);
+      for (let i = 0; i < 120 && Bot.px() > 300; i++) { Bot.dir(Math.abs(420 - Bot.px()) < 3 ? 0 : Math.sign(420 - Bot.px())); Bot.tick(); if (G.dead) Bot.fail("fell"); }
+      Bot.jumpKey(false); Bot.dir(0);
+      Bot.expect(Bot.px() < 262 && Bot.px() > 230, "through the portals");
+      Bot.walkTo(190, 3);
+    },
+  },
+];
+SOLUTIONS["EVERY ECHO"] = () => {
+  // Each station's echo is recorded getting past every station before it, then one last run through all of them. No waiting for every
+  // echo to settle between recordings: the fork's two plates are only both held for a while, at the same time in every run.
+  const st = EVERY_ECHO;
+  for (let k = 0; k < st.length; k++) {
+    Bot.record(st[k].key);
+    for (let j = 0; j < k; j++) st[j].pass();
+    st[k].place();
+  }
+  for (const s of st) s.pass();
+  Bot.expect(G.won, "at the lamp");
 };

@@ -125,8 +125,10 @@ const Bot = (() => {
   function select(slot) {
     const i = typeof slot === "string" ? G.L.slotKeys.indexOf(slot) : slot;
     if (i < 0) fail("no slot " + slot);
-    press("Digit" + (i + 1));
-    tick();
+    // keys 1 to 9 and 0 pick the first ten slots; Tab steps on to the rest
+    if (i <= 9) { press("Digit" + (i < 9 ? i + 1 : 0)); tick(); return; }
+    for (let k = 0; k < 30 && G.sel !== i; k++) { press("Tab"); tick(); }
+    if (G.sel !== i) fail("could not reach slot " + slot);
   }
 
   function swap() {
