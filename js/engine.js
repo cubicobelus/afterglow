@@ -55,7 +55,7 @@ const KINDS = {
   shift: { name: "SHIFT", color: "#8b5cff", blurb: "INSIDE ITS RING THE ROOM SHOWS ITS OTHER SIDE: GOLD BLOCKS VANISH AND DARK BLOCKS APPEAR." },
   branch: { name: "BRANCH", color: "#d2a25c", blurb: "GROWS A BOUGH SIDEWAYS FROM ITS FEET WHEN IT STOPS, THE WAY IT WAS FACING. YOU CAN WALK ON IT." },
   swing: { name: "SWING", color: "#f0d9a8", blurb: "HANGS A ROPE BELOW ITSELF WHEN IT STOPS. JUMP INTO IT TO HANG ON, LEFT AND RIGHT TO SWING, JUMP TO LET GO." },
-  portal: { name: "PORTAL", color: "#ff5fd2", blurb: "PORTALS COME IN PAIRS. WALK INTO ONE AND YOU COME OUT OF THE OTHER, STILL MOVING." },
+  portal: { name: "PORTAL", color: "#ff5fd2", blurb: "PORTALS COME IN PAIRS. WALK INTO ONE AND YOU COME OUT OF THE OTHER, STILL MOVING. A PORTAL HOLDS NO PLATE." },
 };
 // Slots always appear in this order, whatever order a level lists its echoes in, so the numbers on the keys
 // never spell out the order you should record in.
@@ -1075,7 +1075,8 @@ function updatePlates() {
   const L = G.L;
   const bodies = [];
   if (!G.dead) bodies.push(G.p);
-  for (const k in G.echoes) bodies.push(G.echoes[k]);
+  // A portal is a hole, not a body: it holds no plate.
+  for (const k in G.echoes) if (G.echoes[k].kind !== "portal") bodies.push(G.echoes[k]);
   // A mirror puppet that is being recorded is already standing on the other side of the room, and presses plates.
   if (G.rec && G.rec.kind === "mirror" && !G.dead) bodies.push({ x: W - G.p.x - G.p.w, y: G.p.y, w: G.p.w, h: G.p.h });
   const count = {}, pressed = {};

@@ -486,10 +486,20 @@ SOLUTIONS["BOUNCE WELL"] = () => {
   Bot.walkTo(570);
 };
 SOLUTIONS["CRANE"] = () => {
-  // Ride the platform over and walk to the plate on the far side; the shade stays there and holds the door back home.
+  // The phase rides the platform over and stops at the glass, which opens around it. The shade rides over next, walks through the hole and
+  // stays on the plate, which holds the door back home.
+  const ride = (x) => {
+    Bot.walkTo(262, 4);
+    Bot.waitUntil(() => G.t > 250, 900, "the platform to cross");
+    Bot.walkTo(x, 3);
+  };
+  Bot.record("phase");
+  ride(448);
+  Bot.run(10);
+  Bot.stop();
   Bot.record("shade");
-  Bot.walkTo(262, 4);
-  Bot.waitUntil(() => G.t > 250, 900, "the platform to cross");
+  ride(440);
+  settle("phase", 30);
   Bot.walkTo(490, 3);
   Bot.run(20);
   Bot.stop();
@@ -628,13 +638,24 @@ SOLUTIONS["ESCALATOR"] = () => {
 // ================================================================ tier 9: the trench (fork, blades, timed doors)
 SOLUTIONS["PAIR"] = SOLUTIONS["FORK"];
 SOLUTIONS["CLOSET"] = () => {
-  // The closet opens in the second half of each five second cycle. Slip in, stand on the plate and record, and the shade keeps the plate.
-  Bot.record("shade");
+  // The closet opens in the second half of each five second cycle. The glow slips in and stands on the one safe tile, lighting the thorns, so
+  // the shade can cross them to the plate. Then the glow is recorded again before the thorns on the road to the exit.
+  Bot.record("glow");
   Bot.waitUntil(() => G.t > 152, 600, "the closet door to open");
-  Bot.walkTo(50, 3);
-  Bot.run(24);
+  Bot.walkTo(150, 3);
+  Bot.run(10);
   Bot.stop();
+  Bot.record("shade");
+  Bot.waitUntil(() => G.t > 152 && G.echoes.glow && G.echoes.glow.restT > 30, 600, "the door and the light");
+  Bot.walkTo(30, 3);
+  Bot.run(20);
+  Bot.stop();
+  Bot.record("glow");
   Bot.waitUntil(() => G.L.doorOpen.a, 600, "the shade to reach the plate");
+  Bot.walkTo(326, 3);
+  Bot.run(10);
+  Bot.stop();
+  Bot.waitUntil(() => G.L.doorOpen.a && G.echoes.glow.restT > 30, 600, "the plate and the light");
   Bot.walkTo(570);
 };
 SOLUTIONS["TURNSTILE"] = () => {
@@ -875,8 +896,8 @@ const stBridge2 = (key, pitCol, afterX) => ({
 SOLUTIONS["THE FIRST LIGHT"] = () => {
   // The whole tower in a row: calm for the vent, shift for the bridge, pull for the water, vine for the wall.
   runChain([
-    stVent("calm", 6, 212),
-    stBridge2("shift", 12, 346),
+    { key: "calm", place: stVent("calm", 6).place, pass() { settle("calm", 40); Bot.walkTo(110, 3); leap(196, 24); walkThrough(212); } },
+    stBridge2("shift", 12, 350),
     stPull("pull", 360, 495),
     stVine("vine", 528, 180),
   ], () => Bot.walkTo(592));
@@ -894,30 +915,57 @@ const stFerry = () => ({
   },
 });
 SOLUTIONS["SALVAGE"] = () => {
-  runChain([
-    stFerry(),
-    stPull("pull", 320, 455),
-    stPlate("shade", 490, 520),
-  ], () => {
-    Bot.waitUntil(() => G.L.doorOpen.a, 900, "the door to open");
-    Bot.walkTo(592);
-  });
+  // A pull hung over the well. The shade waits a long while on the bank, then rides the platform, crosses the well in the pull and stands on
+  // the first plate. Its path is a ride from the bank to the far side for whoever stands on it while it waits. The pull is recorded again
+  // riding it, to the second plate, and the final run rides it the same way.
+  const rideShade = () => {
+    Bot.walkTo(80, 3);
+    Bot.waitUntil(() => { const e = G.echoes.shade; return e && Math.abs(e.x + PW / 2 - 110) < 3; }, 600, "the shade waiting on the bank");
+    Bot.run(4);
+    Bot.jumpTo(110, 14);
+    Bot.expect(G.p.stand === G.echoes.shade, "standing on the shade");
+    Bot.waitUntil(() => !G.echoes.shade.moving, 2400, "the ride across");
+    Bot.expect(Bot.px() > 470, "across the well");
+  };
+  Bot.record("pull");
+  stFerry().pass();
+  stPull("pull", 320, 455).place();
+  Bot.record("shade");
+  Bot.walkTo(110, 2);
+  Bot.run(200);
+  stFerry().pass();
+  stPull("pull", 320, 455).pass();
+  Bot.walkTo(490, 3);
+  Bot.run(12);
+  Bot.stop();
+  Bot.record("pull");
+  rideShade();
+  Bot.walkTo(530, 3);
+  Bot.run(12);
+  Bot.stop();
+  rideShade();
+  Bot.waitUntil(() => G.L.doorOpen.a, 1500, "the door to open");
+  Bot.walkTo(592);
 };
 SOLUTIONS["DEEP END"] = () => {
-  // The glow lights the thorns. The fork is recorded crossing them and the clock door: stay on the first plate a long while, then move to the
-  // second. In the final run do not wait for the twin: cross early and be at the door when the plates are both held.
-  recWait("glow", 110, 12);
+  // The calm by the gap silences the vent. The fork is recorded crossing the gap and the clock door: stay on the first plate a long while,
+  // then move to the second. In the final run do not wait for the twin: cross early and be at the door when the plates are both held.
+  const cross = () => {
+    settle("calm", 40);
+    Bot.walkTo(112, 3);
+    leap(200, 24);
+    walkThrough(228, 3);
+  };
+  recWait("calm", 114, 12);
   Bot.record("fork");
-  settle("glow", 40);
-  Bot.walkTo(228, 3);
+  cross();
   throughTimed("T", 232, 290);
   Bot.walkTo(310, 3);
   Bot.run(170);
   Bot.walkTo(370, 3);
   Bot.run(20);
   Bot.stop();
-  settle("glow", 40);
-  Bot.walkTo(228, 3);
+  cross();
   throughTimed("T", 232, 290);
   Bot.walkTo(408, 3);
   Bot.waitUntil(() => G.L.doorOpen.a, 1500, "the door to open");
@@ -1240,22 +1288,29 @@ SOLUTIONS["SWING"] = () => {
   Bot.walkTo(570);
 };
 SOLUTIONS["PORTAL"] = () => {
-  // One portal up on the shelf, the other on the plate below: it holds the door and it is the way back up.
+  // The shade holds the near door while a portal is left between the doors, and its twin goes by the spawn. Then the shade drops to the
+  // plate below for the far door, and the portals are the way back past the near door, which has shut.
+  recWait("shade", 450, 10);
   Bot.record("portal");
-  Bot.walkTo(440, 2);
-  Bot.run(10);
+  settle("shade", 10);
+  Bot.walkTo(432, 3);
+  Bot.jumpTo(388, 12);
+  Bot.waitUntil(() => G.L.doorOpen.b, 600, "the near door");
+  Bot.walkTo(350, 2);
+  Bot.run(8);
   Bot.stop();
-  Bot.record("portal2");
-  Bot.walkTo(600);
+  recWait("portal2", 556, 10);
+  Bot.record("shade");
+  Bot.walkTo(410, 2);
+  Bot.waitUntil(() => G.p.onGround && Bot.feet() > 290, 300, "the drop");
   Bot.walkTo(90, 2);
-  Bot.run(10);
+  Bot.run(8);
   Bot.stop();
-  Bot.waitUntil(() => portalOn(G.echoes.portal) && portalOn(G.echoes.portal2), 900, "both portals");
-  Bot.walkTo(600);
-  Bot.dir(-1);
-  for (let i = 0; i < 600 && G.p.y > 150; i++) Bot.tick();
+  Bot.waitUntil(() => portalOn(G.echoes.portal) && portalOn(G.echoes.portal2) && G.L.doorOpen.a, 1500, "both portals and the far door");
+  Bot.dir(1);
+  for (let i = 0; i < 200 && Bot.px() > 400; i++) Bot.tick();
   Bot.dir(0);
-  Bot.expect(G.p.y < 150 && G.L.doorOpen.a, "back up on the shelf with the door open");
+  Bot.expect(Bot.px() < 370 && Bot.px() > 330, "between the doors");
   Bot.walkTo(290);
 };
 

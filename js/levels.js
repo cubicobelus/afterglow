@@ -1002,8 +1002,8 @@ def(6, "ROPE", {
 });
 
 def(6, "CRANE", {
-  echoes: ["shade"], recMax: 20,
-  hint: "THE DOOR IS BACK HOME AND THE PLATE IS ACROSS THE WATER. SOMETHING THAT RODE THE PLATFORM OVER CAN STAY THERE.",
+  echoes: ["phase", "shade"], recMax: 20,
+  hint: "THE DOOR IS BACK HOME AND THE PLATE IS ACROSS THE WATER, SHUT IN GLASS. THE PLATFORM CAN TAKE MORE THAN ONE PASSENGER, ONE AT A TIME.",
 }, (g) => {
   g.base();
   g.set(10, 14, "@");
@@ -1011,8 +1011,10 @@ def(6, "CRANE", {
   g.fill(2, 13, 2, 14, "X");
   g.pit(13, 20);
   g.mover(12, 15, 18, 15, 3, { sp: 40, dwell: 60 });
+  // The plate sits in a glass closet: only something that rode over can open it, and only something else can walk in.
+  g.fill(23, 8, 25, 8, "#").fill(25, 9, 25, 14, "#").fill(23, 9, 23, 14, "%");
   g.set(24, 14, "a");
-  g.set(8, 8, "L").set(16, 5, "L").set(26, 8, "L");
+  g.set(8, 8, "L").set(16, 5, "L").set(28, 8, "L");
 });
 
 def(6, "BOUNCE WELL", {
@@ -1070,18 +1072,19 @@ def(6, "FLING", {
 
 def(6, "SALVAGE", {
   echoes: ["pull", "shade"], recMax: 40,
-  hint: "THE PLATFORM TAKES YOU TO THE ISLAND, A WELL TAKES YOU OFF IT, AND THE DOOR WANTS A PLATE HELD ON THE FAR BANK. WHAT YOU RECORD LATER IS RECORDED RIDING WHAT YOU RECORDED BEFORE.",
+  hint: "THE PLATFORM TAKES YOU TO THE ISLAND AND A WELL TAKES YOU OFF IT. THE DOOR WANTS BOTH PLATES HELD, SO THE WELL CANNOT STAY WHERE IT IS. WHAT CROSSED THE WELL CAN CARRY YOU ACROSS IT AGAIN, IF IT WAITS FOR YOU.",
 }, (g) => {
   g.base();
   g.set(2, 14, "@");
   g.pit(7, 13);
   g.mover(6, 15, 11, 15, 3, { sp: 40, dwell: 60 });
   g.pit(16, 21);
-  g.set(24, 14, "a");
+  g.set(24, 14, "a").set(26, 14, "a");
   g.fill(27, 1, 27, 8, "#").fill(27, 9, 27, 14, "A");
   g.fill(29, 13, 29, 14, "X");
   g.set(4, 8, "L").set(10, 5, "L").set(17, 4, "L").set(25, 8, "L");
 });
+
 
 def(6, "DOCKSIDE", {
   bonus: 20, echoes: ["pull", "shade"], recMax: 60,
@@ -1237,17 +1240,19 @@ def(8, "PAIR", {
 });
 
 def(8, "CLOSET", {
-  autoHint: true, echoes: ["shade"], recMax: 16, dark: true,
-  hint: "THE PLATE IS IN A CLOSET WHOSE DOOR OPENS AND SHUTS ON A CLOCK. AN ECHO DOES NOT NEED THE DOOR TO BE OPEN.",
+  autoHint: true, echoes: ["glow", "shade"], recMax: 16, dark: true,
+  hint: "THE PLATE IS IN A CLOSET WHOSE DOOR OPENS AND SHUTS ON A CLOCK, AND ITS FLOOR IS THORNS. SO IS THE ROAD TO THE EXIT, AND ONE LIGHT CANNOT REACH BOTH.",
 }, (g) => {
   g.base();
-  g.set(8, 14, "@");
-  g.fill(1, 1, 4, 10, "#");
-  g.fill(5, 1, 5, 10, "#").fill(5, 11, 5, 14, "T");
-  g.set(2, 14, "a");
+  g.set(11, 14, "@");
+  g.fill(1, 1, 7, 10, "#");
+  g.fill(8, 1, 8, 10, "#").fill(8, 11, 8, 14, "T");
+  g.fill(2, 14, 6, 14, "t");
+  g.set(1, 14, "a");
   g.fill(14, 1, 14, 8, "#").fill(14, 9, 14, 14, "A");
+  g.fill(17, 14, 21, 14, "t");
   g.fill(28, 13, 28, 14, "X");
-  g.set(8, 10, "L").set(3, 12, "L").set(20, 10, "L");
+  g.set(11, 8, "L").set(26, 8, "L");
 });
 
 def(8, "MILLSTONE", {
@@ -1332,18 +1337,20 @@ def(8, "CLOCK TOWER", {
 });
 
 def(8, "DEEP END", {
-  echoes: ["glow", "fork"], recMax: 40, dark: true,
-  hint: "THE THORNS, THE CLOCK DOOR AND THE TWO PLATES, IN THAT ORDER. THE TWIN SLIPS THROUGH THE CLOCK DOOR ON ITS OWN SCHEDULE, SO ONLY YOU HAVE TO WAIT FOR IT.",
+  echoes: ["calm", "fork"], recMax: 40,
+  hint: "THE VENT, THE CLOCK DOOR AND THE TWO PLATES, IN THAT ORDER. THE TWIN SLIPS THROUGH THE CLOCK DOOR ON ITS OWN SCHEDULE, SO ONLY YOU HAVE TO WAIT FOR IT.",
 }, (g) => {
   g.base();
   g.set(2, 14, "@");
-  g.fill(6, 14, 9, 14, "t");
+  g.pit(6, 8);
+  g.set(9, 14, "<");
   g.fill(12, 1, 12, 8, "#").fill(12, 9, 12, 14, "T");
   g.set(15, 14, "a").set(18, 14, "a");
   g.fill(21, 1, 21, 8, "#").fill(21, 9, 21, 14, "A");
   g.fill(28, 13, 28, 14, "X");
   g.set(4, 10, "L").set(14, 10, "L").set(24, 8, "L");
 });
+
 
 def(8, "FOUR CORNERS", {
   bonus: 20, echoes: ["fork", "fork"], recMax: 30, dark: true,
@@ -1388,19 +1395,23 @@ def(9, "NIGHT STAIRS", {
   g.set(5, 8, "L").set(15, 3, "L").set(26, 1, "L");
 });
 
-def(9, "WAY BACK", {
-  unlock: "portal", echoes: ["portal", "portal"], recMax: 14,
-  hint: "THE DOOR BY THE EXIT WANTS THE PLATE DOWN BELOW, AND ONCE YOU DROP THERE IS NO CLIMBING BACK. PORTALS COME IN PAIRS: ONE LEFT UP HERE IS A WAY BACK.",
-}, (g) => {
+// Way Back and the portal room in the lab share one layout.
+const wayBack = (g) => {
   g.base();
-  g.fill(13, 6, 28, 6, "#");
+  g.fill(13, 6, 19, 6, "#").fill(21, 6, 28, 6, "#");
   g.fill(12, 1, 12, 5, "#");
-  g.fill(18, 1, 18, 3, "#").fill(18, 4, 18, 5, "A");
+  g.fill(16, 1, 16, 3, "#").fill(16, 4, 16, 5, "A");
+  g.fill(18, 1, 18, 3, "#").fill(18, 4, 18, 5, "B");
   g.set(25, 5, "@");
+  g.set(22, 5, "b");
   g.fill(14, 4, 14, 5, "X");
   g.set(4, 14, "a");
   g.set(6, 9, "L").set(22, 2, "L").set(26, 10, "L");
-});
+};
+def(9, "WAY BACK", {
+  unlock: "portal", echoes: ["shade", "portal", "portal"], recMax: 14,
+  hint: "TWO DOORS, TWO PLATES, ONE SHADE. THE PLATE FOR THE FAR DOOR IS DOWN BELOW, AND WHAT DROPS THERE STAYS THERE. A PORTAL IS A HOLE, NOT A WEIGHT: IT HOLDS NO PLATE, BUT ONE LEFT BETWEEN THE DOORS IS A WAY BACK.",
+}, wayBack);
 
 def(9, "KEYSTONE", {
   echoes: ["shift", "shade"], recMax: 20,
@@ -1476,10 +1487,10 @@ def(9, "THE FIRST LIGHT", {
 }, (g) => {
   g.base();
   g.set(2, 14, "@");
-  g.pit(6, 7);
+  g.pit(6, 8);
   g.set(9, 14, "<");
-  g.fill(12, 15, 15, 17, ".");
-  g.fill(12, 15, 15, 15, "*");
+  g.fill(12, 15, 16, 17, ".");
+  g.fill(12, 15, 16, 15, "*");
   g.pit(18, 23);
   g.fill(27, 9, 30, 14, "#");
   g.fill(29, 7, 29, 8, "X");
@@ -1623,18 +1634,9 @@ def(10, "SWING", {
 });
 
 def(10, "PORTAL", {
-  lab: true, unlock: "portal", echoes: ["portal", "portal"], recMax: 14,
-  hint: "THE DOOR BY THE EXIT WANTS THE PLATE DOWN BELOW, AND ONCE YOU DROP THERE IS NO CLIMBING BACK. A PORTAL LEFT UP HERE IS A WAY BACK.",
-}, (g) => {
-  g.base();
-  g.fill(13, 6, 28, 6, "#");
-  g.fill(12, 1, 12, 5, "#");
-  g.fill(18, 1, 18, 3, "#").fill(18, 4, 18, 5, "A");
-  g.set(25, 5, "@");
-  g.fill(14, 4, 14, 5, "X");
-  g.set(4, 14, "a");
-  g.set(6, 9, "L").set(22, 2, "L").set(26, 10, "L");
-});
+  lab: true, unlock: "portal", echoes: ["shade", "portal", "portal"], recMax: 14,
+  hint: "TWO DOORS, TWO PLATES, ONE SHADE. A PORTAL IS A HOLE, NOT A WEIGHT: IT HOLDS NO PLATE, BUT ONE LEFT BETWEEN THE DOORS IS A WAY BACK.",
+}, wayBack);
 
 def(10, "FLOAT", {
   lab: true, benched: true, unlock: "float", echoes: ["float"], recMax: 8,
@@ -1727,7 +1729,7 @@ const PAR = {
   "SURFACE LIGHT": { t: 20, r: 1 },
   "TWO TIERS": { t: 35, r: 2 },
   "GRAPPLE": { t: 20, r: 1 },
-  "CRANE": { t: 25, r: 1 },
+  "CRANE": { t: 35, r: 2 },
   "BOUNCE WELL": { t: 25, r: 2 },
   "SPROUT": { t: 25, r: 1 },
   "HANGING VINE": { t: 25, r: 1 },
@@ -1735,7 +1737,7 @@ const PAR = {
   "TREETOP": { t: 20, r: 1 },
   "ESCALATOR": { t: 45, r: 3 },
   "PAIR": { t: 30, r: 1 },
-  "CLOSET": { t: 25, r: 1 },
+  "CLOSET": { t: 50, r: 3 },
   "TURNSTILE": { t: 35, r: 1 },
   "THORN PAIR": { t: 35, r: 2 },
   "CLOCK TOWER": { t: 30, r: 1 },
@@ -1747,7 +1749,7 @@ const PAR = {
   "UNDERTOW": { t: 55, r: 3 },
   "THE FIRST LIGHT": { t: 90, r: 4 },
   "WINDFALL": { t: 40, r: 2 },
-  "SALVAGE": { t: 70, r: 2 },
+  "SALVAGE": { t: 90, r: 3 },
   "DOCKSIDE": { t: 130, r: 2 },
   "CANOPY": { t: 35, r: 2 },
   "DEEP END": { t: 35, r: 2 },
@@ -1766,7 +1768,7 @@ const PAR = {
   "MILLSTONE": { t: 25, r: 1 },
   "LONG SHUTTER": { t: 30, r: 1 },
   "THE GRINDER": { t: 30, r: 2 },
-  "WAY BACK": { t: 35, r: 2 },
+  "WAY BACK": { t: 25, r: 4 },
   "GOLD SEAL": { t: 40, r: 4 },
   "OVER THE WALL": { t: 25, r: 3 },
   "PULSE": { t: 45, r: 2 },
