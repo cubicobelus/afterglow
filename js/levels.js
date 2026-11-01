@@ -1498,8 +1498,8 @@ def(9, "THE FIRST LIGHT", {
 });
 
 def(9, "GOLDEN HOUR", {
-  bonus: 20, echoes: ["shift", "shift"], recMax: 40, swap: true,
-  hint: "A LONG BRIDGE AND THEN A STAIRCASE, BOTH ONLY THERE IN A RING OF SHIFT. THE FIRST RING CAN BE LEAPT ACROSS THE BRIDGE BY SWAPPING. THE SECOND IS RECORDED AT THE STAIRS, AFTER YOU HAVE CROSSED.",
+  bonus: 20, echoes: ["shift", "shift", "calm"], recMax: 50, swap: true,
+  hint: "A LONG BRIDGE AND A STAIRCASE, BOTH ONLY THERE IN A RING OF SHIFT, AND A VENT AT THE TOP. THE FIRST RING CAN BE LEAPT ACROSS THE BRIDGE BY SWAPPING. A CALM SILENCES THE VENT, AND THE STAIRS TOO IF IT GETS CLOSE TO THEM.",
 }, (g) => {
   g.base();
   g.set(2, 14, "@");
@@ -1509,6 +1509,7 @@ def(9, "GOLDEN HOUR", {
   g.fill(25, 9, 27, 9, "*");
   g.fill(29, 6, 30, 14, "#");
   g.fill(30, 4, 30, 5, "X");
+  g.set(29, 5, "<");
   g.set(5, 8, "L").set(13, 5, "L").set(20, 6, "L");
 });
 
@@ -1753,7 +1754,7 @@ const PAR = {
   "DOCKSIDE": { t: 130, r: 2 },
   "CANOPY": { t: 35, r: 2 },
   "DEEP END": { t: 35, r: 2 },
-  "GOLDEN HOUR": { t: 40, r: 2 },
+  "GOLDEN HOUR": { t: 80, r: 3 },
   "LONG CROSSING": { t: 65, r: 5 },
   "PERISCOPE": { t: 25, r: 2 },
   "SAFETY NET": { t: 40, r: 1 },

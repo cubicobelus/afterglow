@@ -1205,7 +1205,8 @@ SOLUTIONS["DOCKSIDE"] = () => {
 };
 SOLUTIONS["GOLDEN HOUR"] = () => {
   // Ring one at the left bank; a swap brings it to the middle of the bridge. Ring two is recorded at the foot of the stairs after crossing, hung in
-  // the air so that it brings up the first two steps.
+  // the air so that it brings up the first two steps. The vent on the ledge blows the last jump back, so a calm is recorded at the top of a
+  // jump from the second step: high enough to leave the steps alone, close enough to silence the vent.
   const crossBridge = () => {
     settle("shift", 30);
     Bot.walkTo(250, 4);
@@ -1214,6 +1215,14 @@ SOLUTIONS["GOLDEN HOUR"] = () => {
     Bot.swap();
     Bot.run(14);
     Bot.walkTo(372, 4);
+  };
+  const climb = () => {
+    settle("shift2", 30);
+    Bot.walkTo(406, 3);
+    Bot.jumpTo(452, 24);
+    Bot.expect(G.p.onGround && Bot.feet() < 245, "on the first step");
+    Bot.jumpTo(522, 24);
+    Bot.expect(G.p.onGround && Bot.feet() < 185, "on the second step");
   };
   recWait("shift", 150, 12);
   Bot.record("shift2");
@@ -1230,13 +1239,19 @@ SOLUTIONS["GOLDEN HOUR"] = () => {
   Bot.expect(found, "a hover window");
   Bot.jumpKey(false);
   Bot.stop();
+  Bot.record("calm");
+  crossBridge();
+  climb();
+  Bot.walkTo(520, 3);
+  Bot.dir(1);
+  Bot.jumpKey(true);
+  Bot.run(18);
+  Bot.jumpKey(false);
+  Bot.dir(0);
+  Bot.stop();
   settleAll();
   crossBridge();
-  Bot.walkTo(406, 3);
-  Bot.jumpTo(452, 24);
-  Bot.expect(G.p.onGround && Bot.feet() < 245, "on the first step");
-  Bot.jumpTo(522, 24);
-  Bot.expect(G.p.onGround && Bot.feet() < 185, "on the second step");
+  climb();
   Bot.walkTo(530, 3);
   Bot.jumpTo(592, 24);
   Bot.expect(G.p.onGround && Bot.feet() < 125, "up on the ledge");
