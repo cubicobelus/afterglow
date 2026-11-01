@@ -1829,3 +1829,116 @@ SOLUTIONS["GOLD LEAF"] = () => {
   settleAll();
   Bot.walkTo(810);
 };
+
+SOLUTIONS["SECOND THOUGHTS"] = () => {
+  // A gust hung over the vent gap (the gap is too wide for a step without wind). The calm first stands at the edge of the mushroom pit, where
+  // it puts the four mushrooms to sleep but not the one past the pit. The shade waits a long while at the edge, then walks across the
+  // sleeping mushrooms. A vine is hung at the top of a bounce on the last mushroom. Then the calm is recorded again on the bridge above, and
+  // every later run crosses the pit riding the shade, over mushrooms that are awake again.
+  const crossVent = () => {
+    settle("gust", 40);
+    const e = G.echoes.gust;
+    Bot.walkTo(70, 3);
+    Bot.jumpTo(e.x + PW / 2, 24);
+    Bot.expect(G.p.stand === e, "standing on the gust");
+    Bot.run(4);
+    Bot.dir(1);
+    Bot.jumpKey(true);
+    for (let i = 0; i < 200; i++) { if (i === 24) Bot.jumpKey(false); Bot.tick(); if (G.dead) Bot.fail("fell in the vent gap"); if (G.p.onGround && i > 5) break; }
+    Bot.jumpKey(false);
+    Bot.dir(0);
+    Bot.expect(Bot.px() > 262, "across the vent gap");
+  };
+  const hopOnto = (x) => {
+    Bot.dir(1);
+    Bot.jumpKey(true);
+    for (let i = 0; i < 80; i++) { if (i === 3) Bot.jumpKey(false); Bot.tick(); if (G.dead) Bot.fail("died hopping into the pit"); if (G.p.onGround && i > 3 && Bot.px() >= x) break; }
+    Bot.dir(0);
+  };
+  const bounceAndClimb = (record) => {
+    const vx = () => { const v = G.vines.find((q) => q.echo === G.echoes.vine); return v ? v.x : 510; };
+    if (!record) Bot.waitUntil(() => { const v = G.vines.find((q) => q.echo === G.echoes.vine); return v && v.base - v.top >= 118; }, 900, "the vine to grow");
+    Bot.dir(1);
+    Bot.jumpKey(true);
+    let b = false;
+    for (let i = 0; i < 400; i++) {
+      if (G.p.vy < -600) b = true;
+      if (!b) Bot.dir(Math.abs(510 - Bot.px()) < 3 ? 0 : Math.sign(510 - Bot.px()));
+      else if (record) { Bot.dir(0); if (G.p.vy > -30) break; }
+      else Bot.dir(Bot.feet() <= 150 ? 1 : Math.abs(vx() - Bot.px()) < 4 ? 0 : Math.sign(vx() - Bot.px()));
+      Bot.tick();
+      if (G.dead) Bot.fail("fell");
+      if (!record && b && G.p.onGround && Bot.feet() <= 141) break;
+    }
+    Bot.jumpKey(false);
+    Bot.dir(0);
+    if (record) Bot.stop();
+    else Bot.expect(G.p.onGround && Bot.feet() <= 141, "up on the upper floor");
+  };
+  const rideShade = () => {
+    crossVent();
+    walkThrough(340, 4);
+    Bot.waitUntil(() => { const e = G.echoes.shade; return e && Math.abs(e.x + PW / 2 - 370) < 3; }, 900, "the shade waiting at the pit");
+    Bot.run(4);
+    Bot.jumpTo(370, 12);
+    Bot.expect(G.p.stand === G.echoes.shade, "standing on the shade");
+    Bot.waitUntil(() => !G.echoes.shade.moving, 2400, "the ride across the pit");
+    Bot.expect(Bot.px() > 480 && !G.dead, "across the pit");
+    bounceAndClimb(false);
+  };
+  // the gust
+  Bot.record("gust");
+  Bot.walkTo(70, 3);
+  Bot.dir(1);
+  Bot.run(6);
+  Bot.jumpKey(true);
+  for (let i = 0; i < 34; i++) { if (i === 22) Bot.jumpKey(false); Bot.tick(); }
+  Bot.jumpKey(false);
+  Bot.dir(0);
+  Bot.stop();
+  // the calm at the pit, for now
+  Bot.record("calm");
+  crossVent();
+  walkThrough(390, 4);
+  Bot.run(12);
+  Bot.stop();
+  // the shade, which waits, then crosses the sleeping mushrooms
+  Bot.record("shade");
+  crossVent();
+  settle("calm", 40);
+  walkThrough(370, 4);
+  Bot.run(300);
+  hopOnto(412);
+  Bot.walkTo(490, 3);
+  Bot.run(12);
+  Bot.stop();
+  // the vine at the top of a bounce on the last mushroom
+  Bot.record("vine");
+  crossVent();
+  settle("calm", 40);
+  walkThrough(380, 4);
+  hopOnto(412);
+  Bot.walkTo(490, 3);
+  bounceAndClimb(true);
+  // the calm again, now on the bridge
+  Bot.record("calm");
+  rideShade();
+  Bot.walkTo(670, 3);
+  Bot.run(12);
+  Bot.stop();
+  Bot.record("shift");
+  rideShade();
+  Bot.walkTo(750, 3);
+  Bot.run(12);
+  Bot.stop();
+  Bot.record("phase");
+  rideShade();
+  settle("calm", 40);
+  settle("shift", 40);
+  Bot.walkTo(850, 3);
+  Bot.run(12);
+  Bot.stop();
+  rideShade();
+  settleAll();
+  Bot.walkTo(930);
+};

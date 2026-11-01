@@ -1570,6 +1570,31 @@ def(10, "GOLD LEAF", {
   g.fill(40, 20, 40, 21, "X");
   g.set(3, 8, "L").set(44, 8, "L");
 });
+def(10, "SECOND THOUGHTS", {
+  cols: 48, rows: 27, echoes: ["gust", "calm", "shade", "vine", "shift", "phase"], recMax: 60,
+  hint: "THE CALM IS WANTED IN TWO PLACES AND THERE IS ONLY ONE. WHAT CROSSED WHILE IT WAS THERE STILL CROSSES, AND CAN CARRY YOU.",
+}, (g) => {
+  g.base();
+  g.set(2, 21, "@");
+  // a vent gap too wide for a step without wind
+  g.pit(4, 12);
+  g.set(13, 21, "<");
+  // a pit of mushrooms under a low roof of spikes: no jump survives it, and the mushroom past it is the way up
+  g.pit(20, 23);
+  g.fill(20, 21, 23, 21, "m");
+  g.fill(20, 12, 23, 17, "#").fill(20, 18, 23, 18, "v");
+  g.set(25, 21, "m");
+  g.fill(26, 21, 46, 21, "^");
+  // the upper floor: a gold bridge under a roof too low to jump, a gold wall, glass and the lamp
+  g.fill(26, 7, 46, 7, "#");
+  g.fill(30, 7, 35, 7, "+");
+  g.fill(28, 1, 41, 5, "#");
+  g.fill(39, 1, 39, 6, "+");
+  g.fill(43, 1, 43, 6, "%");
+  g.fill(46, 5, 46, 6, "X");
+  g.set(3, 8, "L").set(16, 9, "L").set(24, 4, "L");
+});
+
 
 
 
@@ -1841,6 +1866,7 @@ const PAR = {
   "THE LENS": { t: 50, r: 4 },
   "THE LONG WAY": { t: 380, r: 8 },
   "GOLD LEAF": { t: 80, r: 5 },
+  "SECOND THOUGHTS": { t: 160, r: 7 },
 };
 for (const l of LEVELS) l.par = PAR[l.name];
 
