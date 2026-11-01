@@ -66,10 +66,16 @@ const CHAPTERS = [
     story: ["UNDER THE TOWER, BEFORE THE KEEPER.", "SOMEONE LIT IT FIRST."],
     pal: { bg1: "#1a1204", bg2: "#5c4310", wall: "#7a6a40", wallHi: "#d8c27a", wallLo: "#463a1c", mortar: "#2a1f08", accent: "#ffe27a" },
   },
+  // Page three, after the ending: big rooms that need many echoes at once.
+  {
+    name: "THE AFTERGLOW", line: "EVERY ECHO AT ONCE.", theme: "afterglow", mood: 9, page: 2,
+    story: ["THE LAMP BURNS. THE FLAME STAYS AWAKE.", "IT REMEMBERS EVERYTHING AT ONCE NOW."],
+    pal: { bg1: "#160a1c", bg2: "#4a2040", wall: "#5e4a6a", wallHi: "#c9a0c8", wallLo: "#35283f", mortar: "#1d1424", accent: "#ffc6e6" },
+  },
   // Not part of the game: a room per echo, to try each one. Shows up on the last page of the level select when the dev
   // switch (backslash) has unlocked everything.
   {
-    name: "THE LAB", line: "TRY THE NEW ECHOES.", theme: "lab", mood: 0, lab: true,
+    name: "THE LAB", line: "TRY THE NEW ECHOES.", theme: "lab", mood: 0, lab: true, page: 3,
     pal: { bg1: "#10131f", bg2: "#1d2640", wall: "#445070", wallHi: "#7f8fb8", wallLo: "#262d45", mortar: "#161b2c", accent: "#9fe3ff" },
   },
 ];
@@ -89,6 +95,7 @@ const INTERLUDE = {
   ],
 };
 const ENDING = {
+  after: "THE FIRST LIGHT",
   title: "THE FIRST LIGHT WAS YOURS.",
   lines: [
     "THE KEEPER NEVER LIT IT. HE ONLY KEPT IT.",
@@ -105,7 +112,7 @@ const ENDING = {
 };
 
 // The level select shows five tiers per page.
-const PAGES = [{ name: "THE TOWER" }, { name: "THE REFLECTION" }, { name: "THE LAB", dev: true }];
+const PAGES = [{ name: "THE TOWER" }, { name: "THE REFLECTION" }, { name: "THE AFTERGLOW" }, { name: "THE LAB", dev: true }];
 const TIERS_PER_PAGE = 5;
 
 const LEVELS = [];
@@ -1517,8 +1524,34 @@ def(9, "GOLDEN HOUR", {
   g.set(5, 8, "L").set(13, 5, "L").set(20, 6, "L");
 });
 
+// ================================================================ page three: the afterglow (big rooms, many echoes)
+// These rooms are 48 x 27 tiles and drawn at two thirds size. The floor surface is row 22.
+def(10, "THE LONG WAY", {
+  cols: 48, rows: 27, echoes: ["glow", "phase", "calm", "glow", "vine", "shade", "shift", "pull"], recMax: 90,
+  hint: "EIGHT ECHOES, AND EACH ONE IS RECORDED GETTING PAST EVERYTHING THE ONES BEFORE IT OPENED. THE TWO FLOORS MEET ONLY IN THE SHAFT ON THE RIGHT. KEYS 1 TO 8 PICK A SLOT, AND TAB STEPS TO THE NEXT.",
+}, (g) => {
+  g.base();
+  g.set(2, 21, "@");
+  // the lower floor, left to right: thorns, glass, a vent gap and a bridge of shadow planks
+  g.fill(5, 21, 9, 21, "t");
+  g.fill(13, 17, 13, 21, "%");
+  g.pit(19, 21);
+  g.set(22, 21, "<");
+  g.pit(25, 29);
+  g.fill(25, 22, 29, 22, "~");
+  // the upper floor, right to left from the shaft: a plate and its door, a wall of gold and a bed of spikes
+  g.fill(1, 16, 42, 16, "#");
+  g.set(40, 15, "a");
+  g.fill(37, 1, 37, 10, "#").fill(37, 11, 37, 15, "A");
+  g.fill(31, 1, 31, 15, "+");
+  g.fill(19, 15, 24, 15, "^");
+  g.fill(3, 14, 3, 15, "X");
+  g.set(10, 8, "L").set(27, 6, "L").set(44, 5, "L");
+});
+
+
 // ================================================================ the lab: one room per new echo (the benched ones last)
-def(10, "CALM", {
+def(11, "CALM", {
   lab: true, unlock: "calm", echoes: ["calm"], recMax: 8,
   hint: "A VENT BLOWS ACROSS THE GAP. RECORD A CALM BY THE EDGE: IT SILENCES THE WIND AROUND IT.",
 }, (g) => {
@@ -1530,7 +1563,7 @@ def(10, "CALM", {
   g.set(5, 8, "L").set(24, 8, "L");
 });
 
-def(10, "MIRROR", {
+def(11, "MIRROR", {
   lab: true, unlock: "mirror", echoes: ["mirror"], recMax: 8,
   hint: "THE PLATE IS BEHIND THE DOOR. WALK RIGHT AND YOUR PUPPET WALKS LEFT FROM THE OTHER SIDE. THE ROOM IS SYMMETRIC.",
 }, (g) => {
@@ -1542,7 +1575,7 @@ def(10, "MIRROR", {
   g.set(5, 9, "L").set(25, 9, "L");
 });
 
-def(10, "VINE", {
+def(11, "VINE", {
   lab: true, unlock: "vine", echoes: ["vine"], recMax: 8,
   hint: "RECORD A VINE AT THE FOOT OF THE WALL AND WAIT. HOLD JUMP TO CLIMB IT. LET GO AND YOU SLIDE.",
 }, (g) => {
@@ -1553,7 +1586,7 @@ def(10, "VINE", {
   g.set(5, 8, "L").set(14, 5, "L");
 });
 
-def(10, "PULL", {
+def(11, "PULL", {
   lab: true, unlock: "pull", echoes: ["pull"], recMax: 8,
   hint: "THE GAP IS TOO WIDE TO JUMP. RECORD A PULL IN THE AIR OVER THE MIDDLE: IT CATCHES YOU MID JUMP AND HOLDS YOU THERE.",
 }, (g) => {
@@ -1564,7 +1597,7 @@ def(10, "PULL", {
   g.set(5, 8, "L").set(13, 5, "L").set(24, 8, "L");
 });
 
-def(10, "BEAM", {
+def(11, "BEAM", {
   lab: true, unlock: "beam", echoes: ["beam"], recMax: 8,
   hint: "THE THORNS WITHER IN LIGHT. A BEAM LIGHTS EVERYTHING ALONG ITS LENGTH. STAND FACING THE THORNS AND RECORD.",
 }, (g) => {
@@ -1575,7 +1608,7 @@ def(10, "BEAM", {
   g.set(5, 8, "L").set(24, 8, "L");
 });
 
-def(10, "REFLECTOR", {
+def(11, "REFLECTOR", {
   lab: true, unlock: "reflector", echoes: ["reflector"], recMax: 8,
   hint: "A BEAM FALLS FROM THE CEILING AND THE GATE WANTS LIGHT. STAND IN THE BEAM AND RECORD A REFLECTOR: FACING LEFT IT TURNS THE BEAM TO THE RIGHT.",
 }, (g) => {
@@ -1587,7 +1620,7 @@ def(10, "REFLECTOR", {
   g.set(5, 8, "L").set(14, 6, "L");
 });
 
-def(10, "FORK", {
+def(11, "FORK", {
   lab: true, unlock: "fork", echoes: ["fork"], recMax: 14,
   hint: "THE DOOR NEEDS BOTH PLATES. STAND ON THE FIRST FOR A WHILE, THEN WALK TO THE SECOND AND STAY. YOUR TWIN FOLLOWS A FEW SECONDS LATER.",
 }, (g) => {
@@ -1599,7 +1632,7 @@ def(10, "FORK", {
   g.set(5, 8, "L").set(22, 8, "L");
 });
 
-def(10, "SHIFT", {
+def(11, "SHIFT", {
   lab: true, unlock: "shift", echoes: ["shift"], recMax: 8,
   hint: "THE GOLD BLOCK AND THE DARK BRIDGE ARE THE SAME ROOM SEEN FROM TWO SIDES. INSIDE THE RING GOLD VANISHES AND DARK APPEARS. RECORD INSIDE THE TUNNEL.",
 }, (g) => {
@@ -1613,7 +1646,7 @@ def(10, "SHIFT", {
   g.set(5, 8, "L").set(25, 8, "L");
 });
 
-def(10, "BRANCH", {
+def(11, "BRANCH", {
   lab: true, unlock: "branch", echoes: ["branch"], recMax: 8,
   hint: "THE TUNNEL IS TOO LOW TO JUMP THE GAP. RECORD A BRANCH STANDING AT THE EDGE, FACING ACROSS: IT GROWS A BOUGH THE WAY YOU FACED.",
 }, (g) => {
@@ -1625,7 +1658,7 @@ def(10, "BRANCH", {
   g.set(5, 8, "L").set(26, 8, "L");
 });
 
-def(10, "SWING", {
+def(11, "SWING", {
   lab: true, unlock: "swing", echoes: ["swing"], recMax: 8,
   hint: "THE GAP IS FAR TOO WIDE. JUMP OFF THE LEDGE AND RECORD A SWING ON THE WAY DOWN: ITS ROPE HANGS BELOW IT. JUMP ON, SWING WITH LEFT AND RIGHT, JUMP TO LET GO.",
 }, (g) => {
@@ -1638,12 +1671,12 @@ def(10, "SWING", {
   g.set(4, 2, "L").set(14, 4, "L").set(26, 5, "L");
 });
 
-def(10, "PORTAL", {
+def(11, "PORTAL", {
   lab: true, unlock: "portal", echoes: ["shade", "portal", "portal"], recMax: 14,
   hint: "TWO DOORS, TWO PLATES, ONE SHADE. A PORTAL IS A HOLE, NOT A WEIGHT: IT HOLDS NO PLATE, BUT ONE LEFT BETWEEN THE DOORS IS A WAY BACK.",
 }, wayBack);
 
-def(10, "FLOAT", {
+def(11, "FLOAT", {
   lab: true, benched: true, unlock: "float", echoes: ["float"], recMax: 8,
   hint: "BENCHED. THE LEDGE IS A LITTLE HIGHER THAN A JUMP. GRAVITY IS WEAK INSIDE THE RING.",
 }, (g) => {
@@ -1654,7 +1687,7 @@ def(10, "FLOAT", {
   g.set(5, 8, "L").set(14, 6, "L");
 });
 
-def(10, "SLOW", {
+def(11, "SLOW", {
   lab: true, unlock: "slow", echoes: ["tide", "slow"], recMax: 14,
   hint: "THE DOOR OPENS ONLY WHILE THE TIDE PASSES OVER THE PLATE, AND IT IS FAR TOO THICK TO CROSS IN THAT TIME. A SLOW RING MAKES THE TIDE LINGER.",
 }, (g) => {
@@ -1666,7 +1699,7 @@ def(10, "SLOW", {
   g.set(5, 8, "L").set(21, 8, "L");
 });
 
-def(10, "SHRINK", {
+def(11, "SHRINK", {
   lab: true, benched: true, unlock: "shrink", echoes: ["shrink"], recMax: 8,
   hint: "BENCHED. THE TUNNEL IS HALF A TILE HIGH. YOU ARE HALF SIZE INSIDE THE RING, AND STAY SMALL UNTIL THERE IS ROOM TO GROW.",
 }, (g) => {
@@ -1781,6 +1814,7 @@ const PAR = {
   "DOLDRUMS": { t: 25, r: 2 },
   "PASSENGER": { t: 30, r: 2 },
   "THE LENS": { t: 50, r: 4 },
+  "THE LONG WAY": { t: 380, r: 8 },
 };
 for (const l of LEVELS) l.par = PAR[l.name];
 

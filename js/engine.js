@@ -2,7 +2,13 @@
 
 // engine.js: input, physics, echoes and world rules. No drawing in here.
 
-const TILE = 20, COLS = 32, ROWS = 18, W = COLS * TILE, H = ROWS * TILE, DT = 1 / 60;
+const TILE = 20, DT = 1 / 60;
+// The screen is always 640 x 360. A room is normally the same size (32 x 18 tiles); a big room is drawn scaled down to fit.
+const SCREEN_W = 640, SCREEN_H = 360;
+let COLS = 32, ROWS = 18, W = COLS * TILE, H = ROWS * TILE;
+function setRoomSize(cols, rows) {
+  COLS = cols; ROWS = rows; W = COLS * TILE; H = ROWS * TILE;
+}
 const PW = 12, PH = 16;
 const RUN = 140, JUMP = 460, GRAV = 1500, MAXFALL = 620;
 const ACC_G = 1500, DEC_G = 1800, ACC_A = 950, DEC_A = 520;
@@ -151,9 +157,11 @@ function makeGrid() {
     blade(c, r, len, turns, ph) { g.blades.push({ c, r, len, turns: turns || 2.5, ph: ph || 0 }); return g; },
     set(c, r, ch) { if (c >= 0 && c < COLS && r >= 0 && r < ROWS) a[r][c] = ch; return g; },
     fill(c0, r0, c1, r1, ch) { for (let r = r0; r <= r1; r++) for (let c = c0; c <= c1; c++) g.set(c, r, ch); return g; },
-    // Walls on three sides, a ceiling and a floor three rows thick (surface at row 15).
-    base() { g.fill(0, 0, COLS - 1, 0, "#").fill(0, 0, 0, ROWS - 1, "#").fill(COLS - 1, 0, COLS - 1, ROWS - 1, "#").fill(0, 15, COLS - 1, ROWS - 1, "#"); return g; },
-    pit(c0, c1) { return g.fill(c0, 15, c1, ROWS - 1, "."); },
+    // Walls on three sides, a ceiling and a floor three rows thick (surface at row 15). A big room's floor is five rows thick
+    // (surface at row 22 of 27), so that the slot bar, drawn over the bottom of the scaled room, covers only floor.
+    floorRow: ROWS > 18 ? ROWS - 5 : ROWS - 3,
+    base() { g.fill(0, 0, COLS - 1, 0, "#").fill(0, 0, 0, ROWS - 1, "#").fill(COLS - 1, 0, COLS - 1, ROWS - 1, "#").fill(0, g.floorRow, COLS - 1, ROWS - 1, "#"); return g; },
+    pit(c0, c1) { return g.fill(c0, g.floorRow, c1, ROWS - 1, "."); },
     rows() { return a.map((r) => r.join("")); },
   };
   return g;
@@ -163,6 +171,7 @@ function makeGrid() {
 function parseLevel(which) {
   const idx = typeof which === "number" ? which : -1;
   const def = typeof which === "number" ? LEVELS[which] : which;
+  setRoomSize(def.cols || 32, def.rows || 18);
   const g = makeGrid();
   def.build(g);
   const rows = g.rows();
@@ -1111,9 +1120,12 @@ function handleActions() {
   }
   const n = L.echoes.length;
   // The selected slot is both what E records and what Q swaps with, so it can change while recording.
+  // Keys 1 to 9 and 0 pick the first ten slots; Tab steps to the next slot, for levels with more than ten.
   for (let i = 0; i < n; i++) {
-    if (Input.hit("Digit" + (i + 1)) || Input.hit("Numpad" + (i + 1))) { G.sel = i; SFX("ui"); }
+    const d = i < 9 ? String(i + 1) : i === 9 ? "0" : null;
+    if (d && (Input.hit("Digit" + d) || Input.hit("Numpad" + d))) { G.sel = i; SFX("ui"); }
   }
+  if (n > 1 && Input.hit("Tab")) { G.sel = (G.sel + 1) % n; SFX("ui"); }
   if (!G.rec && Input.hitBind("clear")) clearSelected();
   if (n && Input.hitBind("record")) {
     if (G.rec) stopRec();
@@ -1127,7 +1139,7 @@ function handleActions() {
 function controlInput() {
   if (Input.left() || Input.right()) return true;
   for (const n of ["jump", "record", "swap", "restart", "clear"]) if (Input.bind[n].some((c) => Input.pressed[c])) return true;
-  for (let i = 1; i <= 9; i++) if (Input.pressed["Digit" + i] || Input.pressed["Numpad" + i]) return true;
+  for (let i = 0; i <= 9; i++) if (Input.pressed["Digit" + i] || Input.pressed["Numpad" + i]) return true;
   return false;
 }
 

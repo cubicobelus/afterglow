@@ -42,16 +42,23 @@ const Render = (() => {
     return c;
   }
 
-  const darkCanvas = mkCanvas(W, H);
-  const darkCtx = darkCanvas.getContext("2d");
-  const vignette = mkCanvas(W, H);
+  // The darkness layer and the scaled-down world are the size of the room, so they are made again when the room size changes.
+  let darkCanvas = mkCanvas(W, H), darkCtx = darkCanvas.getContext("2d");
+  let roomCanvas = null, roomCtx = null;
+  function fitRoom() {
+    if (darkCanvas.width !== W || darkCanvas.height !== H) { darkCanvas = mkCanvas(W, H); darkCtx = darkCanvas.getContext("2d"); }
+    if (W !== SCREEN_W || H !== SCREEN_H) {
+      if (!roomCanvas || roomCanvas.width !== W || roomCanvas.height !== H) { roomCanvas = mkCanvas(W, H); roomCtx = roomCanvas.getContext("2d"); }
+    }
+  }
+  const vignette = mkCanvas(SCREEN_W, SCREEN_H);
   {
     const x = vignette.getContext("2d");
-    const g = x.createRadialGradient(W / 2, H / 2, H * 0.35, W / 2, H / 2, H * 0.95);
+    const g = x.createRadialGradient(SCREEN_W / 2, SCREEN_H / 2, SCREEN_H * 0.35, SCREEN_W / 2, SCREEN_H / 2, SCREEN_H * 0.95);
     g.addColorStop(0, "rgba(0,0,0,0)");
     g.addColorStop(1, "rgba(0,0,0,0.5)");
     x.fillStyle = g;
-    x.fillRect(0, 0, W, H);
+    x.fillRect(0, 0, SCREEN_W, SCREEN_H);
   }
 
   // A 5x5 emblem per echo kind, so kinds can be told apart without relying on colour.
@@ -490,6 +497,28 @@ const Render = (() => {
       fg.addColorStop(1, rgba(pal.accent, 0.16));
       x.fillStyle = fg;
       x.fillRect(0, H - 120, W, 120);
+    } else if (th.theme === "afterglow") {
+      // After the ending: the lit lamp seen from inside its own light. Rings of the beam and drifting embers, sized to the room.
+      const cx = W * 0.78, cy = H * 0.18;
+      for (let r2 = H * 0.1; r2 < W; r2 += H * 0.09) {
+        x.strokeStyle = rgba(pal.accent, Math.max(0.015, 0.09 - r2 / W * 0.08));
+        x.lineWidth = 2;
+        x.beginPath(); x.arc(cx, cy, r2, 0, TAU); x.stroke();
+      }
+      const lg = x.createRadialGradient(cx, cy, 2, cx, cy, H * 0.3);
+      lg.addColorStop(0, "rgba(255,230,200,0.35)");
+      lg.addColorStop(1, "rgba(255,230,200,0)");
+      x.fillStyle = lg;
+      x.fillRect(0, 0, W, H);
+      for (let i = 0; i < W / 6; i++) {
+        x.fillStyle = rgba(pal.accent, 0.08 + rng() * 0.18);
+        x.fillRect(Math.floor(rng() * W), Math.floor(rng() * H), rng() < 0.2 ? 2 : 1, 1);
+      }
+      const fg = x.createLinearGradient(0, H * 0.65, 0, H);
+      fg.addColorStop(0, "rgba(10,4,14,0)");
+      fg.addColorStop(1, "rgba(10,4,14,0.55)");
+      x.fillStyle = fg;
+      x.fillRect(0, H * 0.65, W, H * 0.35);
     } else if (th.theme === "lab") {
       x.fillStyle = "rgba(159,227,255,0.05)";
       for (let k = 0; k < W; k += TILE) x.fillRect(k, 0, 1, H);
@@ -528,6 +557,7 @@ const Render = (() => {
   }
 
   function bake(L) {
+    fitRoom();
     L.bg = bakeBackground(L);
     L.tiles = bakeTiles(L);
     L.motes = [];
@@ -1579,9 +1609,13 @@ const Render = (() => {
   }
 
   // ------------------------------------------------------------ world
-  function world(ctx, T) {
+  function world(screen, T) {
     const L = G.L;
     if (!L.bg) bake(L);
+    fitRoom();
+    // A big room is drawn at its own size, then scaled down onto the screen.
+    const big = W !== SCREEN_W || H !== SCREEN_H;
+    const ctx = big ? roomCtx : screen;
     const t = T;
     const pal = CHAPTERS[L.chapter].pal;
     ctx.save();
@@ -1649,7 +1683,13 @@ const Render = (() => {
     drawPlayer(ctx, t);
     drawParticles(ctx);
     ctx.restore();
-    ctx.drawImage(vignette, 0, 0);
+    if (big) {
+      screen.save();
+      screen.imageSmoothingEnabled = true;
+      screen.drawImage(roomCanvas, 0, 0, SCREEN_W, SCREEN_H);
+      screen.restore();
+    }
+    screen.drawImage(vignette, 0, 0);
   }
 
   // ------------------------------------------------------------ HUD
@@ -1704,10 +1744,12 @@ const Render = (() => {
       Font.draw(ctx, label, 28, 21, { scale: 1, color: "#ffffff", shadow: null });
     }
     if (L.echoes.length) {
-      const n = L.echoes.length, bw = n > 5 ? 72 : 76, gap = n > 5 ? 3 : 6;
+      // Up to eight slots fit with their names; more than that get narrow slots with a short name, or only the icon.
+      const n = L.echoes.length, compact = n > 8;
+      const gap = compact ? 2 : n > 5 ? 3 : 6, bw = compact ? Math.floor((SCREEN_W - 12 - (n - 1) * gap) / n) : n > 5 ? 72 : 76;
       const total = n * bw + (n - 1) * gap;
-      let x0 = Math.round((W - total) / 2);
-      const y0 = H - 30;
+      let x0 = Math.round((SCREEN_W - total) / 2);
+      const y0 = SCREEN_H - 30;
       for (let i = 0; i < n; i++) {
         const kind = L.echoes[i], k = KINDS[kind], key = L.slotKeys[i];
         const x = x0 + i * (bw + gap);
@@ -1721,35 +1763,43 @@ const Render = (() => {
         ctx.lineWidth = 1;
         ctx.strokeRect(x + 0.5, y0 + 0.5, bw - 1, 23);
         if (sel) { ctx.fillStyle = rgba(k.color, 0.14); ctx.fillRect(x + 1, y0 + 1, bw - 2, 22); }
+        const sc = recording ? (Math.floor(T / 15) % 2 ? "#ff6b6b" : "#ffb0b0") : have ? k.color : "#6b7385";
+        const keyLabel = i < 9 ? String(i + 1) : i === 9 ? "0" : "";
+        if (compact) {
+          // the name's colour says the state: red while recording, the echo's colour when ready, grey when empty
+          slotIcon(ctx, x + Math.round(bw / 2), y0 + 8, kind, T, have || recording);
+          if (keyLabel) Font.draw(ctx, keyLabel, x + 2, y0 + 2, { scale: 1, color: "#9fa7b8", shadow: null });
+          if (bw >= 30) Font.draw(ctx, k.name.slice(0, bw >= 44 ? 4 : 3) + (L.dupKinds.has(kind) ? L.slotNum[i] : ""), x + Math.round(bw / 2), y0 + 15, { scale: 1, color: sc, shadow: null, align: "center" });
+          continue;
+        }
         slotIcon(ctx, x + 14, y0 + 13, kind, T, have || recording);
-        Font.draw(ctx, String(i + 1), x + 4, y0 + 3, { scale: 1, color: "#9fa7b8", shadow: null });
+        Font.draw(ctx, keyLabel, x + 4, y0 + 3, { scale: 1, color: "#9fa7b8", shadow: null });
         Font.draw(ctx, label, x + 24, y0 + 4, { scale: 1, color: sel ? "#ffffff" : "#b6bdcc", shadow: null });
         const status = recording ? "REC" : have ? "READY" : "EMPTY";
-        const sc = recording ? (Math.floor(T / 15) % 2 ? "#ff6b6b" : "#ffb0b0") : have ? k.color : "#6b7385";
         Font.draw(ctx, status, x + 24, y0 + 14, { scale: 1, color: sc, shadow: null });
       }
       if (G.rec) {
         const frac = G.rec.trace.length / (L.recMax * 60);
-        const bwid = 200, bx = Math.round((W - bwid) / 2);
+        const bwid = 200, bx = Math.round((SCREEN_W - bwid) / 2);
         ctx.fillStyle = "rgba(6,8,16,0.7)";
         ctx.fillRect(bx - 1, 5, bwid + 2, 7);
         ctx.fillStyle = frac > 0.8 ? "#ff6b6b" : KINDS[G.rec.kind].color;
         ctx.fillRect(bx, 6, Math.round(bwid * frac), 5);
-        Font.draw(ctx, "RECORDING  " + keyName(Input.bind.record[0]) + (Input.bind.record.includes("Mouse0") ? " OR CLICK" : "") + " TO STOP", W / 2, 15, { scale: 1, color: "#ffd0d0", align: "center" });
+        Font.draw(ctx, "RECORDING  " + keyName(Input.bind.record[0]) + (Input.bind.record.includes("Mouse0") ? " OR CLICK" : "") + " TO STOP", SCREEN_W / 2, 15, { scale: 1, color: "#ffd0d0", align: "center" });
       }
       if (G.notice && G.notice.t > 0) {
         const a = Math.min(1, G.notice.t / 30);
-        Font.draw(ctx, G.notice.text, W / 2, H - 54, { scale: 1, color: "#ffb0b0", align: "center", alpha: a });
+        Font.draw(ctx, G.notice.text, SCREEN_W / 2, SCREEN_H - 54, { scale: 1, color: "#ffb0b0", align: "center", alpha: a });
       }
       const kn = (name) => keyName(Input.bind[name][0]);
       // The clear hint only appears once there is an echo to clear.
       const keys = kn("record") + " " + (G.rec ? "STOP" : "RECORD") + "   " + kn("restart") + " RESTART" + (L.swap ? "   " + kn("swap") + " SWAP" : "") + (Object.keys(G.echoes).length ? "   " + kn("clear") + " CLEAR" : "");
-      Font.draw(ctx, keys, W / 2, H - 41, { scale: 1, color: "rgba(220,226,240,0.55)", align: "center", shadow: null });
+      Font.draw(ctx, keys, SCREEN_W / 2, SCREEN_H - 41, { scale: 1, color: "rgba(220,226,240,0.55)", align: "center", shadow: null });
     } else {
-      Font.draw(ctx, keyName(Input.bind.restart[0]) + " RESTART", W / 2, H - 14, { scale: 1, color: "rgba(220,226,240,0.45)", align: "center", shadow: null });
+      Font.draw(ctx, keyName(Input.bind.restart[0]) + " RESTART", SCREEN_W / 2, SCREEN_H - 14, { scale: 1, color: "rgba(220,226,240,0.45)", align: "center", shadow: null });
     }
-    Font.draw(ctx, keyName(Input.bind.pause[0]) + " MENU", W - 8, 6, { scale: 1, color: "rgba(220,226,240,0.45)", align: "right", shadow: null });
-    if (L.lanterns.length) drawLanternIcon(ctx, W - 14, 28, G.lanternsGot > 0);
+    Font.draw(ctx, keyName(Input.bind.pause[0]) + " MENU", SCREEN_W - 8, 6, { scale: 1, color: "rgba(220,226,240,0.45)", align: "right", shadow: null });
+    if (L.lanterns.length) drawLanternIcon(ctx, SCREEN_W - 14, 28, G.lanternsGot > 0);
   }
 
   return { world, hud, bake, drawSwapIcon, drawActor, drawFlame, glowAt, drawLanternIcon, slotIcon, EMBLEMS, PLAYER_LOOK, rgba, tint, mulberry, hash };

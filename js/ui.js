@@ -224,7 +224,10 @@ const App = (() => {
     return (CHAPTERS[l.chapter].lab ? "L" : String(l.chapter + 1)) + "-" + n;
   });
   const tierLevels = CHAPTERS.map((c, t) => LEVELS.map((l, i) => i).filter((i) => LEVELS[i].chapter === t));
-  const pageOf = (i) => Math.floor(LEVELS[i].chapter / TIERS_PER_PAGE);
+  // A tier sits on the page its chapter names, or by default five tiers to a page.
+  const pageOfTier = (t) => (CHAPTERS[t].page !== undefined ? CHAPTERS[t].page : Math.floor(t / TIERS_PER_PAGE));
+  const tiersOnPage = (p) => CHAPTERS.map((c, t) => t).filter((t) => pageOfTier(t) === p);
+  const pageOf = (i) => pageOfTier(LEVELS[i].chapter);
   const pageVisible = (p) => !PAGES[p].dev || dev.unlockAll;
   const lastPage = () => { let q = 0; PAGES.forEach((pg, k) => { if (pageVisible(k)) q = k; }); return q; };
   const pageHasLevels = (p) => LEVELS.some((l, i) => pageOf(i) === p);
@@ -392,10 +395,12 @@ const App = (() => {
         { label: "LEVELS", act: goSelect },
       ];
     }
-    const nxt = mainNext(A.idx), last = nxt < 0, inter = !last && LEVELS[A.idx].name === INTERLUDE.after;
+    // The ending plays after the last level of page two; page three comes after it. The last level of page three just finishes.
+    const nxt = mainNext(A.idx), ends = LEVELS[A.idx].name === ENDING.after, last = nxt < 0 || ends;
+    const inter = !last && LEVELS[A.idx].name === INTERLUDE.after;
     const story = (spec, next) => fadeTo(() => { A.state = "ending"; A.story = spec; A.storyNext = next; A.endT = 0; Sfx.play("card"); });
     return [
-      { label: last ? "FINISH" : inter ? "CONTINUE" : "NEXT LEVEL", act: () => { if (last) story(ENDING, -1); else if (inter) story(INTERLUDE, nxt); else startLevel(nxt); } },
+      { label: last ? "FINISH" : inter ? "CONTINUE" : "NEXT LEVEL", act: () => { if (ends) story(ENDING, -1); else if (last) goSelect(); else if (inter) story(INTERLUDE, nxt); else startLevel(nxt); } },
       { label: "RETRY", act: () => startLevel(A.idx) },
       { label: "LEVELS", act: goSelect },
     ];
@@ -532,7 +537,7 @@ const App = (() => {
         if (A.selLevel !== A.syncSel) { A.syncSel = A.selLevel; A.page = pageOf(A.selLevel); }
         if (!pageVisible(A.page)) A.page = 0;
         const turn = Input.hitAny(["KeyE", "PageDown"]) ? 1 : Input.hitAny(["KeyQ", "PageUp"]) ? -1 : 0;
-        const jump = Input.hitAny(["Digit1", "Numpad1"]) ? 0 : Input.hitAny(["Digit2", "Numpad2"]) ? 1 : Input.hitAny(["Digit3", "Numpad3"]) ? 2 : -1;
+        const jump = Input.hitAny(["Digit1", "Numpad1"]) ? 0 : Input.hitAny(["Digit2", "Numpad2"]) ? 1 : Input.hitAny(["Digit3", "Numpad3"]) ? 2 : Input.hitAny(["Digit4", "Numpad4"]) ? 3 : -1;
         if (turn || jump >= 0) {
           const np = jump >= 0 ? (pageVisible(jump) ? jump : A.page) : Math.max(0, Math.min(lastPage(), A.page + turn));
           if (np !== A.page) {
@@ -608,17 +613,17 @@ const App = (() => {
   const stars = [];
   {
     const rng = Render.mulberry(42);
-    for (let i = 0; i < 120; i++) stars.push({ x: rng() * W, y: rng() * H * 0.75, p: rng() * 6, s: rng() < 0.15 ? 2 : 1 });
+    for (let i = 0; i < 120; i++) stars.push({ x: rng() * SCREEN_W, y: rng() * SCREEN_H * 0.75, p: rng() * 6, s: rng() < 0.15 ? 2 : 1 });
   }
 
   function drawTitleScene() {
     const t = A.T;
-    const g = ctx.createLinearGradient(0, 0, 0, H);
+    const g = ctx.createLinearGradient(0, 0, 0, SCREEN_H);
     g.addColorStop(0, "#050827");
     g.addColorStop(0.7, "#1d3566");
     g.addColorStop(1, "#2c4a80");
     ctx.fillStyle = g;
-    ctx.fillRect(0, 0, W, H);
+    ctx.fillRect(0, 0, SCREEN_W, SCREEN_H);
     for (const s of stars) {
       ctx.fillStyle = "rgba(255,255,255," + (0.35 + 0.45 * Math.sin(t * 0.03 + s.p)) + ")";
       ctx.fillRect(s.x, s.y, s.s, s.s);
@@ -629,9 +634,9 @@ const App = (() => {
     ctx.beginPath(); ctx.arc(588, 56, 34, 0, Math.PI * 2); ctx.fill();
     // sea
     ctx.fillStyle = "#0a1535";
-    ctx.fillRect(0, 262, W, H - 262);
+    ctx.fillRect(0, 262, SCREEN_W, SCREEN_H - 262);
     for (let i = 0; i < 26; i++) {
-      const wy = 266 + (i * 7) % 90, wx = (i * 83 + t * (0.15 + (i % 3) * 0.1)) % (W + 40) - 20;
+      const wy = 266 + (i * 7) % 90, wx = (i * 83 + t * (0.15 + (i % 3) * 0.1)) % (SCREEN_W + 40) - 20;
       ctx.fillStyle = "rgba(160,190,255," + (0.07 + (i % 4) * 0.02) + ")";
       ctx.fillRect(wx, wy, 14 + (i % 5) * 6, 1);
     }
@@ -666,10 +671,10 @@ const App = (() => {
     // rocks
     ctx.fillStyle = "#070a1a";
     ctx.beginPath();
-    ctx.moveTo(360, H); ctx.lineTo(380, 262); ctx.lineTo(420, 256); ctx.lineTo(520, 256); ctx.lineTo(560, 270); ctx.lineTo(590, H);
+    ctx.moveTo(360, SCREEN_H); ctx.lineTo(380, 262); ctx.lineTo(420, 256); ctx.lineTo(520, 256); ctx.lineTo(560, 270); ctx.lineTo(590, SCREEN_H);
     ctx.closePath(); ctx.fill();
     ctx.beginPath();
-    ctx.moveTo(0, H); ctx.lineTo(0, 296); ctx.lineTo(70, 288); ctx.lineTo(150, 300); ctx.lineTo(210, H);
+    ctx.moveTo(0, SCREEN_H); ctx.lineTo(0, 296); ctx.lineTo(70, 288); ctx.lineTo(150, 300); ctx.lineTo(210, SCREEN_H);
     ctx.closePath(); ctx.fill();
     // the spirit and an echo looking at the light
     Render.drawActor(ctx, 100, 272, Object.assign({ face: 1, st: 0, g: 1, t, sq: 0, vx: 0 }, Render.PLAYER_LOOK));
@@ -685,11 +690,11 @@ const App = (() => {
   }
 
   function drawPlainBg() {
-    const g = ctx.createLinearGradient(0, 0, 0, H);
+    const g = ctx.createLinearGradient(0, 0, 0, SCREEN_H);
     g.addColorStop(0, "#0a0e22");
     g.addColorStop(1, "#18284a");
     ctx.fillStyle = g;
-    ctx.fillRect(0, 0, W, H);
+    ctx.fillRect(0, 0, SCREEN_W, SCREEN_H);
     for (const s of stars) {
       ctx.fillStyle = "rgba(255,255,255," + (0.15 + 0.25 * Math.sin(A.T * 0.03 + s.p)) + ")";
       ctx.fillRect(s.x, s.y, s.s, s.s);
@@ -705,7 +710,7 @@ const App = (() => {
     ctx.restore();
     Font.draw(ctx, "YOUR PAST SELVES CAN HELP", 200, 78, { scale: 1, color: "#aab8dd", align: "center" });
     menu(titleItems(), hits, 200, 150, 28);
-    Font.draw(ctx, "ARROWS OR WASD + ENTER   F FULLSCREEN", 200, H - 22, { scale: 1, color: "rgba(200,210,235,0.5)", align: "center" });
+    Font.draw(ctx, "ARROWS OR WASD + ENTER   F FULLSCREEN", 200, SCREEN_H - 22, { scale: 1, color: "rgba(200,210,235,0.5)", align: "center" });
     const sx = totalStars(), lx = totalLanternsGot();
     if (sx || lx) Font.draw(ctx, "STARS " + sx + "/" + (gameLevels * 3) + "   LANTERNS " + lx + "/" + totalLanterns, 200, 96, { scale: 1, color: "#ffd35a", align: "center" });
   }
@@ -719,7 +724,7 @@ const App = (() => {
 
   function drawSettings(hits) {
     drawPlainBg();
-    Font.draw(ctx, "SETTINGS", W / 2, 22, { scale: 3, color: "#ffe9a8", align: "center" });
+    Font.draw(ctx, "SETTINGS", SCREEN_W / 2, 22, { scale: 3, color: "#ffe9a8", align: "center" });
     settingsItems().forEach((it, i) => {
       const y = 80 + i * 29, on = A.sel === i;
       const col = it.type === "danger" && resetArmed() ? "#ff8f8f" : on ? "#ffe9a8" : "#aab2c5";
@@ -728,12 +733,12 @@ const App = (() => {
       else if (it.type === "toggle") Font.draw(ctx, it.get() ? "ON" : "OFF", 380, y, { scale: 2, color: it.get() ? "#8fe39a" : "#ff8f8f" });
       hits.push({ x: 140, y: y - 4, w: 360, h: 24, i, act: it.act });
     });
-    Font.draw(ctx, resetArmed() ? "THIS ERASES ALL TIMES, STARS, LANTERNS AND SETTINGS" : "UP AND DOWN PICK   LEFT AND RIGHT CHANGE   ESC BACK", W / 2, H - 24, { scale: 1, color: resetArmed() ? "#ff8f8f" : "rgba(200,210,235,0.5)", align: "center" });
+    Font.draw(ctx, resetArmed() ? "THIS ERASES ALL TIMES, STARS, LANTERNS AND SETTINGS" : "UP AND DOWN PICK   LEFT AND RIGHT CHANGE   ESC BACK", SCREEN_W / 2, SCREEN_H - 24, { scale: 1, color: resetArmed() ? "#ff8f8f" : "rgba(200,210,235,0.5)", align: "center" });
   }
 
   function drawKeys(hits) {
     drawPlainBg();
-    Font.draw(ctx, "KEYS", W / 2, 14, { scale: 3, color: "#ffe9a8", align: "center" });
+    Font.draw(ctx, "KEYS", SCREEN_W / 2, 14, { scale: 3, color: "#ffe9a8", align: "center" });
     keyItems().forEach((it, i) => {
       const y = 48 + i * 22, on = A.sel === i;
       Font.draw(ctx, (on ? "> " : "  ") + it.label, 160, y, { scale: 1, color: on ? "#ffe9a8" : "#aab2c5" });
@@ -743,7 +748,7 @@ const App = (() => {
       }
       hits.push({ x: 150, y: y - 4, w: 340, h: 18, i, act: it.act });
     });
-    Font.draw(ctx, A.rebind ? "PRESS THE NEW KEY   ESC CANCELS" : "ENTER TO CHANGE A KEY   ESC BACK", W / 2, H - 22, { scale: 1, color: "rgba(200,210,235,0.5)", align: "center" });
+    Font.draw(ctx, A.rebind ? "PRESS THE NEW KEY   ESC CANCELS" : "ENTER TO CHANGE A KEY   ESC BACK", SCREEN_W / 2, SCREEN_H - 22, { scale: 1, color: "rgba(200,210,235,0.5)", align: "center" });
   }
 
   function drawStarPips(x, y, i, size, gap) {
@@ -758,7 +763,7 @@ const App = (() => {
 
   function drawSelect(hits) {
     drawPlainBg();
-    Font.draw(ctx, "LEVELS", W / 2, 10, { scale: 3, color: "#ffe9a8", align: "center" });
+    Font.draw(ctx, "LEVELS", SCREEN_W / 2, 10, { scale: 3, color: "#ffe9a8", align: "center" });
     // Page tabs, top left. Q and E (or the page keys) turn the page.
     PAGES.forEach((pg, k) => {
       if (!pageVisible(k)) return;
@@ -777,8 +782,8 @@ const App = (() => {
       ctx.lineWidth = 1;
       ctx.beginPath(); ctx.arc(x + 20, y + 22, 3.5, Math.PI, 0); ctx.stroke();
     };
-    for (let t = A.page * TIERS_PER_PAGE; t < Math.min(CHAPTERS.length, (A.page + 1) * TIERS_PER_PAGE); t++) {
-      const y = 42 + (t - A.page * TIERS_PER_PAGE) * 54;
+    tiersOnPage(A.page).forEach((t, row) => {
+      const y = 42 + row * 54;
       const pal = CHAPTERS[t].pal;
       Font.draw(ctx, CHAPTERS[t].name, 12, y + 4, { scale: 1, color: pal.accent, alpha: tierLevels[t].length ? 1 : 0.6 });
       // A planned tier shows its missing levels as empty slots (nine levels and a bonus) until they exist.
@@ -796,7 +801,7 @@ const App = (() => {
           lock(x, y, "#3a4054");
         }
       };
-      if (!tierLevels[t].length) { ghosts(); continue; }
+      if (!tierLevels[t].length) { ghosts(); return; }
       tierKinds[t].forEach((kind, k) => {
         if (Render.EMBLEMS[kind]) Render.slotIcon(ctx, 18 + k * 18, y + 26, kind, 0, true);
         else Render.drawSwapIcon(ctx, 22 + k * 18, y + 26, "#ffffff");
@@ -817,7 +822,8 @@ const App = (() => {
         if (LEVELS[i].swap) Render.drawSwapIcon(ctx, x + 9, y + th - 9, open ? "#ffffff" : "#4d5468");
         hits.push({ x, y, w: tw, h: th, level: i });
       });
-    }
+      if (tierLevels[t].length < 10 && !CHAPTERS[t].lab) ghosts();
+    });
     let line;
     if (!pageHasLevels(A.page)) {
       line = PAGES[A.page].name + "   LEVELS COMING SOON";
@@ -831,43 +837,43 @@ const App = (() => {
         if (L.par) line += "   PAR " + fmtTime(L.par.t) + " / " + L.par.r + " ECHO" + (L.par.r === 1 ? "" : "ES");
       }
     }
-    Font.draw(ctx, line, W / 2, H - 38, { scale: 1, color: "#e8e2d0", align: "center" });
-    Font.draw(ctx, "STARS " + totalStars() + "/" + (gameLevels * 3) + "   LANTERNS " + totalLanternsGot() + "/" + totalLanterns, W - 10, 10, { scale: 1, color: "#ffd35a", align: "right" });
-    Font.draw(ctx, "ARROWS MOVE   ENTER PLAY   1 2 3 PAGES   ESC BACK", W / 2, H - 20, { scale: 1, color: "rgba(200,210,235,0.5)", align: "center" });
+    Font.draw(ctx, line, SCREEN_W / 2, SCREEN_H - 38, { scale: 1, color: "#e8e2d0", align: "center" });
+    Font.draw(ctx, "STARS " + totalStars() + "/" + (gameLevels * 3) + "   LANTERNS " + totalLanternsGot() + "/" + totalLanterns, SCREEN_W - 10, 10, { scale: 1, color: "#ffd35a", align: "right" });
+    Font.draw(ctx, "ARROWS MOVE   ENTER PLAY   1 2 3 PAGES   ESC BACK", SCREEN_W / 2, SCREEN_H - 20, { scale: 1, color: "rgba(200,210,235,0.5)", align: "center" });
   }
 
   function drawCard() {
     const c = A.cards[0];
     ctx.fillStyle = "#05060e";
-    ctx.fillRect(0, 0, W, H);
+    ctx.fillRect(0, 0, SCREEN_W, SCREEN_H);
     const a = Math.min(1, A.cardT / 30);
     ctx.globalAlpha = a;
     if (c.type === "tier") {
       const ch = CHAPTERS[c.tier];
-      Font.draw(ctx, "TIER " + (c.tier + 1), W / 2, 90, { scale: 1, color: "#8d96ad", align: "center" });
-      Font.draw(ctx, ch.name, W / 2, 112, { scale: 4, color: ch.pal.accent, align: "center" });
-      Font.draw(ctx, ch.line, W / 2, 170, { scale: 1, color: "#d9deec", align: "center" });
-      (ch.story || []).forEach((l, i) => Font.draw(ctx, l, W / 2, 202 + i * 13, { scale: 1, color: "#9aa5c0", align: "center" }));
+      Font.draw(ctx, "TIER " + (c.tier + 1), SCREEN_W / 2, 90, { scale: 1, color: "#8d96ad", align: "center" });
+      Font.draw(ctx, ch.name, SCREEN_W / 2, 112, { scale: 4, color: ch.pal.accent, align: "center" });
+      Font.draw(ctx, ch.line, SCREEN_W / 2, 170, { scale: 1, color: "#d9deec", align: "center" });
+      (ch.story || []).forEach((l, i) => Font.draw(ctx, l, SCREEN_W / 2, 202 + i * 13, { scale: 1, color: "#9aa5c0", align: "center" }));
     } else {
       const info = c.kind === "swap" ? ABILITIES.swap : KINDS[c.kind];
       const color = info.color;
-      Font.draw(ctx, c.kind === "swap" ? "NEW ABILITY, NOT AN ECHO" : "NEW ECHO", W / 2, 60, { scale: 1, color: "#8d96ad", align: "center" });
+      Font.draw(ctx, c.kind === "swap" ? "NEW ABILITY, NOT AN ECHO" : "NEW ECHO", SCREEN_W / 2, 60, { scale: 1, color: "#8d96ad", align: "center" });
       const pat = Render.EMBLEMS[c.kind];
       if (pat) {
         ctx.fillStyle = color;
-        for (let r = 0; r < 5; r++) for (let k = 0; k < 5; k++) if (pat[r][k] === "#") ctx.fillRect(W / 2 - 25 + k * 10, 84 + r * 10, 10, 10);
+        for (let r = 0; r < 5; r++) for (let k = 0; k < 5; k++) if (pat[r][k] === "#") ctx.fillRect(SCREEN_W / 2 - 25 + k * 10, 84 + r * 10, 10, 10);
       } else {
         ctx.save();
-        ctx.translate(W / 2, 108);
+        ctx.translate(SCREEN_W / 2, 108);
         ctx.scale(6, 6);
         Render.drawSwapIcon(ctx, 0, 0, color);
         ctx.restore();
       }
-      Font.draw(ctx, info.name, W / 2, 150, { scale: 4, color, align: "center" });
+      Font.draw(ctx, info.name, SCREEN_W / 2, 150, { scale: 4, color, align: "center" });
       const blurb = c.kind === "swap" ? "PRESS " + keyName(Input.bind.swap[0]) + " TO TRADE PLACES WITH THE SELECTED ECHO, OF ANY KIND. IT TAKES YOUR SPOT. ONLY SOME LEVELS SWITCH IT ON: THEY SHOW THE SWAP SIGN IN THE LEVEL SELECT AND NEXT TO THE LEVEL NAME." : info.blurb;
-      Font.wrap(blurb, 420, 1).forEach((l, i) => Font.draw(ctx, l, W / 2, 200 + i * 12, { scale: 1, color: "#ffe9a8", align: "center" }));
+      Font.wrap(blurb, 420, 1).forEach((l, i) => Font.draw(ctx, l, SCREEN_W / 2, 200 + i * 12, { scale: 1, color: "#ffe9a8", align: "center" }));
     }
-    if (A.cardT > 30 && Math.floor(A.T / 30) % 2 === 0) Font.draw(ctx, "PRESS ENTER", W / 2, 300, { scale: 1, color: "#9aa3bb", align: "center" });
+    if (A.cardT > 30 && Math.floor(A.T / 30) % 2 === 0) Font.draw(ctx, "PRESS ENTER", SCREEN_W / 2, 300, { scale: 1, color: "#9aa3bb", align: "center" });
     ctx.globalAlpha = 1;
   }
 
@@ -877,9 +883,9 @@ const App = (() => {
     if (A.introT < 120) {
       const a = A.introT < 20 ? A.introT / 20 : Math.max(0, 1 - (A.introT - 70) / 50);
       if (a > 0) {
-        Font.draw(ctx, levelNum[A.idx], W / 2, 96, { scale: 2, color: "#9aa3bb", align: "center", alpha: a });
-        Font.draw(ctx, LEVELS[A.idx].name, W / 2, 118, { scale: 4, color: "#ffe9a8", align: "center", alpha: a });
-        if (LEVELS[A.idx].swap) Font.draw(ctx, "SWAP ON: " + keyName(Input.bind.swap[0]) + " TRADES PLACES WITH THE SELECTED ECHO", W / 2, 150, { scale: 1, color: "#ffffff", align: "center", alpha: a });
+        Font.draw(ctx, levelNum[A.idx], SCREEN_W / 2, 96, { scale: 2, color: "#9aa3bb", align: "center", alpha: a });
+        Font.draw(ctx, LEVELS[A.idx].name, SCREEN_W / 2, 118, { scale: 4, color: "#ffe9a8", align: "center", alpha: a });
+        if (LEVELS[A.idx].swap) Font.draw(ctx, "SWAP ON: " + keyName(Input.bind.swap[0]) + " TRADES PLACES WITH THE SELECTED ECHO", SCREEN_W / 2, 150, { scale: 1, color: "#ffffff", align: "center", alpha: a });
       }
     }
     const L = G.L;
@@ -893,29 +899,29 @@ const App = (() => {
       const a = A.hintForce > 0 ? 1 : Math.min(fadeIn, fadeOut);
       ctx.globalAlpha = a;
       ctx.fillStyle = "rgba(5,6,14,0.78)";
-      ctx.fillRect((W - w) / 2, 28, w, h);
-      lines.forEach((l, i) => Font.draw(ctx, l, W / 2, 32 + i * 10, { scale: 1, color: "#ffe9a8", align: "center", shadow: null }));
+      ctx.fillRect((SCREEN_W - w) / 2, 28, w, h);
+      lines.forEach((l, i) => Font.draw(ctx, l, SCREEN_W / 2, 32 + i * 10, { scale: 1, color: "#ffe9a8", align: "center", shadow: null }));
       ctx.globalAlpha = 1;
     } else if (L.hint && (A.hintT >= 90 + 720 || (!autoHint && A.hintT > 90))) {
-      Font.draw(ctx, keyName(Input.bind.hint[0]) + " HINT", W - 8, 18, { scale: 1, color: "rgba(220,226,240,0.35)", align: "right", shadow: null });
+      Font.draw(ctx, keyName(Input.bind.hint[0]) + " HINT", SCREEN_W - 8, 18, { scale: 1, color: "rgba(220,226,240,0.35)", align: "right", shadow: null });
     }
     if (G.won) {
       ctx.fillStyle = "rgba(255,244,200," + Math.min(0.55, G.winT / 90) + ")";
-      ctx.fillRect(0, 0, W, H);
+      ctx.fillRect(0, 0, SCREEN_W, SCREEN_H);
     }
   }
 
   function dim(a) {
     ctx.fillStyle = "rgba(4,5,12," + a + ")";
-    ctx.fillRect(0, 0, W, H);
+    ctx.fillRect(0, 0, SCREEN_W, SCREEN_H);
   }
 
   function drawPause(hits) {
     drawPlay();
     dim(0.7);
-    Font.draw(ctx, "PAUSED", W / 2, 70, { scale: 4, color: "#ffe9a8", align: "center" });
-    menu(pauseItems(), hits, W / 2, 140, 28);
-    Font.draw(ctx, keyName(Input.bind.pause[0]) + " TO RESUME   " + keyName(Input.bind.fullscreen[0]) + " FULLSCREEN", W / 2, H - 24, { scale: 1, color: "rgba(200,210,235,0.5)", align: "center" });
+    Font.draw(ctx, "PAUSED", SCREEN_W / 2, 70, { scale: 4, color: "#ffe9a8", align: "center" });
+    menu(pauseItems(), hits, SCREEN_W / 2, 140, 28);
+    Font.draw(ctx, keyName(Input.bind.pause[0]) + " TO RESUME   " + keyName(Input.bind.fullscreen[0]) + " FULLSCREEN", SCREEN_W / 2, SCREEN_H - 24, { scale: 1, color: "rgba(200,210,235,0.5)", align: "center" });
   }
 
   function drawComplete(hits) {
@@ -923,31 +929,31 @@ const App = (() => {
     dim(0.7);
     const r = A.result || { time: 0, deaths: 0, echoes: 0, newBest: false, earned: [true, false, false], lantern: false, par: { t: 0, r: 0 } };
     const def = LEVELS[A.idx];
-    Font.draw(ctx, "LEVEL COMPLETE", W / 2, 50, { scale: 4, color: "#ffe9a8", align: "center" });
-    Font.draw(ctx, levelNum[A.idx] + "  " + def.name, W / 2, 90, { scale: 1, color: "#c9d0e2", align: "center" });
+    Font.draw(ctx, "LEVEL COMPLETE", SCREEN_W / 2, 50, { scale: 4, color: "#ffe9a8", align: "center" });
+    Font.draw(ctx, levelNum[A.idx] + "  " + def.name, SCREEN_W / 2, 90, { scale: 1, color: "#c9d0e2", align: "center" });
     // three stars: finished, under par time, within par echoes
     const labels = ["FINISHED", "PAR " + fmtTime(r.par.t), "PAR " + r.par.r + " ECHO" + (r.par.r === 1 ? "" : "ES")];
     for (let k = 0; k < 3; k++) {
-      const cx = W / 2 - 110 + k * 110;
+      const cx = SCREEN_W / 2 - 110 + k * 110;
       ctx.fillStyle = r.earned[k] ? "#ffd35a" : "rgba(255,255,255,0.14)";
       ctx.fillRect(cx - 9, 108, 18, 18);
       if (r.earned[k]) { ctx.fillStyle = "#fff3b0"; ctx.fillRect(cx - 9, 108, 18, 3); }
       Font.draw(ctx, labels[k], cx, 132, { scale: 1, color: r.earned[k] ? "#ffe9a8" : "#7c859b", align: "center" });
     }
-    Font.draw(ctx, "TIME " + fmtTime(r.time) + "     ECHOES " + r.echoes + "     DEATHS " + r.deaths, W / 2, 152, { scale: 1, color: "#ffffff", align: "center" });
-    if (r.newBest) Font.draw(ctx, "NEW BEST", W / 2, 168, { scale: 1, color: "#8fe39a", align: "center" });
+    Font.draw(ctx, "TIME " + fmtTime(r.time) + "     ECHOES " + r.echoes + "     DEATHS " + r.deaths, SCREEN_W / 2, 152, { scale: 1, color: "#ffffff", align: "center" });
+    if (r.newBest) Font.draw(ctx, "NEW BEST", SCREEN_W / 2, 168, { scale: 1, color: "#8fe39a", align: "center" });
     let menuY = 212;
     if (lanternLevels[A.idx]) {
-      Render.drawLanternIcon(ctx, W / 2 - 38, 187, r.lantern || !!save.lanterns[A.idx]);
-      Font.draw(ctx, r.lantern ? "LANTERN FOUND" : save.lanterns[A.idx] ? "LANTERN HAD" : "LANTERN MISSED", W / 2 - 26, 183, { scale: 1, color: r.lantern ? "#ffd35a" : "#7c859b" });
+      Render.drawLanternIcon(ctx, SCREEN_W / 2 - 38, 187, r.lantern || !!save.lanterns[A.idx]);
+      Font.draw(ctx, r.lantern ? "LANTERN FOUND" : save.lanterns[A.idx] ? "LANTERN HAD" : "LANTERN MISSED", SCREEN_W / 2 - 26, 183, { scale: 1, color: r.lantern ? "#ffd35a" : "#7c859b" });
       // The keeper's diary line that this lantern holds.
       if (def.diary && (r.lantern || save.lanterns[A.idx])) {
         const lines = Font.wrap(def.diary, 440, 1);
-        lines.forEach((l, i) => Font.draw(ctx, l, W / 2, 199 + i * 10, { scale: 1, color: "#e8dcb0", align: "center" }));
+        lines.forEach((l, i) => Font.draw(ctx, l, SCREEN_W / 2, 199 + i * 10, { scale: 1, color: "#e8dcb0", align: "center" }));
         menuY = 212 + lines.length * 10 + 4;
       }
     }
-    menu(completeItems(), hits, W / 2, menuY, 26);
+    menu(completeItems(), hits, SCREEN_W / 2, menuY, 26);
   }
 
   function drawEnding() {
@@ -956,13 +962,13 @@ const App = (() => {
     const spec = A.story || ENDING, final = spec === ENDING;
     const a = Math.min(1, A.endT / 90);
     ctx.globalAlpha = a;
-    Font.draw(ctx, spec.title, W / 2, 40, { scale: 3, color: "#ffe9a8", align: "center" });
-    spec.lines.forEach((l, i) => Font.draw(ctx, l, W / 2, 96 + i * 14, { scale: 1, color: "#e5e9f5", align: "center" }));
+    Font.draw(ctx, spec.title, SCREEN_W / 2, 40, { scale: 3, color: "#ffe9a8", align: "center" });
+    spec.lines.forEach((l, i) => Font.draw(ctx, l, SCREEN_W / 2, 96 + i * 14, { scale: 1, color: "#e5e9f5", align: "center" }));
     if (final) {
-      Font.draw(ctx, "THANK YOU FOR PLAYING", W / 2, 252, { scale: 1, color: "#ffe9a8", align: "center" });
-      Font.draw(ctx, "STARS " + totalStars() + "/" + (gameLevels * 3) + "   LANTERNS " + totalLanternsGot() + "/" + totalLanterns, W / 2, 268, { scale: 1, color: "#ffd35a", align: "center" });
+      Font.draw(ctx, "THANK YOU FOR PLAYING", SCREEN_W / 2, 252, { scale: 1, color: "#ffe9a8", align: "center" });
+      Font.draw(ctx, "STARS " + totalStars() + "/" + (gameLevels * 3) + "   LANTERNS " + totalLanternsGot() + "/" + totalLanterns, SCREEN_W / 2, 268, { scale: 1, color: "#ffd35a", align: "center" });
     }
-    if (A.endT > 60 && Math.floor(A.T / 30) % 2 === 0) Font.draw(ctx, "PRESS ENTER", W / 2, H - 30, { scale: 1, color: "#9aa3bb", align: "center" });
+    if (A.endT > 60 && Math.floor(A.T / 30) % 2 === 0) Font.draw(ctx, "PRESS ENTER", SCREEN_W / 2, SCREEN_H - 30, { scale: 1, color: "#9aa3bb", align: "center" });
     ctx.globalAlpha = 1;
   }
 
@@ -980,23 +986,23 @@ const App = (() => {
       case "complete": drawComplete(A.hits); break;
       case "ending": drawEnding(); break;
     }
-    if (dev.unlockAll && !dev.open) Font.draw(ctx, "DEV: ALL LEVELS UNLOCKED", W - 8, H - 12, { scale: 1, color: "rgba(159,227,160,0.55)", align: "right", shadow: null });
+    if (dev.unlockAll && !dev.open) Font.draw(ctx, "DEV: ALL LEVELS UNLOCKED", SCREEN_W - 8, SCREEN_H - 12, { scale: 1, color: "rgba(159,227,160,0.55)", align: "right", shadow: null });
     if (dev.open) {
       ctx.fillStyle = "rgba(4,5,12,0.82)";
-      ctx.fillRect(0, 0, W, H);
-      const bw = 320, bh = 112, bx = Math.round((W - bw) / 2), by = Math.round((H - bh) / 2);
+      ctx.fillRect(0, 0, SCREEN_W, SCREEN_H);
+      const bw = 320, bh = 112, bx = Math.round((SCREEN_W - bw) / 2), by = Math.round((SCREEN_H - bh) / 2);
       ctx.fillStyle = "rgba(18,22,44,0.97)";
       ctx.fillRect(bx, by, bw, bh);
       ctx.strokeStyle = "#ffe9a8";
       ctx.lineWidth = 1;
       ctx.strokeRect(bx + 0.5, by + 0.5, bw - 1, bh - 1);
-      Font.draw(ctx, "DEV TOOLS", W / 2, by + 10, { scale: 2, color: "#ffe9a8", align: "center" });
+      Font.draw(ctx, "DEV TOOLS", SCREEN_W / 2, by + 10, { scale: 2, color: "#ffe9a8", align: "center" });
       const ty = by + 46;
       ctx.fillStyle = dev.unlockAll ? "rgba(90,200,120,0.28)" : "rgba(255,255,255,0.08)";
       ctx.fillRect(bx + 20, ty - 5, bw - 40, 19);
-      Font.draw(ctx, "UNLOCK ALL LEVELS   " + (dev.unlockAll ? "ON" : "OFF"), W / 2, ty, { scale: 1, color: dev.unlockAll ? "#9fe3a0" : "#e8e2d0", align: "center" });
-      Font.draw(ctx, "= NEXT LEVEL   - PREVIOUS LEVEL", W / 2, by + bh - 34, { scale: 1, color: "rgba(200,210,235,0.6)", align: "center", shadow: null });
-      Font.draw(ctx, "ENTER OR CLICK TOGGLES   \\ OR ESC CLOSES", W / 2, by + bh - 18, { scale: 1, color: "rgba(200,210,235,0.6)", align: "center", shadow: null });
+      Font.draw(ctx, "UNLOCK ALL LEVELS   " + (dev.unlockAll ? "ON" : "OFF"), SCREEN_W / 2, ty, { scale: 1, color: dev.unlockAll ? "#9fe3a0" : "#e8e2d0", align: "center" });
+      Font.draw(ctx, "= NEXT LEVEL   - PREVIOUS LEVEL", SCREEN_W / 2, by + bh - 34, { scale: 1, color: "rgba(200,210,235,0.6)", align: "center", shadow: null });
+      Font.draw(ctx, "ENTER OR CLICK TOGGLES   \\ OR ESC CLOSES", SCREEN_W / 2, by + bh - 18, { scale: 1, color: "rgba(200,210,235,0.6)", align: "center", shadow: null });
       dev.rect = { x: bx + 20, y: ty - 5, w: bw - 40, h: 19 };
     }
     if (A.toast && A.T - A.toast.t < 240) {
@@ -1004,20 +1010,20 @@ const App = (() => {
       const w = Font.width(A.toast.text, 1) + 20;
       ctx.globalAlpha = a;
       ctx.fillStyle = "rgba(5,6,14,0.85)";
-      ctx.fillRect((W - w) / 2, 6, w, 18);
-      Font.draw(ctx, A.toast.text, W / 2, 11, { scale: 1, color: "#ffe9a8", align: "center", shadow: null });
+      ctx.fillRect((SCREEN_W - w) / 2, 6, w, 18);
+      Font.draw(ctx, A.toast.text, SCREEN_W / 2, 11, { scale: 1, color: "#ffe9a8", align: "center", shadow: null });
       ctx.globalAlpha = 1;
     }
     if (A.fade > 0) {
       ctx.fillStyle = "rgba(0,0,0," + A.fade + ")";
-      ctx.fillRect(0, 0, W, H);
+      ctx.fillRect(0, 0, SCREEN_W, SCREEN_H);
     }
   }
 
   // ---------------------------------------------------------------- pointer
   function toCanvas(e) {
     const r = canvas.getBoundingClientRect();
-    return { x: (e.clientX - r.left) * W / r.width, y: (e.clientY - r.top) * H / r.height };
+    return { x: (e.clientX - r.left) * SCREEN_W / r.width, y: (e.clientY - r.top) * SCREEN_H / r.height };
   }
 
   canvas.addEventListener("mousemove", (e) => {
@@ -1054,7 +1060,7 @@ const App = (() => {
         return;
       }
     }
-    // A click records and stops too, for keyboards that cannot register W, D and E together.
+    // A click records and stops too, for keyboards that cannot register SCREEN_W, D and E together.
     if (A.state === "play" && e.button === 0) Input.pressed.Mouse0 = true;
     if (A.state === "chapter" && A.cardT > 30) nextCard();
     if (A.state === "ending" && A.endT > 60) { if (A.story === INTERLUDE && A.storyNext >= 0) startLevel(A.storyNext); else goTitle(); }
@@ -1130,9 +1136,9 @@ const App = (() => {
 
   function fit() {
     const w = window.innerWidth, h = window.innerHeight;
-    const s = Math.min(w / W, h / H);
-    canvas.style.width = Math.floor(W * s) + "px";
-    canvas.style.height = Math.floor(H * s) + "px";
+    const s = Math.min(w / SCREEN_W, h / SCREEN_H);
+    canvas.style.width = Math.floor(SCREEN_W * s) + "px";
+    canvas.style.height = Math.floor(SCREEN_H * s) + "px";
   }
   window.addEventListener("resize", fit);
   fit();

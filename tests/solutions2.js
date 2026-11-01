@@ -837,7 +837,8 @@ const leap = (x, hold) => Bot.jumpTo(x, hold === undefined ? 24 : hold);
 // A station has `key` (its echo slot), place() (go to where its echo is recorded, wait, stop recording) and pass() (get across it once its
 // echo is in place, ending on the far side). Echoes are recorded in order, each recording crossing the stations before it; then the whole route.
 // A replaying echo that is still walking cuts any beam it crosses and can be in the way, so wait for every echo to be at rest before crossing.
-const settleAll = () => Bot.waitUntil(() => Object.values(G.echoes).every((e) => !e.moving && e.restT > 30), 2400, "every echo to settle");
+// Big rooms on page three have recordings of a minute or more, so the wait scales with the longest recording.
+const settleAll = () => Bot.waitUntil(() => Object.values(G.echoes).every((e) => !e.moving && e.restT > 30), G.L.def.cols ? 7200 : 2400, "every echo to settle");
 const runChain = (stations, finish) => {
   for (let k = 0; k < stations.length; k++) {
     if (!stations[k].key) continue;
@@ -1733,4 +1734,37 @@ SOLUTIONS["FOUR CORNERS"] = () => {
   Bot.dir(-1);
   for (let i = 0; i < 200 && !G.won; i++) { Bot.tick(); if (G.dead) Bot.fail("crushed by the door"); }
   Bot.expect(G.won, "through the door");
+};
+
+// ================================================================ page three: the afterglow
+SOLUTIONS["THE LONG WAY"] = () => {
+  // A chain of eight. Lower floor left to right: glow for the thorns, phase for the glass, calm for the vent, the second glow for the
+  // planks, the vine up the shaft. Upper floor right to left: shade on the plate, shift at the gold wall, pull over the spikes.
+  runChain([
+    stThorns("glow", 90, 222),
+    stCrystal("phase", 250, 292),
+    { key: "calm", place() { Bot.walkTo(374, 3); Bot.run(12); Bot.stop(); }, pass() { settle("calm", 40); Bot.walkTo(372, 3); leap(456, 24); walkThrough(470); } },
+    { key: "glow2", place() { walkThrough(490, 4); Bot.run(12); Bot.stop(); }, pass() { settle("glow2", 40); walkThrough(610); } },
+    { key: "vine", place() { Bot.walkTo(880, 3); Bot.run(12); Bot.stop(); }, pass() { climbVine("vine", 320, -1); } },
+    { key: "shade", place() { Bot.walkTo(810, 3); Bot.run(12); Bot.stop(); }, pass() { Bot.waitUntil(() => G.L.doorOpen.a, 1500, "the door"); Bot.walkTo(700, 3); } },
+    stCrystal("shift", 652, 560),
+    {
+      key: "pull",
+      place() {
+        Bot.walkTo(506, 3);
+        Bot.dir(-1);
+        Bot.jumpKey(true);
+        for (let i = 0; i < 28; i++) { if (i === 22) Bot.jumpKey(false); Bot.tick(); if (G.dead) Bot.fail("fell"); }
+        Bot.jumpKey(false);
+        Bot.dir(0);
+        Bot.stop();
+      },
+      pass() {
+        settle("pull", 40);
+        Bot.dir(-1);
+        for (let i = 0; i < 900; i++) { Bot.tick(); if (G.dead) Bot.fail("fell on the spikes"); if (G.p.onGround && Bot.px() < 372) break; }
+        Bot.dir(0);
+      },
+    },
+  ], () => Bot.walkTo(70));
 };
