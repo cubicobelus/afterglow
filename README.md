@@ -21,7 +21,7 @@ Each slot along the bottom of the screen holds one echo, and an echo's power swi
 Later levels give you several slots, sometimes two or three of the same kind. An echo does not care about walls or
 glass, so one you no longer need can be recorded again somewhere else.
 
-The game has 100 levels in ten tiers on two pages: The Tower climbs to the lamp, The Reflection goes down through the drowned half of it. Each tier has its own scenery, teaches two new echoes (or one and an ability), and ends with a bonus level that opens once you have 20 stars in that tier. Every echo gets one or two easy levels, then the
+The game has 100 levels in ten tiers on two pages: The Tower climbs to the lamp, The Reflection goes down through the drowned half of it. Each tier has its own scenery, teaches two new echoes (or one and an ability), and ends with a bonus level that opens once you have 20 stars in that tier. After the ending a third page, The Afterglow, opens: big rooms drawn at a smaller scale that need many echoes at once, ending with a tower that needs one of every echo. Every echo gets one or two easy levels, then the
 tiers mix them and climb to levels where the order matters, an echo has to be recorded again halfway through, and
 what you recorded earlier can carry you or lead you through doors.
 
@@ -45,7 +45,7 @@ what you recorded earlier can carry you or lead you through doors.
 | Fork | One recording makes two echoes: the first, and a twin that follows a few seconds later. |
 | Slow | Time crawls inside its ring: other echoes, blades, clock doors and cargo platforms. |
 | Shift | Inside its ring gold blocks vanish and dark blocks appear. |
-| Portal | Portals come in pairs: walk into one and you come out of the other, still moving. |
+| Portal | Portals come in pairs: walk into one and you come out of the other, still moving. A portal holds no plate. |
 
 **Swap** is an ability, not an echo. Press **Q** to trade places with the picked echo, whatever kind it is: you appear where it was, and it stays where you were. It is switched on in every level of the fifth tier, The Mirror, and in a few later levels. Those levels show a swap sign beside the level name and on the level select. A small clock beside the level name starts with your first move.
 
@@ -59,7 +59,7 @@ its par. A few levels hide a lantern worth finding.
 | Move | Arrow keys or A and D |
 | Jump | Space, Up or W |
 | Record, stop | E, K or a mouse click |
-| Pick an echo slot | Number keys |
+| Pick an echo slot | Number keys (0 is the tenth slot); Tab steps to the next slot |
 | Swap places with the picked echo (The Mirror) | Q |
 | Restart the attempt | R |
 | Clear the picked echo | X |
