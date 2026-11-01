@@ -1548,6 +1548,24 @@ def(10, "THE LONG WAY", {
   g.fill(3, 14, 3, 15, "X");
   g.set(10, 8, "L").set(27, 6, "L").set(44, 5, "L");
 });
+def(10, "GOLD LEAF", {
+  echoes: ["calm", "shift", "phase"], recMax: 24,
+  hint: "THE RING THAT OPENS THE GOLD WALL ALSO TAKES THE GOLD BRIDGE FROM UNDER YOU. A CALM SILENCES EVERY POWER INSIDE ITS RING, EVEN A SHIFT.",
+}, (g) => {
+  g.base();
+  g.set(3, 14, "@");
+  // a bridge of gold over the pit, under a low roof, and a gold wall at its end
+  g.pit(8, 15);
+  g.fill(8, 15, 15, 15, "+");
+  g.fill(11, 1, 17, 12, "#");
+  g.set(13, 14, "a");
+  g.fill(18, 1, 18, 14, "+");
+  g.fill(23, 1, 23, 14, "%");
+  g.fill(27, 1, 27, 8, "#").fill(27, 9, 27, 14, "A");
+  g.fill(30, 13, 30, 14, "X");
+  g.set(5, 8, "L").set(21, 6, "L").set(25, 6, "L");
+});
+
 
 
 // ================================================================ the lab: one room per new echo (the benched ones last)
@@ -1815,6 +1833,7 @@ const PAR = {
   "PASSENGER": { t: 30, r: 2 },
   "THE LENS": { t: 50, r: 4 },
   "THE LONG WAY": { t: 380, r: 8 },
+  "GOLD LEAF": { t: 50, r: 3 },
 };
 for (const l of LEVELS) l.par = PAR[l.name];
 

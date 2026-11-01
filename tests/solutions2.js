@@ -1768,3 +1768,22 @@ SOLUTIONS["THE LONG WAY"] = () => {
     },
   ], () => Bot.walkTo(70));
 };
+
+SOLUTIONS["GOLD LEAF"] = () => {
+  // The calm stands on the plate on the bridge: it holds the door and keeps the gold under it, but it is too far from the wall to keep that.
+  // The shift by the wall opens it and would take the bridge without the calm. The phase opens the glass.
+  recWait("calm", 270, 12);
+  Bot.record("shift");
+  settle("calm", 30);
+  Bot.walkTo(350, 3);
+  Bot.run(12);
+  Bot.stop();
+  Bot.record("phase");
+  settleAll();
+  Bot.walkTo(450, 3);
+  Bot.run(12);
+  Bot.stop();
+  settleAll();
+  Bot.waitUntil(() => G.L.doorOpen.a, 600, "the door");
+  Bot.walkTo(610);
+};
