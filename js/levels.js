@@ -1176,17 +1176,21 @@ def(7, "GREEN DARK", {
   g.set(24, 6, "L");
 });
 
-def(7, "TREETOP", {
-  echoes: ["vine"], recMax: 24,
-  hint: "THE MUSHROOM THROWS YOU HIGHER THAN ANY VINE REACHES FROM THE GROUND. A VINE HUNG IN THE AIR AT THE TOP OF A BOUNCE REACHES HIGHER STILL.",
+def(7, "HUSH", {
+  echoes: ["calm", "vine"], recMax: 24,
+  hint: "THE PIT IS FLOORED WITH MUSHROOMS UNDER A ROOF OF SPIKES. A CALM PUTS MUSHROOMS TO SLEEP, BUT THE LAST ONE HAS TO BE AWAKE TO THROW YOU UP, AND THE LEDGE IS HIGHER THAN ANY BOUNCE.",
 }, (g) => {
   g.base();
   g.set(2, 14, "@");
-  g.set(6, 14, "m");
-  g.fill(11, 3, 30, 14, "#");
+  g.pit(8, 13);
+  g.fill(8, 14, 13, 14, "m");
+  g.fill(7, 1, 14, 8, "#").fill(7, 9, 14, 9, "v");
+  g.set(16, 14, "m");
+  g.fill(18, 3, 30, 14, "#");
   g.fill(28, 1, 28, 2, "X");
-  g.set(4, 8, "L").set(8, 3, "L");
+  g.set(4, 8, "L").set(16, 4, "L");
 });
+
 
 def(7, "ESCALATOR", {
   echoes: ["tide", "vine"], recMax: 40,
@@ -1735,7 +1739,7 @@ const PAR = {
   "SPROUT": { t: 25, r: 1 },
   "HANGING VINE": { t: 25, r: 1 },
   "GREEN DARK": { t: 45, r: 2 },
-  "TREETOP": { t: 20, r: 1 },
+  "HUSH": { t: 35, r: 2 },
   "ESCALATOR": { t: 45, r: 3 },
   "PAIR": { t: 30, r: 1 },
   "CLOSET": { t: 50, r: 3 },

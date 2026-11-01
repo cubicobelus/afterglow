@@ -571,30 +571,54 @@ SOLUTIONS["HANGING VINE"] = () => {
   Bot.expect(G.p.onGround && Bot.feet() <= 121, "up on the wall");
   Bot.walkTo(570);
 };
-SOLUTIONS["TREETOP"] = () => {
-  // A running jump from the spawn onto the mushroom, jump held: a big bounce. Record the vine at the top of it, hanging in the air. When it has
-  // grown, bounce again, grab it at the top and climb to the high ledge.
-  Bot.record("vine");
+SOLUTIONS["HUSH"] = () => {
+  // A calm stopped late in a jump off the edge, low over the pit: it puts the six mushrooms in the pit to sleep and leaves the last one, past
+  // the pit, awake. Walk across, bounce on the last one with the jump held and record a vine at the top of the bounce. Then bounce again, grab
+  // the vine and climb to the ledge.
+  const across = () => {
+    settle("calm", 40);
+    Bot.walkTo(150, 3);
+    Bot.jumpTo(190, 12);
+    Bot.expect(G.p.onGround && !G.dead, "on the sleeping mushrooms");
+    Bot.walkTo(300, 3);
+  };
+  const bounce = () => {
+    Bot.dir(1);
+    Bot.jumpKey(true);
+    let b = false;
+    for (let i = 0; i < 300; i++) {
+      if (G.p.vy < -600) b = true;
+      if (!b) Bot.dir(Math.abs(330 - Bot.px()) < 3 ? 0 : Math.sign(330 - Bot.px()));
+      else Bot.dir(0);
+      if (b && G.p.vy > -30) return;
+      Bot.tick();
+      if (G.dead) Bot.fail("fell");
+    }
+    Bot.fail("no bounce");
+  };
+  Bot.record("calm");
+  Bot.walkTo(150, 3);
   Bot.dir(1);
   Bot.jumpKey(true);
-  let bounced = false;
-  for (let i = 0; i < 300; i++) {
-    if (G.p.vy < -600) bounced = true;
-    if (bounced && G.p.vy > -30) break;
-    Bot.tick();
-    if (G.dead) Bot.fail("fell");
-  }
+  for (let i = 0; i < 33; i++) { if (i === 26) Bot.jumpKey(false); Bot.tick(); }
   Bot.jumpKey(false);
   Bot.dir(0);
   Bot.stop();
+  Bot.record("vine");
+  across();
+  bounce();
+  Bot.jumpKey(false);
+  Bot.stop();
+  across();
   Bot.waitUntil(() => G.vines.length && G.vines[0].top <= 25, 900, "the vine to grow");
   const vx = G.vines[0].x;
   Bot.dir(1);
   Bot.jumpKey(true);
-  bounced = false;
+  let bounced = false;
   for (let i = 0; i < 400; i++) {
     if (G.p.vy < -600) bounced = true;
-    if (bounced) Bot.dir(Math.abs(vx - Bot.px()) < 4 ? 0 : Math.sign(vx - Bot.px()));
+    if (!bounced) Bot.dir(Math.abs(330 - Bot.px()) < 3 ? 0 : Math.sign(330 - Bot.px()));
+    else Bot.dir(Math.abs(vx - Bot.px()) < 4 ? 0 : Math.sign(vx - Bot.px()));
     if (bounced && Bot.feet() <= 62) Bot.dir(1);
     Bot.tick();
     if (G.dead) Bot.fail("fell");
