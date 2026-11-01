@@ -1770,58 +1770,62 @@ SOLUTIONS["THE LONG WAY"] = () => {
 };
 
 SOLUTIONS["GOLD LEAF"] = () => {
-  // The calm is wanted at the bridge, so the vent is beaten by a gust hung just before the gap, blowing the other way. The shade holds
-  // the plate that lights the thorns. The shift stands right against the gold wall, and the calm on the bridge between the two: near
-  // enough to keep the gold the shift would take, far enough from the shift, the wall and the lit thorns to leave them alone.
+  // The vent gap is too wide for a step without wind, so the gust is hung over it, facing across: a step whose wind carries the jump off
+  // it. (The calm, the obvious tool for a vent, is wanted at the bridge.) The shade holds the plate that lights the thorns. The shift stands
+  // by the gold wall, and the calm on the bridge between them: near enough to keep the gold the shift takes, far enough from the shift, the
+  // wall and the lit thorns to leave them alone.
   const crossVent = () => {
     settle("gust", 40);
-    Bot.walkTo(56, 4);
-    Bot.dir(1);
+    const e = G.echoes.gust;
+    Bot.walkTo(70, 3);
+    Bot.jumpTo(e.x + PW / 2, 24);
+    Bot.expect(G.p.stand === e, "standing on the gust");
     Bot.run(4);
+    Bot.dir(1);
     Bot.jumpKey(true);
     for (let i = 0; i < 200; i++) { if (i === 24) Bot.jumpKey(false); Bot.tick(); if (G.dead) Bot.fail("fell in the vent gap"); if (G.p.onGround && i > 5) break; }
     Bot.jumpKey(false);
     Bot.dir(0);
-    Bot.expect(Bot.px() > 140, "across the vent gap");
+    Bot.expect(Bot.px() > 262, "across the vent gap");
   };
   Bot.record("gust");
-  Bot.walkTo(71, 3);
+  Bot.walkTo(70, 3);
   Bot.dir(1);
-  Bot.run(2);
-  Bot.dir(0);
+  Bot.run(6);
   Bot.jumpKey(true);
-  Bot.run(12);
+  for (let i = 0; i < 34; i++) { if (i === 22) Bot.jumpKey(false); Bot.tick(); }
   Bot.jumpKey(false);
+  Bot.dir(0);
   Bot.stop();
   Bot.record("shade");
   crossVent();
-  Bot.walkTo(170, 3);
+  walkThrough(310, 4);
   Bot.run(12);
   Bot.stop();
   const toBridge = () => {
     crossVent();
     Bot.waitUntil(() => G.L.doorOpen.a, 900, "the lamp over the thorns");
-    walkThrough(190, 4);
+    walkThrough(370, 4);
     Bot.run(30);
   };
   Bot.record("calm");
   toBridge();
-  Bot.walkTo(400, 3);
+  Bot.walkTo(580, 3);
   Bot.run(12);
   Bot.stop();
   Bot.record("shift");
   toBridge();
-  Bot.walkTo(510, 3);
+  Bot.walkTo(690, 3);
   Bot.run(12);
   Bot.stop();
   Bot.record("phase");
   toBridge();
   settle("calm", 40);
   settle("shift", 40);
-  Bot.walkTo(570, 3);
+  Bot.walkTo(750, 3);
   Bot.run(12);
   Bot.stop();
   toBridge();
   settleAll();
-  Bot.walkTo(612);
+  Bot.walkTo(810);
 };

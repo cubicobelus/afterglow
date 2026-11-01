@@ -1549,26 +1549,28 @@ def(10, "THE LONG WAY", {
   g.set(10, 8, "L").set(27, 6, "L").set(44, 5, "L");
 });
 def(10, "GOLD LEAF", {
-  echoes: ["gust", "shade", "calm", "shift", "phase"], recMax: 40,
+  cols: 48, rows: 27, echoes: ["gust", "shade", "calm", "shift", "phase"], recMax: 40,
   hint: "THE RING THAT OPENS THE GOLD WALL ALSO TAKES THE BRIDGE FROM UNDER YOU, AND NOTHING JUMPS UNDER THAT ROOF. A CALM SILENCES EVERY POWER INSIDE ITS RING: A SHIFT, A LAMP, A WALL OF GOLD, A VENT. THERE IS ONLY ONE.",
 }, (g) => {
   g.base();
-  g.set(2, 14, "@");
-  g.pit(4, 6);
-  g.set(7, 14, "<");
+  g.set(2, 21, "@");
+  // a vent gap too wide for a plain step: only a step with a wind of its own reaches
+  g.pit(4, 12);
+  g.set(13, 21, "<");
   // the plate lights the lamp over the thorns
-  g.set(8, 14, "a");
-  g.fill(10, 14, 14, 14, "t");
-  g.set(12, 10, "P");
+  g.set(15, 21, "a");
+  g.fill(19, 21, 23, 21, "t");
+  g.set(21, 17, "P");
   // a gold bridge under a roof too low to jump, then a gold wall, then glass
-  g.pit(17, 22);
-  g.fill(17, 15, 22, 15, "+");
-  g.fill(15, 1, 25, 13, "#");
-  g.fill(26, 1, 26, 14, "+");
-  g.fill(29, 1, 29, 14, "%");
-  g.fill(30, 13, 30, 14, "X");
-  g.set(3, 8, "L").set(27, 6, "L");
+  g.pit(26, 31);
+  g.fill(26, 22, 31, 22, "+");
+  g.fill(24, 1, 34, 20, "#");
+  g.fill(35, 1, 35, 21, "+");
+  g.fill(38, 1, 38, 21, "%");
+  g.fill(40, 20, 40, 21, "X");
+  g.set(3, 8, "L").set(44, 8, "L");
 });
+
 
 
 
