@@ -376,10 +376,13 @@ const App = (() => {
     ];
   }
 
+  const hasSolMap = () => !LEVELS[A.idx].lab && typeof SOLMAP !== "undefined" && !!(SOLMAP[LEVELS[A.idx].name] || []).length;
+
   function pauseItems() {
     return [
       { label: "RESUME", act: () => { A.state = "play"; } },
       { label: "RESTART LEVEL", act: () => startLevel(A.idx) },
+      ...(hasSolMap() ? [{ label: "SOLUTION MAP", act: () => { A.state = "solmap"; } }] : []),
       { label: fsElement() ? "LEAVE FULLSCREEN" : "FULLSCREEN", fsToggle: true, act: () => {} },
       { label: "SETTINGS", act: () => openSettings("pause") },
       { label: "LEVELS", act: goSelect },
@@ -595,6 +598,10 @@ const App = (() => {
       case "pause": {
         navMenu(pauseItems());
         if (Input.hitBind("pause")) A.state = "play";
+        break;
+      }
+      case "solmap": {
+        if (Input.hitAny(["Enter", "Space", "Backspace"]) || Input.hitBind("pause")) { A.state = "pause"; Sfx.play("ui"); }
         break;
       }
       case "complete": {
@@ -983,6 +990,7 @@ const App = (() => {
       case "chapter": drawCard(); break;
       case "play": drawPlay(); break;
       case "pause": drawPause(A.hits); break;
+      case "solmap": Render.solutionMap(ctx, SOLMAP[LEVELS[A.idx].name], A.T); break;
       case "complete": drawComplete(A.hits); break;
       case "ending": drawEnding(); break;
     }
@@ -1062,6 +1070,7 @@ const App = (() => {
     }
     // A click records and stops too, for keyboards that cannot register SCREEN_W, D and E together.
     if (A.state === "play" && e.button === 0) Input.pressed.Mouse0 = true;
+    if (A.state === "solmap") { A.state = "pause"; Sfx.play("ui"); }
     if (A.state === "chapter" && A.cardT > 30) nextCard();
     if (A.state === "ending" && A.endT > 60) { if (A.story === INTERLUDE && A.storyNext >= 0) startLevel(A.storyNext); else goTitle(); }
   });

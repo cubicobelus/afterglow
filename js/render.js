@@ -1692,6 +1692,71 @@ const Render = (() => {
     screen.drawImage(vignette, 0, 0);
   }
 
+  // ------------------------------------------------------------ solution map
+  // The level with every echo of the scripted solution placed where it ends up, numbered in the order it is recorded.
+  // rows: [number, kind, x, y, face, gravity, flag, path] from SOLMAP; flag 1 is a fork twin, 0 a tide with its path.
+  function solutionMap(screen, rows, T) {
+    const saveEch = G.echoes, saveDead = G.dead, saveRec = G.rec;
+    const fake = {};
+    const used = {};
+    rows.forEach((r, i) => {
+      const kind = r[1];
+      used[kind] = (used[kind] || 0) + 1;
+      const key = kind === "portal" ? (used[kind] === 1 ? "portal" : "portal" + used[kind]) : "m" + i;
+      const e = makeEcho("shade", [{ x: r[2], y: r[3], f: r[4], s: 0, g: r[5] }], key);
+      e.kind = kind; e.moving = false; e.restT = 999; e.clk = 1e9;
+      fake[key] = e;
+    });
+    G.echoes = fake; G.dead = true; G.rec = null;
+    computeFields();
+    world(screen, T);
+    G.echoes = saveEch; G.dead = saveDead; G.rec = saveRec;
+    computeFields();
+    const L = G.L, s = SCREEN_W / W;
+    screen.save();
+    screen.textBaseline = "alphabetic";
+    rows.forEach((r) => {
+      const k = KINDS[r[1]], path = r[7];
+      if (path && path.length > 1) {
+        screen.strokeStyle = rgba(k.color, 0.7);
+        screen.lineWidth = 1;
+        screen.setLineDash([3, 3]);
+        screen.beginPath();
+        path.forEach((q, j) => { const px = (q[0] + PW / 2) * s, py = (q[1] + (r[5] < 0 ? 0 : PH)) * s; if (j) screen.lineTo(px, py); else screen.moveTo(px, py); });
+        screen.stroke();
+        screen.setLineDash([]);
+      }
+      const up = r[5] >= 0;
+      const bx = Math.round((r[2] + PW / 2) * s), by = Math.round((up ? r[3] - 12 : r[3] + PH + 12) * s + (up ? -4 : 4));
+      screen.fillStyle = "rgba(5,6,14,0.85)";
+      screen.beginPath(); screen.arc(bx, by, 7, 0, TAU); screen.fill();
+      screen.strokeStyle = k.color;
+      screen.lineWidth = 1.5;
+      screen.beginPath(); screen.arc(bx, by, 7, 0, TAU); screen.stroke();
+      const txt = String(r[0]);
+      Font.draw(screen, txt, bx - Math.floor(Font.width(txt, 1) / 2), by - 3, { scale: 1, color: "#ffffff", shadow: null });
+    });
+    screen.restore();
+    // a legend along the bottom: number and kind, in the kind's colour
+    const items = rows.filter((r) => r[6] !== 1).map((r) => ({ t: r[0] + " " + KINDS[r[1]].name, c: KINDS[r[1]].color }));
+    const lines = [];
+    let cur = [], w = 0;
+    for (const it of items) {
+      const iw = Font.width(it.t, 1) + 12;
+      if (w + iw > SCREEN_W - 16 && cur.length) { lines.push(cur); cur = []; w = 0; }
+      cur.push(it); w += iw;
+    }
+    if (cur.length) lines.push(cur);
+    const bh = lines.length * 10 + 16;
+    screen.fillStyle = "rgba(5,6,14,0.8)";
+    screen.fillRect(0, SCREEN_H - bh, SCREEN_W, bh);
+    lines.forEach((ln, li) => {
+      let x = 8;
+      for (const it of ln) { Font.draw(screen, it.t, x, SCREEN_H - bh + 12 + li * 10, { scale: 1, color: it.c, shadow: null }); x += Font.width(it.t, 1) + 12; }
+    });
+    Font.draw(screen, "SOLUTION: ECHOES IN THE ORDER YOU RECORD THEM", 8, SCREEN_H - bh + 2, { scale: 1, color: "rgba(255,233,168,0.8)", shadow: null });
+  }
+
   // ------------------------------------------------------------ HUD
   function slotIcon(ctx, x, y, kind, t, on) {
     const k = KINDS[kind];
@@ -1802,5 +1867,5 @@ const Render = (() => {
     if (L.lanterns.length) drawLanternIcon(ctx, SCREEN_W - 14, 28, G.lanternsGot > 0);
   }
 
-  return { world, hud, bake, drawSwapIcon, drawActor, drawFlame, glowAt, drawLanternIcon, slotIcon, EMBLEMS, PLAYER_LOOK, rgba, tint, mulberry, hash };
+  return { world, hud, solutionMap, bake, drawSwapIcon, drawActor, drawFlame, glowAt, drawLanternIcon, slotIcon, EMBLEMS, PLAYER_LOOK, rgba, tint, mulberry, hash };
 })();
