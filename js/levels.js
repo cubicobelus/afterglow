@@ -1641,6 +1641,9 @@ def(10, "EVERY ECHO", {
   g.fill(1, 15, 16, 15, "#").fill(21, 15, 62, 15, "#");
   g.fill(7, 16, 7, 22, "#").fill(12, 16, 12, 22, "#").set(9, 22, "d");
   g.fill(51, 16, 51, 22, "D");
+  // a lid of spikes under the hole in floor three (above a solid base low enough for the rope): a fall into it is the end, and nothing can lift you up through it from here
+  g.fill(50, 20, 50, 21, "#").fill(52, 20, 55, 21, "#");
+  g.set(50, 16, "^").fill(52, 16, 55, 16, "^");
   g.fill(42, 22, 47, 22, "^");
   g.fill(30, 16, 37, 19, "#");
   g.blade(33, 21, 26, 6, 0);
