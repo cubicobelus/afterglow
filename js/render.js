@@ -1700,6 +1700,7 @@ const Render = (() => {
     const fake = {};
     const used = {};
     rows.forEach((r, i) => {
+      if (r[6] & 2) return; // an earlier recording that was replaced is only marked, not placed
       const kind = r[1];
       used[kind] = (used[kind] || 0) + 1;
       const key = kind === "portal" ? (used[kind] === 1 ? "portal" : "portal" + used[kind]) : "m" + i;
@@ -1716,7 +1717,7 @@ const Render = (() => {
     screen.save();
     screen.textBaseline = "alphabetic";
     rows.forEach((r) => {
-      const k = KINDS[r[1]], path = r[7];
+      const k = KINDS[r[1]], path = r[8], old = r[6] & 2;
       if (path && path.length > 1) {
         screen.strokeStyle = rgba(k.color, 0.7);
         screen.lineWidth = 1;
@@ -1728,17 +1729,30 @@ const Render = (() => {
       }
       const up = r[5] >= 0;
       const bx = Math.round((r[2] + PW / 2) * s), by = Math.round((up ? r[3] - 12 : r[3] + PH + 12) * s + (up ? -4 : 4));
+      if (old) {
+        // replaced by a later recording of the same slot: a faded marker where its echo stood
+        const fx = Math.round((r[2] + PW / 2) * s), fy = Math.round((r[3] + (up ? PH : 0)) * s);
+        screen.strokeStyle = rgba(k.color, 0.6);
+        screen.lineWidth = 1;
+        screen.setLineDash([2, 2]);
+        screen.beginPath(); screen.ellipse(fx, fy, 8, 3, 0, 0, TAU); screen.stroke();
+        screen.setLineDash([]);
+        screen.globalAlpha = 0.55;
+      }
       screen.fillStyle = "rgba(5,6,14,0.85)";
       screen.beginPath(); screen.arc(bx, by, 7, 0, TAU); screen.fill();
       screen.strokeStyle = k.color;
       screen.lineWidth = 1.5;
+      if (old) screen.setLineDash([2, 2]);
       screen.beginPath(); screen.arc(bx, by, 7, 0, TAU); screen.stroke();
+      screen.setLineDash([]);
       const txt = String(r[0]);
       Font.draw(screen, txt, bx - Math.floor(Font.width(txt, 1) / 2), by - 3, { scale: 1, color: "#ffffff", shadow: null });
+      screen.globalAlpha = 1;
     });
     screen.restore();
     // a legend along the bottom: number and kind, in the kind's colour
-    const items = rows.filter((r) => r[6] !== 1).map((r) => ({ t: r[0] + " " + KINDS[r[1]].name, c: KINDS[r[1]].color }));
+    const items = rows.filter((r) => !(r[6] & 1)).map((r) => ({ t: r[0] + " " + KINDS[r[1]].name + (r[6] & 2 && r[7] ? " (REDONE AS " + r[7] + ")" : ""), c: KINDS[r[1]].color }));
     const lines = [];
     let cur = [], w = 0;
     for (const it of items) {
