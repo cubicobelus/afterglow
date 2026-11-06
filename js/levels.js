@@ -1620,7 +1620,7 @@ def(10, "THE OTHER HALF", {
 def(10, "EVERY ECHO", {
   cols: 64, rows: 36, recMax: 200,
   echoes: ["shade", "glow", "fork", "calm", "gust", "tide", "spring", "mirror", "pull", "slow", "phase", "beam", "reflector", "shift", "flip", "swing", "vine", "branch", "shade", "portal", "portal"],
-  hint: "ONE OF EVERY ECHO, FLOOR BY FLOOR, EACH RECORDED GETTING PAST WHAT THE OTHERS DID. SOME NEED TWO: A BEAM ONLY SHINES STRAIGHT. TAB STEPS THROUGH THE SLOTS.",
+  hint: "ONE OF EVERY ECHO, FLOOR BY FLOOR, EACH RECORDED GETTING PAST WHAT THE OTHERS DID. TAB STEPS THROUGH THE SLOTS.",
 }, (g) => {
   g.base();
   // floors: the ground (surface row 31), then slabs at rows 23, 15 and 7, each with a way up at alternate ends
