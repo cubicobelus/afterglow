@@ -2083,7 +2083,7 @@ const EVERY_ECHO = [
     },
   },
   // Floor two runs right to left (feet at y 460).
-  { key: "mirror", place() { Bot.walkTo(1090, 3); Bot.run(10); Bot.stop(); }, pass() { Bot.waitUntil(() => G.L.doorOpen.d, 2400, "the puppet on plate d"); Bot.walkTo(1000, 3); } },
+  { key: "mirror", place() { Bot.walkTo(1170, 3); Bot.run(10); Bot.stop(); }, pass() { Bot.waitUntil(() => G.L.doorOpen.d, 2400, "the puppet on plate d"); Bot.walkTo(1000, 3); } },
   {
     key: "pull",
     place() { Bot.walkTo(966, 3); Bot.dir(-1); Bot.jumpKey(true); for (let i = 0; i < 28; i++) { if (i === 22) Bot.jumpKey(false); Bot.tick(); if (G.dead) Bot.fail("fell"); } Bot.jumpKey(false); Bot.dir(0); Bot.stop(); },
@@ -2170,7 +2170,7 @@ const EVERY_ECHO = [
       let b = false;
       for (let i = 0; i < 300; i++) {
         if (G.p.vy < -520) b = true;
-        const tx = !b ? 1230 : Bot.feet() < 136 ? -1 : 1212;
+        const tx = !b ? 1210 : Bot.feet() < 136 ? -1 : 1210;
         Bot.dir(tx === -1 ? -1 : Math.abs(tx - Bot.px()) < 3 ? 0 : Math.sign(tx - Bot.px()));
         Bot.tick();
         if (G.dead) Bot.fail("fell");

@@ -1620,7 +1620,7 @@ def(10, "THE OTHER HALF", {
 def(10, "EVERY ECHO", {
   cols: 64, rows: 36, recMax: 200,
   echoes: ["shade", "glow", "fork", "calm", "gust", "tide", "spring", "mirror", "pull", "slow", "phase", "beam", "reflector", "shift", "flip", "swing", "vine", "branch", "shade", "portal", "portal"],
-  hint: "ONE OF EVERY ECHO, FLOOR BY FLOOR. EACH ONE IS RECORDED GETTING PAST WHAT THE OTHERS OPENED. TAB STEPS THROUGH THE SLOTS.",
+  hint: "ONE OF EVERY ECHO, FLOOR BY FLOOR, EACH RECORDED GETTING PAST WHAT THE OTHERS DID. SOME NEED TWO: A BEAM ONLY SHINES STRAIGHT. TAB STEPS THROUGH THE SLOTS.",
 }, (g) => {
   g.base();
   // floors: the ground (surface row 31), then slabs at rows 23, 15 and 7, each with a way up at alternate ends
@@ -1637,14 +1637,14 @@ def(10, "EVERY ECHO", {
   g.set(44, 30, "<");
   g.pit(49, 54);
   g.set(3, 26, "L").set(24, 26, "L").set(46, 26, "L").set(60, 26, "L");
-  // floor two, right to left: a door whose plate is shut in a room across the tower, spikes, a blade in a tunnel, glass, a mushroom up
+  // floor two, right to left: a door whose plate is shut in a room across the tower, a spiked pit hanging over a low passage, spikes, a blade in a tunnel, glass, a mushroom up
   g.fill(1, 15, 16, 15, "#").fill(21, 15, 62, 15, "#");
-  g.fill(7, 16, 7, 22, "#").fill(12, 16, 12, 22, "#").set(9, 22, "d");
-  g.fill(51, 16, 51, 22, "D");
+  g.fill(3, 16, 3, 22, "#").fill(8, 16, 8, 22, "#").set(5, 22, "d");
+  g.fill(57, 16, 57, 22, "D");
   // under the hole in floor three: a sealed pit with a spiked floor, hanging from the slab over a low passage, so a fall into it is the end
   // and nothing can lift you up through it from floor two (the rope still hangs clear, and the swing never dips below y 308)
-  g.fill(49, 16, 49, 21, "#").fill(56, 16, 56, 21, "#").fill(50, 20, 50, 21, "#").fill(52, 20, 55, 21, "#");
-  g.set(50, 19, "^").fill(52, 19, 55, 19, "^");
+  g.fill(49, 16, 49, 21, "#").fill(56, 16, 56, 21, "#").fill(50, 20, 55, 21, "#");
+  g.fill(50, 19, 55, 19, "^");
   g.fill(42, 22, 47, 22, "^");
   g.fill(30, 16, 37, 19, "#");
   g.blade(33, 21, 26, 6, 0);
@@ -1652,12 +1652,12 @@ def(10, "EVERY ECHO", {
   g.set(18, 22, "m");
   g.set(55, 18, "L").set(44, 18, "L").set(14, 18, "L");
   // floor three, left to right: a gold wall, spikes under a low ceiling, a hole, then a hatch over the mushroom that only a beam turned upward opens
-  g.fill(1, 7, 57, 7, "#");
+  g.fill(1, 7, 58, 7, "#").fill(61, 7, 62, 7, "#");
   g.fill(40, 8, 40, 14, "+");
   g.fill(43, 8, 48, 12, "#").fill(45, 14, 47, 14, "^");
   g.fill(50, 15, 55, 15, ".");
-  g.set(61, 14, "m");
-  g.fill(58, 7, 62, 7, "G");
+  g.set(60, 14, "m");
+  g.fill(59, 7, 60, 7, "G");
   g.set(19, 9, "L").set(50, 10, "L");
   // floor three's left end is a sealed pocket, reached only by dropping from floor four
   g.fill(16, 8, 16, 14, "#").set(5, 14, "a");
