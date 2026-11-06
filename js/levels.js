@@ -1625,9 +1625,9 @@ def(10, "EVERY ECHO", {
   g.base();
   // floors: the ground (surface row 31), then slabs at rows 23, 15 and 7, each with a way up at alternate ends
   g.fill(1, 23, 57, 23, "#");
-  // floor one, left to right: a gap for a step, thorns, two plates and their door, a vent gap, a gust gap, a ferry gap, a spring up
+  // floor one, left to right: a gap for a ferry, thorns, two plates and their door, a vent gap, a gust gap, a gap for a step, a spring up
   g.set(2, 30, "@");
-  g.pit(5, 9);
+  g.pit(4, 9);
   g.fill(12, 30, 16, 30, "t");
   g.set(18, 30, "c").set(20, 30, "c");
   g.fill(22, 24, 22, 30, "C");
@@ -1635,7 +1635,7 @@ def(10, "EVERY ECHO", {
   g.set(29, 30, "<");
   g.pit(35, 43);
   g.set(44, 30, "<");
-  g.pit(49, 55);
+  g.pit(49, 54);
   g.set(3, 26, "L").set(24, 26, "L").set(46, 26, "L").set(60, 26, "L");
   // floor two, right to left: a door whose plate is shut in a room across the tower, spikes, a blade in a tunnel, glass, a mushroom up
   g.fill(1, 15, 16, 15, "#").fill(21, 15, 62, 15, "#");
@@ -1647,15 +1647,13 @@ def(10, "EVERY ECHO", {
   g.fill(24, 16, 24, 22, "%");
   g.set(18, 22, "m");
   g.set(55, 18, "L").set(44, 18, "L").set(14, 18, "L");
-  // floor three, left to right: thorns in a line, a gate lit by a turned beam, a gold wall, spikes under a low ceiling, a hole, a mushroom
+  // floor three, left to right: a gold wall, spikes under a low ceiling, a hole, then a hatch over the mushroom that only a beam turned upward opens
   g.fill(1, 7, 57, 7, "#");
-  g.fill(24, 14, 29, 14, "t");
-  g.set(33, 8, "s");
-  g.fill(37, 8, 37, 12, "#").fill(37, 13, 37, 14, "G");
   g.fill(40, 8, 40, 14, "+");
   g.fill(43, 8, 48, 12, "#").fill(45, 14, 47, 14, "^");
   g.fill(50, 15, 55, 15, ".");
-  g.set(60, 14, "m");
+  g.set(61, 14, "m");
+  g.fill(58, 7, 62, 7, "G");
   g.set(19, 9, "L").set(50, 10, "L");
   // floor three's left end is a sealed pocket, reached only by dropping from floor four
   g.fill(16, 8, 16, 14, "#").set(5, 14, "a");
@@ -1667,7 +1665,7 @@ def(10, "EVERY ECHO", {
   g.fill(13, 1, 13, 4, "#").fill(13, 5, 13, 6, "B");
   g.fill(11, 1, 11, 4, "#").fill(11, 5, 11, 6, "A");
   g.fill(9, 5, 9, 6, "X");
-  g.set(40, 3, "L").set(56, 3, "L").set(6, 3, "L");
+  g.set(40, 3, "L").set(52, 3, "L").set(6, 3, "L");
 });
 
 

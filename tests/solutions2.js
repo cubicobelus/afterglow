@@ -1993,20 +1993,22 @@ SOLUTIONS["THE OTHER HALF"] = () => {
 // Floor one runs left to right on the ground (feet at y 620).
 const EVERY_ECHO = [
   {
-    key: "shade",
-    // a gap a jump cannot clear: a shade stopped over it is the step
-    place() { Bot.walkTo(92, 3); Bot.dir(1); Bot.jumpKey(true); for (let i = 0; i < 26; i++) { if (i === 10) Bot.jumpKey(false); Bot.tick(); } Bot.jumpKey(false); Bot.dir(0); Bot.stop(); },
+    key: "tide",
+    // a gap a jump cannot clear: a tide that waits at the edge, then jumps out over the gap, ferries you to its far end
+    place() { Bot.walkTo(72, 3); Bot.run(120); Bot.jumpKey(true); Bot.dir(1); Bot.run(36); Bot.jumpKey(false); Bot.dir(0); Bot.stop(); },
     pass() {
-      settle("shade", 20);
-      const e = G.echoes.shade;
-      Bot.walkTo(90, 3);
-      Bot.jumpTo(e.x + PW / 2, 24);
-      Bot.expect(G.p.stand === e, "standing on the shade");
-      Bot.run(4);
-      Bot.dir(1); Bot.jumpKey(true);
-      for (let i = 0; i < 200; i++) { if (i === 12) Bot.jumpKey(false); Bot.tick(); if (G.dead) Bot.fail("fell in the step gap"); if (G.p.onGround && i > 4) break; }
-      Bot.jumpKey(false); Bot.dir(0);
-      Bot.expect(G.p.onGround && Bot.px() > 205 && Bot.px() < 236, "across the step gap");
+      Bot.walkTo(72, 3);
+      // board early in its wait at the edge, on its way out (a tide plays its path forward, then back)
+      const tr = G.echoes.tide.trace, at = tr.map((t, i) => (Math.abs(t.x + PW / 2 - 72) < 2 ? i : -1)).filter((i) => i >= 0);
+      const i0 = at[0], i1 = at[at.length - 1];
+      Bot.waitUntil(() => { const e = G.echoes.tide, n = e.trace.length, k = Math.floor(e.clk) % (2 * (n - 1)); return k >= i0 + 40 && k <= (i0 + i1) / 2; }, 9000, "the tide waiting at the edge");
+      Bot.jumpTo(72, 12);
+      // later echoes recorded riding the tide ride along with it, so standing on any of them is the same ride
+      Bot.expect(G.p.stand && G.p.stand.trace, "on the tide or something riding it");
+      const n = G.echoes.tide.trace.length;
+      Bot.waitUntil(() => { const e = G.echoes.tide; return Math.floor(e.clk) % (2 * (n - 1)) >= n - 3; }, 900, "the ride out over the gap");
+      Bot.jumpTo(222, 24);
+      Bot.expect(G.p.onGround && Bot.px() > 205 && Bot.px() < 236, "across the first gap");
     },
   },
   stThorns("glow", 230, 352),
@@ -2044,21 +2046,21 @@ const EVERY_ECHO = [
     },
   },
   {
-    key: "tide",
-    place() { Bot.walkTo(972, 3); Bot.run(120); Bot.jumpKey(true); Bot.dir(1); Bot.run(36); Bot.jumpKey(false); Bot.dir(0); Bot.stop(); },
+    key: "shade",
+    // a gap a jump cannot clear: a shade stopped over it is the step
+    place() { Bot.walkTo(972, 3); Bot.dir(1); Bot.jumpKey(true); for (let i = 0; i < 26; i++) { if (i === 10) Bot.jumpKey(false); Bot.tick(); } Bot.jumpKey(false); Bot.dir(0); Bot.stop(); },
     pass() {
+      settle("shade", 20);
+      const e = G.echoes.shade;
       walkThrough(966, 4);
-      // board early in its wait at the edge, on its way out (a tide plays its path forward, then back)
-      const tr = G.echoes.tide.trace, at = tr.map((t, i) => (Math.abs(t.x + PW / 2 - 972) < 2 ? i : -1)).filter((i) => i >= 0);
-      const i0 = at[0], i1 = at[at.length - 1];
-      Bot.waitUntil(() => { const e = G.echoes.tide, n = e.trace.length, k = Math.floor(e.clk) % (2 * (n - 1)); return k >= i0 + 40 && k <= (i0 + i1) / 2; }, 9000, "the tide waiting at the edge");
-      Bot.jumpTo(972, 12);
-      // later echoes recorded riding the tide ride along with it, so standing on any of them is the same ride
-      Bot.expect(G.p.stand && G.p.stand.trace, "on the tide or something riding it");
-      const n = G.echoes.tide.trace.length;
-      Bot.waitUntil(() => { const e = G.echoes.tide; return Math.floor(e.clk) % (2 * (n - 1)) >= n - 3; }, 900, "the ride out over the gap");
-      Bot.jumpTo(1150, 24);
-      Bot.expect(G.p.onGround && Bot.px() > 1125, "across the ferry gap");
+      Bot.walkTo(972, 3);
+      Bot.jumpTo(e.x + PW / 2, 24);
+      Bot.expect(G.p.stand === e, "standing on the shade");
+      Bot.run(4);
+      Bot.dir(1); Bot.jumpKey(true);
+      for (let i = 0; i < 200; i++) { if (i === 12) Bot.jumpKey(false); Bot.tick(); if (G.dead) Bot.fail("fell in the step gap"); if (G.p.onGround && i > 4) break; }
+      Bot.jumpKey(false); Bot.dir(0);
+      Bot.expect(G.p.onGround && Bot.px() > 1105, "across the step gap");
     },
   },
   {
@@ -2126,13 +2128,6 @@ const EVERY_ECHO = [
     },
   },
   // Floor three runs left to right (feet at y 300).
-  { key: "beam", place() { Bot.walkTo(470, 3); Bot.run(10); Bot.stop(); }, pass() { settle("beam", 30); Bot.walkTo(470, 3); Bot.dir(1); for (let i = 0; i < 400 && Bot.px() < 612; i++) { Bot.tick(); if (G.dead) Bot.fail("died on the thorns"); } Bot.dir(0); } },
-  {
-    key: "reflector",
-    // a reflector sends a beam the opposite way to the way it faces, so it ends facing back toward the thorns
-    place() { Bot.walkTo(684, 3); Bot.dir(-1); for (let i = 0; i < 100 && Bot.px() > 671; i++) Bot.tick(); Bot.dir(0); Bot.run(10); Bot.stop(); },
-    pass() { settle("reflector", 30); Bot.waitUntil(() => G.L.gates.some((gt) => gt.open), 600, "the gate"); Bot.walkTo(772, 3); },
-  },
   { key: "shift", place() { Bot.walkTo(790, 3); Bot.run(10); Bot.stop(); }, pass() { settle("shift", 30); Bot.walkTo(846, 3); } },
   {
     key: "flip",
@@ -2154,13 +2149,29 @@ const EVERY_ECHO = [
       Bot.waitUntil(() => { const r = G.ropes.find((q) => q.echo === G.echoes.swing); return r && r.len >= 119; }, 900, "the rope");
       swingAcross(990, 10, 0.5);
       Bot.expect(G.p.onGround && Bot.feet() <= 301 && Bot.px() > 1125, "across the hole");
-      // the mushroom under the shaft: a held bounce, then over onto floor four
+    },
+  },
+  // The hatch over the last mushroom opens only for a beam turned upward: the beam shines along the floor and the reflector, standing in it,
+  // sends it up the shaft. (The beam alone shines past; a reflector alone has no beam to turn.)
+  { key: "beam", place() { Bot.walkTo(1132, 3); Bot.walkTo(1150, 3); Bot.run(10); Bot.stop(); }, pass() { settle("beam", 30); } },
+  {
+    key: "reflector",
+    // a reflector sends a beam the opposite way to the way it faces: standing in a beam that runs right and facing right, it turns it up
+    place() { Bot.walkTo(1198, 3); Bot.run(10); Bot.stop(); },
+    pass() {
+      settle("reflector", 30);
+      // wait clear of the beam (earlier runs' echoes stand where you stand, and an echo in the beam cuts it), until the hatch has stayed open a while
+      Bot.walkTo(1132, 3);
+      const open = () => G.L.gates.some((gt) => gt.tx === 60 && gt.ty === 7 && gt.open);
+      let c = 0;
+      Bot.waitUntil(() => { c = open() ? c + 1 : 0; return c >= 40; }, 3000, "the hatch");
       Bot.walkTo(1170, 3);
       Bot.jumpKey(true);
       let b = false;
       for (let i = 0; i < 300; i++) {
         if (G.p.vy < -520) b = true;
-        Bot.dir(!b ? (Math.abs(1210 - Bot.px()) < 3 ? 0 : Math.sign(1210 - Bot.px())) : Bot.feet() < 136 ? -1 : 0);
+        const tx = !b ? 1230 : Bot.feet() < 136 ? -1 : 1212;
+        Bot.dir(tx === -1 ? -1 : Math.abs(tx - Bot.px()) < 3 ? 0 : Math.sign(tx - Bot.px()));
         Bot.tick();
         if (G.dead) Bot.fail("fell");
         if (b && G.p.onGround) break;
