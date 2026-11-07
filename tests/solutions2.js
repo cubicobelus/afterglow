@@ -1831,24 +1831,11 @@ SOLUTIONS["GOLD LEAF"] = () => {
 };
 
 SOLUTIONS["SECOND THOUGHTS"] = () => {
-  // A gust hung over the vent gap (the gap is too wide for a step without wind). The calm first stands at the edge of the mushroom pit, where
-  // it puts the four mushrooms to sleep but not the one past the pit. The shade waits a long while at the edge, then walks across the
-  // sleeping mushrooms. A vine is hung at the top of a bounce on the last mushroom. Then the calm is recorded again on the bridge above, and
-  // every later run crosses the pit riding the shade, over mushrooms that are awake again.
-  const crossVent = () => {
-    settle("gust", 40);
-    const e = G.echoes.gust;
-    Bot.walkTo(70, 3);
-    Bot.jumpTo(e.x + PW / 2, 24);
-    Bot.expect(G.p.stand === e, "standing on the gust");
-    Bot.run(4);
-    Bot.dir(1);
-    Bot.jumpKey(true);
-    for (let i = 0; i < 200; i++) { if (i === 24) Bot.jumpKey(false); Bot.tick(); if (G.dead) Bot.fail("fell in the vent gap"); if (G.p.onGround && i > 5) break; }
-    Bot.jumpKey(false);
-    Bot.dir(0);
-    Bot.expect(Bot.px() > 262, "across the vent gap");
-  };
+  // The calm first stands at the edge of the mushroom pit, where it puts the four mushrooms to sleep but not the one past the pit. The
+  // shade waits a long while at the edge, then walks across the sleeping mushrooms. A vine is hung at the top of a bounce on the last
+  // mushroom. Then the calm is recorded again on the bridge above, and every later run crosses the pit riding the shade, over mushrooms
+  // that are awake again.
+  const walkIn = () => Bot.walkTo(270, 3);
   const hopOnto = (x) => {
     Bot.dir(1);
     Bot.jumpKey(true);
@@ -1876,7 +1863,7 @@ SOLUTIONS["SECOND THOUGHTS"] = () => {
     else Bot.expect(G.p.onGround && Bot.feet() <= 141, "up on the upper floor");
   };
   const rideShade = () => {
-    crossVent();
+    walkIn();
     walkThrough(340, 4);
     Bot.waitUntil(() => { const e = G.echoes.shade; return e && Math.abs(e.x + PW / 2 - 370) < 3; }, 900, "the shade waiting at the pit");
     Bot.run(4);
@@ -1886,25 +1873,15 @@ SOLUTIONS["SECOND THOUGHTS"] = () => {
     Bot.expect(Bot.px() > 480 && !G.dead, "across the pit");
     bounceAndClimb(false);
   };
-  // the gust
-  Bot.record("gust");
-  Bot.walkTo(70, 3);
-  Bot.dir(1);
-  Bot.run(6);
-  Bot.jumpKey(true);
-  for (let i = 0; i < 34; i++) { if (i === 22) Bot.jumpKey(false); Bot.tick(); }
-  Bot.jumpKey(false);
-  Bot.dir(0);
-  Bot.stop();
   // the calm at the pit, for now
   Bot.record("calm");
-  crossVent();
+  walkIn();
   walkThrough(390, 4);
   Bot.run(12);
   Bot.stop();
   // the shade, which waits, then crosses the sleeping mushrooms
   Bot.record("shade");
-  crossVent();
+  walkIn();
   settle("calm", 40);
   walkThrough(370, 4);
   Bot.run(300);
@@ -1914,7 +1891,7 @@ SOLUTIONS["SECOND THOUGHTS"] = () => {
   Bot.stop();
   // the vine at the top of a bounce on the last mushroom
   Bot.record("vine");
-  crossVent();
+  walkIn();
   settle("calm", 40);
   walkThrough(380, 4);
   hopOnto(412);

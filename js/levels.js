@@ -1571,14 +1571,11 @@ def(10, "GOLD LEAF", {
   g.set(3, 8, "L").set(44, 8, "L");
 });
 def(10, "SECOND THOUGHTS", {
-  cols: 48, rows: 27, echoes: ["gust", "calm", "shade", "vine", "shift", "phase"], recMax: 60,
+  cols: 48, rows: 27, echoes: ["calm", "shade", "vine", "shift", "phase"], recMax: 60,
   hint: "THE CALM IS WANTED IN TWO PLACES AND THERE IS ONLY ONE. WHAT CROSSED WHILE IT WAS THERE STILL CROSSES, AND CAN CARRY YOU.",
 }, (g) => {
   g.base();
   g.set(2, 21, "@");
-  // a vent gap too wide for a step without wind
-  g.pit(4, 12);
-  g.set(13, 21, "<");
   // a pit of mushrooms under a low roof of spikes: no jump survives it, and the mushroom past it is the way up
   g.pit(20, 23);
   g.fill(20, 21, 23, 21, "m");
@@ -1961,7 +1958,7 @@ const PAR = {
   "THE LENS": { t: 50, r: 4 },
   "THE LONG WAY": { t: 380, r: 8 },
   "GOLD LEAF": { t: 80, r: 5 },
-  "SECOND THOUGHTS": { t: 160, r: 7 },
+  "SECOND THOUGHTS": { t: 155, r: 6 },
   "THE OTHER HALF": { t: 35, r: 5 },
   "CROSSCURRENT": { t: 35, r: 3 },
   "EVERY ECHO": { t: 1785, r: 22 },
