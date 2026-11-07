@@ -1616,6 +1616,21 @@ def(10, "THE OTHER HALF", {
   g.set(44, 21, "b");
   g.set(10, 10, "L").set(38, 10, "L").set(44, 14, "L");
 });
+def(10, "CROSSCURRENT", {
+  cols: 48, rows: 27, echoes: ["mirror", "spring", "tide"], recMax: 60, swap: true,
+  hint: "A SWAP MADE WHILE RECORDING STAYS IN THE RECORDING. THE PUPPET CANNOT BE IN TWO PLACES.",
+}, (g) => {
+  g.base();
+  g.set(2, 21, "@");
+  // the left half is a narrow room: everything right of column 11 is solid, so the puppet never stands nearer the door than mid-pit
+  g.fill(12, 1, 23, 21, "#");
+  // the right half, wall to edge: the lamp room under a solid roof, its door, a floor, a wide pit, and the plate
+  g.fill(24, 1, 27, 19, "#");
+  g.fill(24, 20, 24, 21, "X");
+  g.fill(27, 20, 27, 21, "B");
+  g.pit(33, 41);
+  g.set(44, 21, "b");
+});
 // The finale: a tower of four floors, one station for every echo the game has. 64 x 36 tiles, drawn at half size.
 def(10, "EVERY ECHO", {
   cols: 64, rows: 36, recMax: 200,
@@ -1948,6 +1963,7 @@ const PAR = {
   "GOLD LEAF": { t: 80, r: 5 },
   "SECOND THOUGHTS": { t: 160, r: 7 },
   "THE OTHER HALF": { t: 35, r: 5 },
+  "CROSSCURRENT": { t: 35, r: 3 },
   "EVERY ECHO": { t: 1785, r: 22 },
 };
 for (const l of LEVELS) l.par = PAR[l.name];

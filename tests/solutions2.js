@@ -1989,6 +1989,60 @@ SOLUTIONS["THE OTHER HALF"] = () => {
   Bot.walkTo(490);
 };
 
+SOLUTIONS["CROSSCURRENT"] = () => {
+  // The puppet must stay on the far plate to hold the lamp room's door, so the player cannot swap with it on the real run. Each recording
+  // swaps through it instead: the spring is left hanging over the pit, and the tide, recorded through the same swap and over that spring,
+  // carries the swap in its path. On the run the player swaps to the tide where it waits by the door.
+  const swapToPuppet = () => {
+    Bot.waitUntil(() => G.echoes.mirror && !G.echoes.mirror.moving, 900, "the puppet to stop");
+    Bot.walkTo(70, 3);
+    Bot.run(4);
+    Bot.select("mirror");
+    Bot.swap();
+    Bot.run(6);
+    Bot.expect(Bot.px() > 840, "on the far floor");
+  };
+  recWait("mirror", 70, 20);
+  settle("mirror", 40);
+  Bot.expect(G.L.doorOpen.b, "the puppet holds the door");
+  // the spring: off the far lip and stopped on the way down, over the pit
+  Bot.record("spring");
+  swapToPuppet();
+  Bot.walkTo(848, 2);
+  Bot.dir(-1);
+  Bot.jumpKey(true);
+  Bot.run(24);
+  Bot.jumpKey(false);
+  Bot.run(16);
+  Bot.stop();
+  Bot.dir(0);
+  // the tide: off the lip onto the spring, bounced over to the floor by the door, and left waiting there
+  Bot.record("tide");
+  swapToPuppet();
+  Bot.walkTo(848, 2);
+  settle("spring", 30);
+  const sx = G.echoes.spring.x + PW / 2;
+  let bounced = false;
+  for (let i = 0; i < 240 && !(bounced && G.p.onGround); i++) {
+    Bot.dir(bounced || Bot.px() > sx + 2 ? -1 : Bot.px() < sx - 2 ? 1 : 0);
+    Bot.jumpKey(true);
+    Bot.run(1);
+    if (G.p.vy < -300 && Bot.px() < 836) bounced = true;
+  }
+  Bot.jumpKey(false);
+  Bot.dir(0);
+  Bot.expect(bounced && Bot.px() < 660, "over the pit");
+  Bot.walkTo(575, 3);
+  Bot.run(60);
+  Bot.stop();
+  // the run: swap to the tide while it waits by the open door
+  Bot.waitUntil(() => G.L.doorOpen.b && G.echoes.tide && G.echoes.tide.x > 540 && G.echoes.tide.x < 600, 6000, "the tide by the door");
+  Bot.select("tide");
+  Bot.swap();
+  Bot.run(4);
+  Bot.walkTo(490);
+};
+
 // ---------------------------------------------------------------- the finale, Every Echo: one station per echo, floor by floor
 // Floor one runs left to right on the ground (feet at y 620).
 const EVERY_ECHO = [
