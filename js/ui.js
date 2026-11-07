@@ -178,6 +178,15 @@ const App = (() => {
     persist();
   }
   save.v = SAVE_VERSION;
+  // A best time that shows the same as par earns the time star; saves from before that rule get it here.
+  let parFixed = false;
+  LEVELS.forEach((l, i) => {
+    const b = save.best[i];
+    if (!l.par || b === undefined || Math.floor(b) > l.par.t) return;
+    const s = save.stars[i] || [true, false, false];
+    if (!s[1]) { s[1] = true; save.stars[i] = s; parFixed = true; }
+  });
+  if (parFixed) persist();
   const isDone = (i) => !!save.done[i];
   // A bonus level (`bonus: N` in its definition) sits outside the main path: the level before it in the list does not
   // unlock it, the level after it does not wait for it, and it opens once N stars are earned in its tier.
@@ -314,7 +323,8 @@ const App = (() => {
     const prevBest = save.best[i];
     const newBest = prevBest === undefined || t < prevBest;
     const par = def.par || { t: 9999, r: 99 };
-    const earned = [true, t <= par.t, G.recCount <= par.r];
+    // compare whole seconds, as the clock shows them: 1:20.7 on a 1:20 par earns the star
+    const earned = [true, Math.floor(t) <= par.t, G.recCount <= par.r];
     const old = save.stars[i] || [false, false, false];
     save.stars[i] = earned.map((v, k) => v || !!old[k]);
     save.done[i] = true;

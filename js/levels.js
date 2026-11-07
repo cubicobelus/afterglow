@@ -1841,7 +1841,7 @@ def(11, "SHRINK", {
   g.set(5, 8, "L").set(25, 8, "L");
 });
 
-// Par for the two bonus stars: finish under par.t seconds, and use no more than par.r recordings.
+// Par for the two bonus stars: finish with the clock showing par.t seconds or less, and use no more than par.r recordings.
 // Set from the scripted solutions in tests/ with plenty of slack for a person.
 const PAR = {
   "FIRST STEPS": { t: 15, r: 0 },
