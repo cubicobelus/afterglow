@@ -2169,6 +2169,64 @@ SOLUTIONS["BLIND SPOT"] = () => {
   Bot.walkTo(880, 3);
 };
 
+SOLUTIONS["LATE ARRIVAL"] = () => {
+  // One plate opens both doors of a long corridor. The fork's first holds it while you pass the first door, and its twin, 150 ticks behind,
+  // holds it again for the far door; neither can be done alone, and every other echo is busy later. The spring and the flip are then recorded
+  // through both doors: the spring at the foot of the ledge, the flip on it, and the run bounces off the spring into the flip's ring.
+  const untilTick = (t) => { while (G.t < t) Bot.run(1); };
+  const bounce = () => {
+    // stand 15 px left of a resting spring, hop onto it with the key held, steer right afterwards
+    let bounced = false;
+    for (let i = 0; i < 300; i++) {
+      Bot.dir(bounced || i < 4 ? 1 : 0);
+      Bot.jumpKey(i < 10 || i >= 20);
+      Bot.run(1);
+      if (G.p.vy < -500) bounced = true;
+      if (G.dead) Bot.fail("died after the bounce");
+      if (bounced && G.p.onGround) break;
+    }
+    Bot.jumpKey(false);
+    Bot.dir(0);
+    Bot.expect(bounced, "a bounce");
+  };
+  // through the first door while the first holds the plate, then wait at the far door for the twin
+  const throughDoors = () => {
+    untilTick(74);
+    Bot.walkTo(250, 3);
+    Bot.walkTo(580, 3);
+    untilTick(312);
+    Bot.waitUntil(() => G.L.doorOpen.a, 600, "the far door");
+    Bot.walkTo(640, 3);
+  };
+  Bot.record("fork");
+  Bot.run(100);
+  Bot.walkTo(150, 2);
+  Bot.run(100);
+  Bot.walkTo(190, 3);
+  Bot.run(10);
+  Bot.stop();
+  Bot.record("spring");
+  throughDoors();
+  Bot.walkTo(650, 2);
+  Bot.run(12);
+  Bot.stop();
+  Bot.record("flip");
+  throughDoors();
+  Bot.walkTo(635, 2);
+  Bot.waitUntil(() => G.echoes.spring && G.echoes.spring.restT > 30, 1200, "the spring to settle");
+  Bot.walkTo(635, 1);
+  bounce();
+  Bot.walkTo(725, 2);
+  Bot.run(20);
+  Bot.stop();
+  throughDoors();
+  Bot.walkTo(635, 1);
+  Bot.waitUntil(() => G.echoes.spring && G.echoes.spring.restT > 30 && G.echoes.flip && G.echoes.flip.restT > 40, 1200, "the spring and the flip to settle");
+  bounce();
+  Bot.expect(G.p.onGround && Bot.feet() < 170, "on the tower");
+  Bot.walkTo(915);
+};
+
 // ---------------------------------------------------------------- the finale, Every Echo: one station per echo, floor by floor
 // Floor one runs left to right on the ground (feet at y 620).
 const EVERY_ECHO = [

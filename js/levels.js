@@ -1661,6 +1661,22 @@ def(10, "BLIND SPOT", {
   g.fill(45, 15, 45, 16, "#");
   g.set(44, 16, "X").set(44, 15, "X");
 });
+def(10, "LATE ARRIVAL", {
+  cols: 48, rows: 27, echoes: ["fork", "spring", "flip"], recMax: 40,
+  hint: "ONE PLATE, TWO DOORS, TOO FAR APART FOR ONE VISIT. A RECORDING THAT HAS DONE ITS WORK CAN BE MADE AGAIN.",
+}, (g) => {
+  g.base();
+  g.set(2, 21, "@");
+  // one plate for both doors, and a long corridor between them
+  g.set(7, 21, "a");
+  g.fill(12, 1, 12, 11, "#").fill(12, 12, 12, 21, "A");
+  g.fill(30, 1, 30, 11, "#").fill(30, 12, 30, 21, "A");
+  // the far room: a spike bed, a ledge and a tower with the exit
+  g.fill(35, 14, 38, 21, "#");
+  g.fill(33, 21, 34, 21, "^");
+  g.fill(39, 8, 46, 21, "#");
+  g.fill(45, 6, 45, 7, "X");
+});
 // The finale: a tower of four floors, one station for every echo the game has. 64 x 36 tiles, drawn at half size.
 def(10, "EVERY ECHO", {
   cols: 64, rows: 36, recMax: 200,
@@ -1996,6 +2012,7 @@ const PAR = {
   "CROSSCURRENT": { t: 35, r: 3 },
   "HANDOFF": { t: 45, r: 4 },
   "BLIND SPOT": { t: 110, r: 6 },
+  "LATE ARRIVAL": { t: 60, r: 3 },
   "EVERY ECHO": { t: 1785, r: 22 },
 };
 for (const l of LEVELS) l.par = PAR[l.name];
