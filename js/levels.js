@@ -1628,6 +1628,39 @@ def(10, "CROSSCURRENT", {
   g.pit(33, 41);
   g.set(44, 21, "b");
 });
+def(10, "HANDOFF", {
+  cols: 48, rows: 27, echoes: ["mirror", "spring", "phase"], recMax: 40, swap: true,
+  hint: "THE PUPPET GOES WHERE YOUR PATH GOES, FLIPPED, BUT ONLY FOR A MOMENT. WHAT A SWAP TAKES YOU TO DEPENDS ON WHEN YOU MAKE IT.",
+}, (g) => {
+  g.base();
+  g.set(2, 21, "@");
+  // the right half is one solid tower with a sealed room high inside it: a landing room, a wall of glass, and a nook with a shelf
+  g.fill(23, 1, 46, 21, "#");
+  g.fill(31, 2, 37, 13, ".");
+  g.fill(38, 2, 38, 13, "%");
+  g.fill(39, 2, 44, 13, ".");
+  g.fill(45, 6, 46, 13, "#");
+  g.fill(45, 4, 46, 5, "X");
+});
+def(10, "BLIND SPOT", {
+  cols: 48, rows: 27, echoes: ["beam", "reflector", "portal", "portal", "shade"], recMax: 60,
+  hint: "LIGHT STOPS AT ANYTHING THAT STANDS IN IT, EVEN AN ECHO YOU NEEDED THERE. THE BEAM THAT LIT THE WAY IN IS NOT WHERE IT HAS TO BE TO LIGHT THE WAY OUT.",
+}, (g) => {
+  g.base();
+  g.set(2, 21, "@");
+  // the first thorn bed under a low roof, and a low wall that stops any light shining along the floor
+  g.fill(8, 21, 20, 21, "t");
+  g.fill(7, 1, 21, 19, "#");
+  g.fill(24, 19, 24, 21, "#");
+  // the second thorn bed runs through a tunnel only a hair taller than you, then the shaft: a hatch in a slab over the last chamber and a crawlspace above it
+  g.fill(27, 21, 32, 21, "t");
+  g.fill(27, 1, 27, 17, "#");
+  g.fill(28, 1, 45, 14, "#");
+  g.fill(28, 17, 45, 17, "#").set(34, 17, "G");
+  g.fill(28, 18, 32, 20, "#");
+  g.fill(45, 15, 45, 16, "#");
+  g.set(44, 16, "X").set(44, 15, "X");
+});
 // The finale: a tower of four floors, one station for every echo the game has. 64 x 36 tiles, drawn at half size.
 def(10, "EVERY ECHO", {
   cols: 64, rows: 36, recMax: 200,
@@ -1961,6 +1994,8 @@ const PAR = {
   "SECOND THOUGHTS": { t: 155, r: 6 },
   "THE OTHER HALF": { t: 35, r: 5 },
   "CROSSCURRENT": { t: 35, r: 3 },
+  "HANDOFF": { t: 45, r: 4 },
+  "BLIND SPOT": { t: 110, r: 6 },
   "EVERY ECHO": { t: 1785, r: 22 },
 };
 for (const l of LEVELS) l.par = PAR[l.name];

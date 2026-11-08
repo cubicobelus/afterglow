@@ -2020,6 +2020,155 @@ SOLUTIONS["CROSSCURRENT"] = () => {
   Bot.walkTo(490);
 };
 
+SOLUTIONS["HANDOFF"] = () => {
+  // A spring on the left floor throws a mirror recording high; the puppet then flies through a sealed room in the right-hand tower for a
+  // moment. A swap made in that moment, while recording a phase, leaves the phase by the glass inside; made again while recording the
+  // spring (which is recycled), it leaves the spring in the nook; made once more on the run, it takes you in to walk through the glass.
+  const puppetIn = () => { const m = G.echoes.mirror; return m && m.x > 690 && m.x < 730 && m.y <= 250; };
+  const swapIn = () => {
+    Bot.select("mirror");
+    Bot.waitUntil(puppetIn, 1200, "the puppet to fly through the room");
+    Bot.swap();
+    Bot.expect(Bot.px() > 650, "inside the sealed room");
+  };
+  recWait("spring", 250, 12);
+  settle("spring", 40);
+  // the puppet: a held bounce on the spring, then back to rest on the left
+  Bot.record("mirror");
+  Bot.walkTo(205, 3);
+  Bot.dir(1);
+  Bot.jumpKey(true);
+  for (let i = 0; i < 200; i++) {
+    if (i > 5 && G.p.vy < -600) Bot.dir(0);
+    if (i === 14) Bot.dir(0);
+    Bot.tick();
+    if (i > 40 && G.p.vy > -30) break;
+  }
+  Bot.jumpKey(false);
+  Bot.dir(-1);
+  Bot.run(30);
+  Bot.walkTo(120, 3);
+  Bot.run(10);
+  Bot.stop();
+  // the phase, left by the glass inside the room
+  Bot.record("phase");
+  swapIn();
+  Bot.walkTo(748, 3);
+  Bot.run(10);
+  Bot.stop();
+  // the spring again (the left one is gone), left in the nook
+  Bot.record("spring");
+  swapIn();
+  settle("phase", 40);
+  Bot.walkTo(845, 3);
+  Bot.run(10);
+  Bot.stop();
+  // the run
+  swapIn();
+  settle("phase", 40);
+  settle("spring", 40);
+  const sx = G.echoes.spring.x + PW / 2;
+  Bot.walkTo(sx - 26, 3);
+  Bot.jumpKey(true);
+  for (let i = 0; i < 200; i++) {
+    Bot.dir(Math.abs(sx - Bot.px()) < 2 ? 0 : Math.sign(sx - Bot.px()));
+    Bot.tick();
+    if (G.p.vy < -500) break;
+  }
+  Bot.expect(G.p.vy < -700, "bounced on the spring, jump held");
+  Bot.jumpKey(false);
+  for (let i = 0; i < 140 && !G.won; i++) { Bot.dir(1); Bot.tick(); if (G.p.onGround) break; }
+  Bot.expect(Bot.feet() <= 121, "up on the shelf");
+  Bot.walkTo(925);
+};
+
+SOLUTIONS["BLIND SPOT"] = () => {
+  // A beam on the left lights the first thorn bed, and the portal pair is recorded across it (the far portal by the low wall, the near one
+  // by the spawn). The beam is then recorded again on the far side of the wall, through the portals, so it lights the low tunnel of thorns
+  // and runs on into a mirror at the foot of the hatch that turns it up. The shade hangs in the air under the hatch, just clear of the
+  // mirror, as the step: stacked on the mirror, where it looks natural, it would stand in the light it is there to use.
+  const intoPortal = () => {
+    Bot.dir(1);
+    for (let i = 0; i < 200 && Bot.px() < 400; i++) { Bot.tick(); if (G.dead) Bot.fail("died walking into the portal"); }
+    Bot.dir(0);
+    Bot.expect(Bot.px() > 400, "through the portal");
+  };
+  const toBed2 = (x) => {
+    intoPortal();
+    Bot.walkTo(470, 3);
+    Bot.jumpTo(510, 22);
+    Bot.dir(1);
+    for (let i = 0; i < 400 && Bot.px() < x; i++) { Bot.tick(); if (G.dead) Bot.fail("died on the second bed"); }
+    Bot.dir(0);
+  };
+  const portalsSettle = () => { settle("portal", 20); settle("portal2", 20); };
+  recWait("beam", 130, 10);
+  Bot.record("portal2");
+  settle("beam", 30);
+  Bot.walkTo(450, 3);
+  Bot.run(20);
+  Bot.stop();
+  Bot.record("portal");
+  Bot.walkTo(90, 3);
+  Bot.run(20);
+  Bot.stop();
+  // the beam again, past the wall
+  Bot.record("beam");
+  portalsSettle();
+  intoPortal();
+  Bot.walkTo(470, 3);
+  Bot.jumpTo(510, 22);
+  Bot.walkTo(530, 3);
+  Bot.run(12);
+  Bot.stop();
+  // the mirror at the foot of the hatch
+  Bot.record("reflector");
+  portalsSettle();
+  settle("beam", 30);
+  toBed2(660);
+  Bot.walkTo(678, 2);
+  Bot.run(12);
+  Bot.stop();
+  settle("reflector", 30);
+  Bot.expect(G.L.gates.every((g) => g.open), "the hatch lit");
+  // the shade, hung in the air beside the hatch
+  Bot.record("shade");
+  portalsSettle();
+  settle("beam", 30);
+  settle("reflector", 30);
+  toBed2(660);
+  Bot.walkTo(692, 2);
+  Bot.jumpKey(true);
+  let hung = false;
+  for (let i = 0; i < 90; i++) {
+    Bot.tick();
+    if (i > 5) Bot.jumpKey(false);
+    if (i > 8 && G.p.vy > 0 && Bot.feet() >= 418) { hung = true; break; }
+  }
+  Bot.jumpKey(false);
+  Bot.expect(hung, "a hover window beside the hatch");
+  Bot.stop();
+  // the run
+  settleAll();
+  Bot.expect(G.L.gates.every((g) => g.open), "the hatch lit with the shade in place");
+  toBed2(660);
+  Bot.walkTo(665, 2);
+  Bot.jumpTo(692, 22);
+  Bot.expect(G.p.stand === G.echoes.shade, "standing on the shade");
+  Bot.walkTo(690, 2);
+  Bot.jumpKey(true);
+  for (let i = 0; i < 90 && !(i > 5 && G.p.onGround && G.p.y + PH <= 341); i++) {
+    if (i === 24) Bot.jumpKey(false);
+    Bot.dir(G.p.y + PH < 338 ? -1 : 0);
+    Bot.tick();
+  }
+  Bot.jumpKey(false);
+  Bot.dir(0);
+  Bot.expect(G.p.onGround && Bot.feet() <= 341, "up in the crawlspace");
+  Bot.jumpTo(730, 12);
+  Bot.walkTo(880, 3);
+};
+
 // ---------------------------------------------------------------- the finale, Every Echo: one station per echo, floor by floor
 // Floor one runs left to right on the ground (feet at y 620).
 const EVERY_ECHO = [
