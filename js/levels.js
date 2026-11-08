@@ -1677,6 +1677,26 @@ def(10, "LATE ARRIVAL", {
   g.fill(39, 8, 46, 21, "#");
   g.fill(45, 6, 45, 7, "X");
 });
+def(10, "STILL WATER", {
+  cols: 48, rows: 27, echoes: ["branch", "calm", "slow", "slow"], recMax: 60, clockOpen: 30,
+  hint: "THE RING OF A CALM QUIETS EVERYTHING INSIDE IT, YOUR OWN HELP INCLUDED. A SLOW RING IS WANTED IN TWO PLACES. CHOOSE WHERE EACH ECHO STANDS.",
+}, (g) => {
+  g.base();
+  g.set(2, 21, "@");
+  // a crawl with no room to jump, ending over a pit with a pillar in it (the pillar stops a bough short)
+  g.fill(12, 1, 22, 20, "#");
+  g.pit(21, 26);
+  g.fill(23, 22, 23, 26, "#");
+  // the far bank is a step down. The vent on it blows back anyone in the air; past it a low tunnel with a blade and a clock door
+  g.fill(27, 22, 43, 22, ".");
+  g.set(27, 22, "<");
+  g.fill(23, 1, 27, 18, "#");
+  g.fill(28, 1, 43, 19, "#");
+  g.blade(30, 21, 26, 2, 0);
+  g.fill(37, 20, 40, 22, "T");
+  g.fill(44, 21, 44, 22, "X");
+  g.set(5, 8, "L").set(25, 6, "L").set(42, 8, "L");
+});
 // The finale: a tower of four floors, one station for every echo the game has. 64 x 36 tiles, drawn at half size.
 def(10, "EVERY ECHO", {
   cols: 64, rows: 36, recMax: 200,
@@ -2013,6 +2033,7 @@ const PAR = {
   "HANDOFF": { t: 45, r: 4 },
   "BLIND SPOT": { t: 110, r: 6 },
   "LATE ARRIVAL": { t: 60, r: 3 },
+  "STILL WATER": { t: 90, r: 4 },
   "EVERY ECHO": { t: 1785, r: 22 },
 };
 for (const l of LEVELS) l.par = PAR[l.name];

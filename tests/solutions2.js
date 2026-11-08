@@ -2227,6 +2227,77 @@ SOLUTIONS["LATE ARRIVAL"] = () => {
   Bot.walkTo(915);
 };
 
+SOLUTIONS["STILL WATER"] = () => {
+  // A bough from the pit edge stops short at the pillar. The calm must keep out of reach of the bough's echo, of the blade and of the slow ring
+  // that holds it, yet still quiet the vent over the second hop: it is recorded in the air, stopped just after the jump off the pillar. The first
+  // slow is recorded on the far bank (it needs the calm to get there) and carries the second slow past the blade; the second slow holds the clock door.
+  const bough = () => Bot.waitUntil(() => G.branches.length && G.branches[0].w >= 50, 900, "the bough to grow");
+  const goTo = (x) => { Bot.dir(1); for (let i = 0; i < 300 && Bot.px() < x; i++) { Bot.tick(); if (G.dead) Bot.fail("died"); } Bot.dir(0); };
+  // run along the bough and the pillar and jump off its far edge; stop (a recording) after `air` ticks in the air, if given
+  const leap = (air) => {
+    Bot.walkTo(440, 3);
+    Bot.dir(1);
+    for (let i = 0; i < 200 && Bot.px() < 474; i++) Bot.tick();
+    Bot.jumpKey(true);
+    for (let i = 0; i < 80; i++) {
+      if (i === 22) Bot.jumpKey(false);
+      if (air !== undefined && i === air) { Bot.jumpKey(false); Bot.dir(0); return; }
+      Bot.tick();
+      if (G.dead) Bot.fail("died in the jump");
+      if (G.p.onGround && i > 5) break;
+    }
+    Bot.jumpKey(false); Bot.dir(0);
+  };
+  const pastBlade = () => {
+    const b = G.L.blades[0];
+    Bot.waitUntil(() => { const a = ((bladeAngle(b) % Math.PI) + Math.PI) % Math.PI; return a > 2.55 && a < 2.75; }, 4000, "the blade to come level");
+    Bot.dir(1);
+    for (let i = 0; i < 300 && Bot.px() < 690; i++) { Bot.tick(); if (G.dead) Bot.fail("hit by the blade"); }
+    Bot.dir(0);
+  };
+  Bot.record("branch");
+  Bot.walkTo(408, 2);
+  Bot.dir(1); Bot.tick(); Bot.dir(0);
+  Bot.run(6);
+  Bot.stop();
+  bough();
+  Bot.record("calm");
+  Bot.walkTo(408, 2);
+  bough();
+  leap(CALM_AIR);
+  Bot.stop();
+  Bot.record("slow");
+  Bot.walkTo(408, 2);
+  bough();
+  settle("calm");
+  leap();
+  goTo(555);
+  Bot.run(12);
+  Bot.stop();
+  Bot.record("slow2");
+  Bot.walkTo(408, 2);
+  bough();
+  settleAll();
+  leap();
+  goTo(555);
+  pastBlade();
+  goTo(726);
+  Bot.run(12);
+  Bot.stop();
+  Bot.walkTo(408, 2);
+  bough();
+  settleAll();
+  leap();
+  goTo(555);
+  pastBlade();
+  goTo(722);
+  Bot.waitUntil(() => !doorShut(G.L.timed[0]), 4000, "the door to open");
+  Bot.dir(1);
+  for (let i = 0; i < 300 && Bot.px() < 850; i++) { Bot.tick(); if (G.dead) Bot.fail("crushed by the door"); }
+  Bot.walkTo(900);
+};
+var CALM_AIR = 8;
+
 // ---------------------------------------------------------------- the finale, Every Echo: one station per echo, floor by floor
 // Floor one runs left to right on the ground (feet at y 620).
 const EVERY_ECHO = [
