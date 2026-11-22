@@ -363,10 +363,11 @@ def(1, "LOOKING GLASS", {
   hint: "THE BUTTON IS ON THE CEILING, HIGHER THAN YOU CAN JUMP. A FLIP HUNG HIGH IN THE AIR LIFTS YOU TO IT. ECHOES CAN BE RECORDED AGAIN WHEN THEIR JOB IS DONE.",
 }, (g) => {
   g.base();
-  g.set(2, 14, "@");
-  g.fill(1, 1, 30, 9, "#");
-  g.fill(8, 10, 30, 12, "#");
-  g.set(5, 10, "1");
+  g.set(4, 14, "@");
+  g.fill(1, 9, 3, 14, "#");
+  g.fill(1, 1, 30, 8, "#");
+  g.fill(8, 9, 30, 12, "#");
+  g.set(5, 9, "1");
   g.fill(8, 13, 8, 14, "A");
   g.pit(12, 15);
   g.fill(16, 13, 16, 14, "%");
