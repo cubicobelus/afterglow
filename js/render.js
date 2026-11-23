@@ -717,14 +717,13 @@ const Render = (() => {
   function getRuns(L) {
     const c = L._runCache;
     if (c && c.doors === L.doorTiles && c.gates === L.gates && c.nd === L.doorTiles.length && c.ng === L.gates.length) return c;
+    // A lone door or gate tile set in a floor or ceiling (wall on both sides) is a hatch: draw it lying down.
+    const solid = (tx, ty) => ((L.rows[ty] || "")[tx] || "#") === "#";
+    const flatHatch = (q) => solid(q.tx - 1, q.ty) && solid(q.tx + 1, q.ty) && !(solid(q.tx, q.ty - 1) && solid(q.tx, q.ty + 1));
     const nc = {
       doors: L.doorTiles, gates: L.gates, nd: L.doorTiles.length, ng: L.gates.length,
-      doorRuns: buildRuns(L.doorTiles, (p, q) => p.id === q.id),
-      // A lone gate tile set in a floor or ceiling (wall on both sides) is a hatch: draw it lying down.
-      gateRuns: buildRuns(L.gates, () => true, (q) => {
-        const solid = (tx, ty) => ((L.rows[ty] || "")[tx] || "#") === "#";
-        return solid(q.tx - 1, q.ty) && solid(q.tx + 1, q.ty) && !(solid(q.tx, q.ty - 1) && solid(q.tx, q.ty + 1));
-      }),
+      doorRuns: buildRuns(L.doorTiles, (p, q) => p.id === q.id, flatHatch),
+      gateRuns: buildRuns(L.gates, () => true, flatHatch),
     };
     L._runCache = nc;
     return nc;
