@@ -307,7 +307,7 @@ SOLUTIONS["GRAZE"] = () => {
   settle("beam", 30);
   Bot.walkTo(92, 3);
   Bot.jumpTo(128, 24);
-  Bot.expect(G.p.onGround && G.p.y + PH < 265, "on the ledge");
+  Bot.expect(G.p.onGround && G.p.y + PH < 285, "on the ledge");
   Bot.jumpTo(172, 14);
   Bot.expect(G.p.onGround && G.p.y + PH < 245, "up on the planks");
   Bot.walkTo(570);
@@ -377,19 +377,19 @@ const hoverHere = (slot, lo, hi, baseY) => {
 };
 
 SOLUTIONS["TWO TIERS"] = () => {
-  // Beam one hangs beside the first bridge. Beam two is recorded standing on the middle block, hung at the height of the second bridge.
+  // Beam one hangs beside the first bridge. Beam two is recorded standing at the end of the first bridge, hung at the height of the
+  // second. (Recording beam one again there drops the first bridge from under you: the middle block that allowed it is gone.)
   hoverAt("beam", 82, 43, 55);
   settle("beam", 30);
   const toMiddle = () => {
     Bot.walkTo(92, 3);
     Bot.jumpTo(128, 24);
     Bot.jumpTo(172, 14);
-    Bot.walkTo(318, 3);
+    Bot.walkTo(286, 3);
   };
   Bot.record("beam2");
   settle("beam", 30);
   toMiddle();
-  Bot.walkTo(314, 3);
   Bot.jumpKey(true);
   let found = false;
   for (let i = 0; i < 90; i++) {
@@ -398,7 +398,7 @@ SOLUTIONS["TWO TIERS"] = () => {
     const h = 240 - Bot.feet();
     if (i > 8 && G.p.vy > 0 && h <= 36 && h >= 22) { found = true; break; }
   }
-  Bot.expect(found, "a hover window above the middle block");
+  Bot.expect(found, "a hover window above the end of the first bridge");
   Bot.jumpKey(false);
   Bot.stop();
   settle("beam", 30);

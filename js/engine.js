@@ -516,7 +516,30 @@ function computeFields() {
   for (const v of L.vents) G.winds.push({ x: v.x, y: v.y, r: GUST_R, dir: v.dir, vent: true });
   G.drafts = L.updrafts;
   for (const m of L.mushrooms) m.silenced = calmed(m.x + TILE / 2, m.y);
-  for (const gt of L.gates) gt.open = litRect(gt);
+  // A gate is one object: touching gate tiles open together when light falls on any of them.
+  if (!L.gateGroups) {
+    L.gateGroups = [];
+    const seen = new Set();
+    const at = (tx, ty) => L.gates.find((o) => o.tx === tx && o.ty === ty);
+    for (const g0 of L.gates) {
+      if (seen.has(g0)) continue;
+      const grp = [], stack = [g0];
+      seen.add(g0);
+      while (stack.length) {
+        const g1 = stack.pop();
+        grp.push(g1);
+        for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
+          const n = at(g1.tx + dx, g1.ty + dy);
+          if (n && !seen.has(n)) { seen.add(n); stack.push(n); }
+        }
+      }
+      L.gateGroups.push(grp);
+    }
+  }
+  for (const grp of L.gateGroups) {
+    const open = grp.some((gt) => litRect(gt));
+    for (const gt of grp) gt.open = open;
+  }
 }
 
 const inZone = (z, x, y) => (x - z.x) * (x - z.x) + (y - z.y) * (y - z.y) <= z.r * z.r;
@@ -1189,7 +1212,8 @@ function tick() {
     if (overlap({ x: p.x + 2, y: p.y + 2, w: p.w - 4, h: p.h - 4 }, sp)) { kill(); updateParticles(); return; }
   }
   for (const th of L.thorns) {
-    const lit = litPoint(th.cx, th.cy);
+    // A beam withers a thorn wherever it visibly crosses it, not only through its middle.
+    const lit = litPoint(th.cx, th.cy) || G.beamRects.some((b) => th.x < b.x + b.w && th.x + th.w > b.x && th.y < b.y + b.h && th.y + th.h > b.y && !calmedAt(th.cx, th.cy));
     if (lit && !th.lit) { SFX("wither"); burst(th.cx, th.cy - 4, 5, "#9fe3a0", 40, 0.5, 2, 0); }
     th.lit = lit;
     if (!lit && overlap({ x: p.x + 2, y: p.y + 2, w: p.w - 4, h: p.h - 4 }, th)) { kill(); updateParticles(); return; }

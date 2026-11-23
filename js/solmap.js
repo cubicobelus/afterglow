@@ -61,7 +61,7 @@ const SOLMAP = {
   "GRAZE": [[1,"beam",75,231,1,1,0,0]],
   "STAIRWELL": [[1,"reflector",442,164,1,1,0,0]],
   "SURFACE LIGHT": [[1,"reflector",166,159,-1,1,0,0]],
-  "TWO TIERS": [[1,"beam",75,231,1,1,0,0],[2,"beam",312,193,1,1,0,0]],
+  "TWO TIERS": [[1,"beam",75,231,1,1,0,0],[2,"beam",279,193,1,1,0,0]],
   "PERISCOPE": [[1,"reflector",433,235,1,1,2,2],[2,"reflector",225,167,-1,1,0,0],[3,"reflector",223,284,-1,1,0,0]],
   "PULSE": [[1,"reflector",99,284,-1,1,0,0],[2,"reflector",492,282,1,1,0,0]],
   "GRAPPLE": [[1,"pull",219,288,1,1,2,2],[2,"pull",224,230,1,1,0,0]],

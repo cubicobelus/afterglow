@@ -683,53 +683,104 @@ const Render = (() => {
     }
   }
 
-  function drawDoorTile(ctx, d, open, t, L) {
-    d.amt += ((open ? 1 : 0) - d.amt) * 0.12;
-    const col = PLATE_COLORS[d.id];
-    const x = d.x, y = d.y;
-    const h = Math.round(TILE * (1 - d.amt));
+  // Group tiles into straight runs so a door or gate draws as one object.
+  // Vertical runs claim first, then horizontal runs of 2+, then single tiles (vertical).
+  function buildRuns(tiles, sameGroup, flat) {
+    const at = new Map();
+    for (const q of tiles) at.set(q.tx + "," + q.ty, q);
+    const claimed = new Set();
+    const runs = [];
+    const get = (tx, ty) => at.get(tx + "," + ty);
+    const free = (q) => q && !claimed.has(q);
+    const take = (list, horiz) => { for (const q of list) claimed.add(q); runs.push({ tiles: list, horiz, amt: list[0].amt || 0 }); };
+    const sorted = tiles.slice().sort((p, q) => p.tx - q.tx || p.ty - q.ty);
+    for (const q of sorted) {
+      if (claimed.has(q)) continue;
+      const prev = get(q.tx, q.ty - 1);
+      if (free(prev) && sameGroup(prev, q)) continue;
+      const list = [q];
+      let n = get(q.tx, q.ty + 1);
+      while (free(n) && sameGroup(list[list.length - 1], n)) { list.push(n); n = get(n.tx, n.ty + 1); }
+      if (list.length > 1) take(list, false);
+    }
+    const byRow = tiles.slice().sort((p, q) => p.ty - q.ty || p.tx - q.tx);
+    for (const q of byRow) {
+      if (claimed.has(q)) continue;
+      const list = [q];
+      let n = get(q.tx + 1, q.ty);
+      while (free(n) && sameGroup(list[list.length - 1], n)) { list.push(n); n = get(n.tx + 1, n.ty); }
+      take(list, list.length > 1 || (!!flat && flat(q)));
+    }
+    return runs;
+  }
+
+  function getRuns(L) {
+    const c = L._runCache;
+    if (c && c.doors === L.doorTiles && c.gates === L.gates && c.nd === L.doorTiles.length && c.ng === L.gates.length) return c;
+    const nc = {
+      doors: L.doorTiles, gates: L.gates, nd: L.doorTiles.length, ng: L.gates.length,
+      doorRuns: buildRuns(L.doorTiles, (p, q) => p.id === q.id),
+      // A lone gate tile set in a floor or ceiling (wall on both sides) is a hatch: draw it lying down.
+      gateRuns: buildRuns(L.gates, () => true, (q) => {
+        const solid = (tx, ty) => ((L.rows[ty] || "")[tx] || "#") === "#";
+        return solid(q.tx - 1, q.ty) && solid(q.tx + 1, q.ty) && !(solid(q.tx, q.ty - 1) && solid(q.tx, q.ty + 1));
+      }),
+    };
+    L._runCache = nc;
+    return nc;
+  }
+
+  // One frame, one set of bars; the bars retract as one piece (up for vertical, left for horizontal).
+  function drawRun(ctx, run, edge, barLo, barHi, crossCol, sun) {
+    const q0 = run.tiles[0], n = run.tiles.length, horiz = run.horiz;
+    const x = q0.x, y = q0.y, len = n * TILE;
+    const vis = Math.round(len * (1 - run.amt));
     ctx.fillStyle = "#1a1d26";
-    ctx.fillRect(x, y, 3, TILE);
-    ctx.fillRect(x + 17, y, 3, TILE);
-    ctx.fillStyle = col;
-    ctx.globalAlpha = 0.25 + d.amt * 0.5;
-    ctx.fillRect(x, y, 1, TILE);
-    ctx.fillRect(x + 19, y, 1, TILE);
+    if (horiz) { ctx.fillRect(x, y, len, 3); ctx.fillRect(x, y + 17, len, 3); }
+    else { ctx.fillRect(x, y, 3, len); ctx.fillRect(x + 17, y, 3, len); }
+    ctx.fillStyle = edge;
+    ctx.globalAlpha = 0.25 + run.amt * 0.5;
+    if (horiz) { ctx.fillRect(x, y, len, 1); ctx.fillRect(x, y + 19, len, 1); }
+    else { ctx.fillRect(x, y, 1, len); ctx.fillRect(x + 19, y, 1, len); }
     ctx.globalAlpha = 1;
-    if (h > 0) {
-      ctx.fillStyle = "#4a5160";
-      for (let i = 0; i < 3; i++) ctx.fillRect(x + 4 + i * 5, y, 3, h);
-      ctx.fillStyle = "#7c8598";
-      for (let i = 0; i < 3; i++) ctx.fillRect(x + 4 + i * 5, y, 1, h);
-      ctx.fillStyle = tint(col, -0.1);
-      ctx.fillRect(x + 3, y + 8, 14, 2);
+    if (vis <= 0) return;
+    ctx.fillStyle = barLo;
+    for (let i = 0; i < 3; i++) { if (horiz) ctx.fillRect(x, y + 4 + i * 5, vis, 3); else ctx.fillRect(x + 4 + i * 5, y, 3, vis); }
+    ctx.fillStyle = barHi;
+    for (let i = 0; i < 3; i++) { if (horiz) ctx.fillRect(x, y + 4 + i * 5, vis, 1); else ctx.fillRect(x + 4 + i * 5, y, 1, vis); }
+    if (crossCol) {
+      ctx.fillStyle = crossCol;
+      for (let i = 0; i < n; i++) {
+        const o = i * TILE + 8, w = Math.min(2, vis - o);
+        if (w <= 0) break;
+        if (horiz) ctx.fillRect(x + o, y + 3, w, 14); else ctx.fillRect(x + 3, y + o, 14, w);
+      }
+    }
+    if (sun && vis > 12) {
+      const cx = horiz ? x + vis / 2 : x + 10, cy = horiz ? y + 10 : y + vis / 2;
+      const rx = Math.round(cx), ry = Math.round(cy);
+      ctx.fillStyle = "#ffd27a";
+      ctx.fillRect(rx - 2, ry - 2, 4, 4);
+      ctx.fillRect(rx - 1, ry - 4, 2, 8);
+      ctx.fillRect(rx - 4, ry - 1, 8, 2);
     }
   }
 
+  function drawDoorRun(ctx, run, L) {
+    const id = run.tiles[0].id;
+    run.amt += ((L.doorOpen[id] ? 1 : 0) - run.amt) * 0.12;
+    for (const d of run.tiles) d.amt = run.amt;
+    const col = PLATE_COLORS[id];
+    drawRun(ctx, run, col, "#4a5160", "#7c8598", tint(col, -0.1), false);
+  }
+
   // A light gate: iron bars with a sun mark that lift while light falls on them.
-  function drawGate(ctx, gt, t) {
-    gt.amt += ((gt.open ? 1 : 0) - gt.amt) * 0.12;
-    const x = gt.x, y = gt.y, h = Math.round(TILE * (1 - gt.amt));
-    ctx.fillStyle = "#1a1d26";
-    ctx.fillRect(x, y, 3, TILE);
-    ctx.fillRect(x + 17, y, 3, TILE);
-    ctx.fillStyle = "#ffd27a";
-    ctx.globalAlpha = 0.25 + gt.amt * 0.5;
-    ctx.fillRect(x, y, 1, TILE);
-    ctx.fillRect(x + 19, y, 1, TILE);
-    ctx.globalAlpha = 1;
-    if (h > 0) {
-      ctx.fillStyle = "#5a5446";
-      for (let i = 0; i < 3; i++) ctx.fillRect(x + 4 + i * 5, y, 3, h);
-      ctx.fillStyle = "#a89d80";
-      for (let i = 0; i < 3; i++) ctx.fillRect(x + 4 + i * 5, y, 1, h);
-      if (h > 12) {
-        ctx.fillStyle = "#ffd27a";
-        ctx.fillRect(x + 8, y + 8, 4, 4);
-        ctx.fillRect(x + 9, y + 6, 2, 8);
-        ctx.fillRect(x + 6, y + 9, 8, 2);
-      }
-    }
+  function drawGateRun(ctx, run) {
+    let open = false;
+    for (const g of run.tiles) if (g.open) open = true;
+    run.amt += ((open ? 1 : 0) - run.amt) * 0.12;
+    for (const g of run.tiles) g.amt = run.amt;
+    drawRun(ctx, run, "#ffd27a", "#5a5446", "#a89d80", null, true);
   }
 
   function drawLantern(ctx, ln, t) {
@@ -1659,8 +1710,9 @@ const Render = (() => {
     drawExit(ctx, L, t);
     for (const v of L.vents) drawVent(ctx, v, t);
     for (const em of L.emitters) drawEmitter(ctx, em, t);
-    for (const d of L.doorTiles) drawDoorTile(ctx, d, !!L.doorOpen[d.id], t, L);
-    for (const gt of L.gates) drawGate(ctx, gt, t);
+    const runs = getRuns(L);
+    for (const r of runs.doorRuns) drawDoorRun(ctx, r, L);
+    for (const r of runs.gateRuns) drawGateRun(ctx, r);
     for (const d of L.updrafts) drawUpdraft(ctx, d, t);
     for (const r of L.roots) drawRoot(ctx, r, t);
     for (const m of L.mushrooms) drawMushroom(ctx, m, t);
